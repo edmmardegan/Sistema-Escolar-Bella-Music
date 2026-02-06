@@ -1,0 +1,138 @@
+// Local: src/services/api.js
+import axios from "axios";
+
+const api_url = "http://localhost:3000";
+
+const axiosInstance = axios.create({
+  baseURL: api_url,
+});
+
+// --- INTERCEPTORES (Usando axiosInstance) ---
+
+// 1. Enviar o Token JWT automaticamente
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("@App:token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// 2. Tratar erro 401 (Unauthorized)
+(error) => {
+  if (error.response?.status === 401) {
+    // Só limpa se realmente não estivermos tentando logar
+    if (!window.location.pathname.includes("/login")) {
+      console.warn("Sessão expirada ou não autorizada");
+      localStorage.removeItem("@App:token"); // Remova apenas o token, talvez?
+      window.location.href = "/login";
+    }
+  }
+  return Promise.reject(error);
+};
+
+// --- OBJETO API PARA EXPORTAÇÃO ---
+const api = {
+  // === AUTENTICAÇÃO ===
+  login: async (email, password) => {
+    const payload = { email: email.trim(), password: password.trim() };
+    const response = await axiosInstance.post("/auth/login", payload);
+    return response.data;
+  },
+
+  // === ALUNOS ===
+  getAlunos: async () => (await axiosInstance.get("/alunos")).data,
+  saveAluno: async (aluno, id = null) => {
+    if (id) return (await axiosInstance.put(`/alunos/${id}`, aluno)).data;
+    return (await axiosInstance.post("/alunos", aluno)).data;
+  },
+  deleteAluno: async (id) => (await axiosInstance.delete(`/alunos/${id}`)).data,
+
+  // === CURSOS ===
+  getCursos: async () => (await axiosInstance.get("/cursos")).data,
+  saveCurso: async (curso, id = null) => {
+    if (id) return (await axiosInstance.put(`/cursos/${id}`, curso)).data;
+    return (await axiosInstance.post("/cursos", curso)).data;
+  },
+  deleteCurso: async (id) => (await axiosInstance.delete(`/cursos/${id}`)).data,
+
+  // === MATRÍCULAS ===
+  getMatriculas: async () => (await axiosInstance.get("/matriculas")).data,
+  saveMatricula: async (matricula, id = null) => {
+    if (id) return (await axiosInstance.put(`/matriculas/${id}`, matricula)).data;
+    return (await axiosInstance.post("/matriculas", matricula)).data;
+  },
+  deleteMatricula: async (id) => (await axiosInstance.delete(`/matriculas/${id}`)).data,
+
+  // === NOTAS / BOLETIM ===
+  updateNota: async (termoId, notaTeorica, notaPratica) => {
+    const res = await axiosInstance.patch(`/matriculas/termo/${termoId}`, { notaTeorica, notaPratica });
+    return res.data;
+  },
+
+  // === FINANCEIRO ===
+  getAllFinanceiro: async () => (await axiosInstance.get("/financeiro")).data,
+  getPorMatricula: async (matriculaId) => (await axiosInstance.get(`/financeiro/matricula/${matriculaId}`)).data,
+  pagar: async (id) => (await axiosInstance.post(`/financeiro/${id}/pagar`)).data,
+  estornar: async (id) => (await axiosInstance.post(`/financeiro/${id}/estornar`)).data,
+  deleteParcela: async (id) => (await axiosInstance.delete(`/financeiro/${id}`)).data,
+  gerarParcelaIndividual: async (dados) => (await axiosInstance.post("/financeiro/gerar-individual", dados)).data,
+  gerarParcelaGlobal: async (dados) => (await axiosInstance.post("/financeiro/gerar-lote-anual", dados)).data,
+
+  // === USUÁRIOS ===
+  getUsuarios: async () => (await axiosInstance.get("/usuarios")).data,
+  saveUsuario: async (dados, id = null) => {
+    if (id) return (await axiosInstance.put(`/usuarios/${id}`, dados)).data;
+    return (await axiosInstance.post("/usuarios", dados)).data;
+  },
+
+  deleteUsuario: async (id) => {
+    const response = await axiosInstance.delete(`/usuarios/${id}`);
+    return response.data;
+  },
+
+  resetPasswordAdmin: async (id, dados) => {
+    const response = await axiosInstance.patch(`/usuarios/${id}/reset-password-admin`, dados);
+    return response.data;
+  },
+  updateOwnPassword: async (id, dados) => {
+    const response = await axiosInstance.patch(`/usuarios/${id}/update-own-password`, dados);
+    return response.data;
+  },
+
+  // === 📅 AGENDA AULA ===
+  getAgenda: async (data) => (await axiosInstance.get(`/aulas/agenda?data=${data}`)).data,
+  getAulasNaoLancadas: async () => (await axiosInstance.get("/aulas/nao-lancadas")).data,
+  getFaltasPendentes: async () => (await axiosInstance.get("/aulas/pendentes")).data,
+  getHistoricoAulas: async () => (await axiosInstance.get("/aulas/historico")).data,
+  registrarPresenca: async (id) => (await axiosInstance.patch(`/aulas/${id}/presenca`)).data,
+  registrarReposicao: async (id, novaData) => {
+    const res = await axiosInstance.patch(`/aulas/${id}/reposicao`, { novaData });
+    return res.data;
+  },
+
+  registrarFalta: async (id, motivo) => (await axiosInstance.patch(`/aulas/${id}/falta`, { motivo })).data,
+
+  gerarAgendaMensal: async (mes, ano) => {
+    const res = await axiosInstance.post("/aulas/gerar-mensal", { mes, ano });
+    return res.data;
+  },
+  // CORRIGIDO: Agora usa axiosInstance e a rota correta
+  deleteAula: async (id) => {
+    const response = await axiosInstance.delete(`/aulas/${id}`);
+    return response.data;
+  },
+
+  getDetalhesBoletim: async (termoId) => {
+    const response = await axiosInstance.get(`/matriculas/termo/${termoId}`);
+    return response.data;
+  },
+
+  updateBoletimDetalhado: async (termoId, dados) => {
+    // Note que usamos PATCH pois vamos atualizar apenas alguns campos do Termo
+    const response = await axiosInstance.patch(`/matriculas/termo/${termoId}`, dados);
+    return response.data;
+  },
+};
+
+export default api;

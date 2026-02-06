@@ -1,0 +1,196 @@
+.container-financeiro {
+  width: 100%;
+  max-width: 1150px;
+}
+
+.header-financeiro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.btn-global {
+  background-color: #6f42c1;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.painel-filtros {
+  margin: 20px 0;
+  align-items: flex-end;
+}
+
+.resumo-cards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.card-resumo {
+  flex: 1;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.resumo-titulo {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+.resumo-valor {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.linha-paga {
+  opacity: 0.6;
+}
+.txt-secundario {
+  font-size: 0.85rem;
+  color: #555;
+}
+.txt-valor {
+  font-weight: bold;
+}
+
+.bg-paga {
+  background-color: #28a745;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.bg-aberta {
+  background-color: #ffc107;
+  color: #333;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.bg-vencida {
+  background-color: red;
+  color: #333;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.btn-detalhes {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Container do bloco de geração */
+.bloco-geracao {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #e9ecef;
+  padding: 10px;
+  border: 1px solid #ced4da;
+}
+
+/* Rótulo "GERAR LOTE" */
+.bloco-geracao .label-geracao {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #495057;
+  text-transform: uppercase;
+}
+
+/* Ajuste específico para os campos dentro do bloco */
+.bloco-geracao .select-mes {
+  width: 120px;
+}
+
+.bloco-geracao .input-ano {
+  width: 85px;
+}
+
+/* Responsividade: em telas pequenas, o bloco se ajusta */
+@media (max-width: 768px) {
+  .bloco-geracao {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+.resumo-financeiro-cards {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.card-resumo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  border-radius: 10px;
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-resumo.pago {
+  background: #a8e9b7;
+} /* Verde */
+.card-resumo.aberto {
+  background: #f7f0ba;
+  color: #333;
+} /* Amarelo */
+
+.resumo-icon {
+  font-size: 2rem;
+  margin-right: 15px;
+  opacity: 0.8;
+}
+
+.resumo-info span {
+  display: block;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.resumo-info strong {
+  font-size: 1.4rem;
+}
+
+/* Container dos filtros em linha única */
+.painel-filtros.linha-unica {
+  display: flex;
+  flex-wrap: nowrap; /* Impede que os campos pulem para baixo */
+  gap: 10px;
+  align-items: flex-end;
+  background: #fdfdfd;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #eee;
+}
+
+/* Redução geral do tamanho das labels */
+.painel-filtros.linha-unica label {
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+/* Larguras específicas para cada tipo de dado */
+.painel-filtros.linha-unica .campo-mes { width: 140px; }
+.painel-filtros.linha-unica .campo-ano { width: 80px; }
+.painel-filtros.linha-unica .campo-prof { width: 150px; }
+.painel-filtros.linha-unica .campo-status { width: 130px; }
+
+/* Ajuste nos inputs para não terem margem lateral sobrando */
+.painel-filtros.linha-unica .input-field {
+  padding: 6px 8px;
+  font-size: 0.85rem;
+}

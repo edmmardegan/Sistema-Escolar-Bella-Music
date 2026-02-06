@@ -1,0 +1,129 @@
+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
+
+
+
+-------------------------------- P O S T G R E S --------------------------------------------------
+Entrar no banco
+psql -h 127.0.0.1 -p 5433 -U postgres -d escolaron
+
+Guia de Sobrevivência: Terminal PostgreSQL (Linux)
+1. Acesso e Gestão do Serviço
+Verificar se o Postgres está ligado: sudo systemctl status postgresql
+
+Ligar o Postgres: sudo systemctl start postgresql
+
+Entrar no terminal (psql): sudo -u postgres psql
+
+2. Navegação (Meta-comandos do psql)
+Listar todos os bancos: \l
+
+Conectar em um banco específico: \c nome_do_banco
+
+Listar bancos \d 
+Listar tabelas do banco atual: \dt
+
+Ver detalhes de uma tabela (colunas/tipos): \d nome_da_tabela
+
+Sair do terminal: \q
+
+3. Operações de Tabela e Dados (SQL)
+Criar tabela (exemplo usuários):
+
+SQL
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    senha VARCHAR(255),
+    role VARCHAR(20)
+);
+Inserir registro (O "pulo do gato" com aspas simples):
+
+SQL
+INSERT INTO usuarios (nome, email, senha, role) 
+VALUES ('Nome', 'email@teste.com', 'hash_da_senha', 'adm');
+Consultar dados: SELECT * FROM usuarios;
+
+Deletar algo (CUIDADO): DELETE FROM usuarios WHERE id = 1;
+
+Apaga os registros e zero o contador 
+TRUNCATE TABLE aula RESTART IDENTITY CASCADE;
+
+4. Entendendo o Cursor (Onde a maioria trava)
+=# -> Pronto para o comando.
+
+(# -> Parêntese aberto. (Dica: digite ); para fechar).
+
+'# -> Aspas abertas. (Dica: digite '; para fechar).
+
+Dica mestre: Se o comando "travar" ou o cursor estiver estranho, use Ctrl + C para cancelar e recomeçar.
+
+💡 Dica para a Vaga de Emprego
+Se te perguntarem como você lida com banco de dados no desenvolvimento, você pode dizer: "Eu utilizo o TypeORM para a produtividade do dia a dia, mas domino o terminal psql para realizar manutenções, conferir migrações e gerenciar permissões e dados diretamente no Linux." Isso mostra que você tem base sólida.
+
+--------------------------------- G I T -----------------------------------------------------------
+git start .
+
+git init .
+
+git rm -r --cached . //limpar cache do git para fazer 100%
+
+git add -A: Prepara todos os arquivos
+
+git add .: Prepara todos os arquivos que você alterou para serem salvos.
+
+git commit -m "mensagem": Cria um "ponto de salvamento" com uma descrição do que você fez.
+
+git push origin main: Envia seus commits para o GitHub (vai pedir o Token no lugar da senha).
+
+git pull origin main: Traz as alterações da nuvem para o seu PC (útil se você editar algo direto no site do GitHub).
+
+git status: Mostra quais arquivos foram modificados e ainda não foram salvos.
+
+----------------------- Regras de Ouro do React (Frontend) -------------------------------
+Para evitar que a tela fique branca ou dê erros de compilação.
+
+Contexto Separado: Sempre deixe o AuthContext.js (a caixa) em um arquivo e o AuthProvider.jsx (a lógica) em outro. Isso evita erros de Fast Refresh no Vite.
+
+Uso do Contexto: Use const { user } = useContext(AuthContext); dentro dos componentes para saber quem está logado.
+
+Pasta node_modules: Nunca apague ou mexa nela manualmente. Se o projeto der erro de "módulo não encontrado", rode npm install.
+
+4. Dicas de Segurança e Ambiente (Ubuntu)
+Token do GitHub: Nunca salve o código ghp_... dentro de arquivos do projeto. Guarde em um bloco de notas externo ou no seu celular.
+
+CORS no NestJS: Se o frontend não conseguir falar com o backend, verifique se o app.enableCors() está no main.ts do seu Backend.
+
+Tipos de Dados: Lembre-se que no Postgres (Linux) usamos timestamp para datas, e não datetime.
+
+--------------------------- (Docker/Postgres) ---------------------------------------------------
+Liga o banco de dados (use sempre que ligar o PC).
+docker start db_escola: 
+
+Desliga o banco.
+docker stop db_escola: 
+
+Entra no terminal do banco para rodar comandos SQL manualmente.
+docker exec -it db_escola psql -U postgres -d escolaron: 
+
+Lista todos os usuários cadastrados.
+SELECT * FROM users;: (Dentro do psql) 
+
+Sai do terminal do banco e volta para o Ubuntu.
+\q: 
+
+---------------------------------- instalação pgadmin --------------------------
+# Adiciona a chave pública do repositório
+sudo curl https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo apt-key add -
+
+# Adiciona o repositório oficial
+sudo sh -c 'echo "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list'
+
+# Atualiza e instala (instala a versão desktop e a web)
+sudo apt update
+sudo apt install pgadmin4
+
+------------------------------------ postgresql ----------------------------------------------
+UPDATE usuarios 
+SET senha = '$2b$10$RLqAH/5zFP.YKwUaJlvR7OXtQ3B3VH8uc1.70uGc30h7359JovmBW' 
+WHERE email = 'admin@admin.com';

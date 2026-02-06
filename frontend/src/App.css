@@ -1,0 +1,248 @@
+/* ================= GLOBAL & RESET ================= */
+:root {
+  --primary: #007bff;
+  --secondary: #6c757d;
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #ffc107;
+  --orange: #fd7e14;
+  --purple: #6f42c1;
+  --dark: #2c3e50;
+  --light: #f8f9fa;
+  --font-main: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --text-main: #333333;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: #f0f2f5;
+  margin: 0;
+  padding: 0;
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+h2 {
+  margin-top: 0;
+  color: var(--primary) !important;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+/* ================= LAYOUT PRINCIPAL ================= */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+}
+
+.conteudo-principal {
+  flex: 1;
+  margin-left: 150px;
+  padding: 25px;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* ================= SIDEBAR MENU ================= */
+.sidebar-menu {
+  width: 150px;
+  min-width: 150px;
+  height: 100vh;
+  background-color: var(--dark);
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+.sidebar-menu span,
+.sidebar-menu svg,
+.sidebar-menu .user-name {
+  color: #ffffff !important;
+}
+
+.menu-link-item {
+  color: #ecf0f1 !important;
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+}
+
+.menu-link-item:hover {
+  background-color: #34495e;
+}
+.menu-link-item.active {
+  background-color: var(--primary);
+}
+
+/* ================= TABELAS ================= */
+.tabela-responsiva,
+.tabela-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.tabela-padrao,
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela-padrao thead th,
+.tabela thead th {
+  background-color: var(--primary) !important;
+  color: #ffffff !important;
+  padding: 15px;
+  text-align: left;
+  font-weight: bold;
+  border: none !important;
+}
+
+.tabela-padrao td,
+.tabela td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f1f1f1;
+  color: var(--text-main) !important;
+}
+
+/* ================= FORMULÁRIOS & INPUTS ================= */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #ffffff !important;
+  color: #333 !important;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  background-color: #fff9c4 !important;
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  transform: scale(1.01);
+}
+
+/* ================= PADRÃO DE BOTÕES (GLOBAL) ================= */
+
+/* 1. Base para Botões de Ícones e Ações */
+.btn-icon,
+.btn-primary,
+.btn-success,
+.btn-cancelar {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: #ffffff !important;
+}
+
+/* Ajuste específico para os botões pequenos em tabelas/agenda */
+.btn-icon {
+  padding: 8px 16px;
+}
+table .btn-icon,
+.agenda-container .btn-icon {
+  padding: 6px 10px;
+}
+
+/* 2. Cores Individuais */
+.btn-primary,
+.btn-modal {
+  background-color: var(--primary) !important;
+}
+.btn-success,
+.btn-confirm,
+.btn-edit,
+.btn-pagar,
+.btn-reposicao {
+  background-color: var(--success) !important;
+}
+.btn-not-confirm,
+.btn-excluir {
+  background-color: var(--danger) !important;
+}
+.btn-estornar,
+.btn-print {
+  background-color: var(--orange) !important;
+}
+.btn-boletim {
+  background-color: var(--purple) !important;
+}
+.btn-cancelar {
+  background-color: var(--secondary) !important;
+}
+.btn-key {
+  background-color: var(--warning) !important;
+  color: #212529 !important;
+}
+
+/* 3. Hover Único (Com Movimento Suave) */
+.btn-icon:hover,
+.btn-primary:hover,
+.btn-success:hover,
+.btn-cancelar:hover,
+.btn-confirm:hover,
+.btn-edit:hover,
+.btn-pagar:hover,
+.btn-not-confirm:hover,
+.btn-excluir:hover,
+.btn-estornar:hover,
+.btn-print:hover,
+.btn-boletim:hover,
+.btn-modal:hover,
+.btn-key:hover,
+.btn-reposicao:hover {
+  filter: brightness(0.9);
+  transform: translateY(-3px) !important; /* O salto para todos */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Clique (Afundar) */
+.btn-icon:active,
+.btn-primary:active,
+.btn-success:active {
+  transform: translateY(0);
+  scale: 0.96;
+}
+
+.btn-icon svg {
+  font-size: 16px;
+  color: inherit;
+}

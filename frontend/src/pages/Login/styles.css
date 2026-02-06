@@ -1,0 +1,100 @@
+/* Login.css - Focado apenas na tela de acesso */
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  /* Garante que ocupe 100% da largura e altura da janela do navegador */
+  width: 100vw; 
+  height: 100vh;
+  
+  /* Isso aqui é o segredo: ele ignora o "margin-left" do layout principal */
+  position: fixed; 
+  top: 0;
+  left: 0;
+  z-index: 9999; /* Fica por cima de tudo */
+  
+  background-color: var(--bg-tela); /* Usa o cinza padrão do App.css */
+}
+
+.login-form {
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-form h2 {
+  text-align: center;
+  margin-bottom: 25px; /* Espaço abaixo da linha */
+  color: var(--primary);
+  
+  padding-bottom: 10px; 
+  font-size: 1.8rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+/* O CAMPO DE INPUT - ONDE AS LETRAS SUMIRAM */
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc !important;
+  
+  /* FORÇANDO CORES PARA NÃO SUMIR NADA */
+  background-color: #ffffff !important; /* Fundo sempre branco */
+  color: #333333 !important;            /* LETRA SEMPRE ESCURA */
+  
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+/* QUANDO O USUÁRIO CLICA (DESTAQUE) */
+.form-group input:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15) !important;
+  transform: translateY(-1px);
+  background-color: #ffffff !important;
+  color: #000000 !important; /* Letra preta no foco */
+}
+
+/* TRATAMENTO PARA O CHROME NÃO "PINTAR" O CAMPO DE CINZA */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #333333 !important; /* Letra escura no preenchimento */
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important; /* Fundo branco no preenchimento */
+}
+
+/* BOTÃO DE ENTRAR */
+.login-form button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.login-form button:hover {
+  background-color: #0056b3;
+}
