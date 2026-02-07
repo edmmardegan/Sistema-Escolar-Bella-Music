@@ -1,18 +1,18 @@
-// Local: src/Alunos/index.jsx
-
-import React, { useState, useEffect, useCallback } from "react";
-import { FaTrash, FaPen, FaUserPlus, FaSave, FaTimes } from "react-icons/fa";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { FaTrash, FaPen, FaUserPlus, FaSave, FaTimes, FaSearch, FaListOl } from "react-icons/fa";
 import api from "../../services/api.js";
 import InputMask from "../../components/InputMask";
 import "./styles.css";
 
 export default function Alunos() {
-  // --- ESTADOS PADRONIZADOS ---
+  // --- ESTADOS ---
   const [dados, setDados] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [exibindoForm, setExibindoForm] = useState(false);
+  const inputNomeRef = useRef(null);
   const [editandoId, setEditandoId] = useState(null);
   const [filtroAba, setFiltroAba] = useState("Ativos");
+  const [buscaNome, setBuscaNome] = useState("");
 
   const [form, setForm] = useState({
     nome: "",
@@ -26,7 +26,6 @@ export default function Alunos() {
     cidade: "",
   });
 
-  // --- FUNÇÃO PADRÃO: CARREGAR ---
   const carregar = useCallback(async () => {
     try {
       setCarregando(true);
@@ -43,16 +42,29 @@ export default function Alunos() {
     carregar();
   }, [carregar]);
 
+  useEffect(() => {
+    if (exibindoForm) {
+      const timer = setTimeout(() => {
+        inputNomeRef.current?.focus();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [exibindoForm]);
+
   // --- FILTRAGEM ---
   const listaExibida = dados
     .filter((aluno) => {
-      if (filtroAba === "Ativos") return aluno.ativo === true;
-      if (filtroAba === "Inativos") return aluno.ativo === false;
-      return true;
+      const bateAba = filtroAba === "Ativos" ? aluno.ativo === true : filtroAba === "Inativos" ? aluno.ativo === false : true;
+
+      const bateNome = (aluno.nome || "").toLowerCase().includes(buscaNome.toLowerCase());
+
+      return bateAba && bateNome;
     })
     .sort((a, b) => (a.nome || "").localeCompare(b.nome || ""));
 
-  // --- FUNÇÃO PADRÃO: SALVAR ---
+  const totalExibido = listaExibida.length;
+
+  // --- AÇÕES ---
   const salvar = async (e) => {
     e.preventDefault();
     try {
@@ -65,18 +77,16 @@ export default function Alunos() {
     }
   };
 
-  // --- FUNÇÃO PADRÃO: EXCLUIR ---
   const excluir = async (id) => {
     if (!window.confirm("Deseja realmente excluir este aluno?")) return;
     try {
       await api.deleteAluno(id);
       carregar();
     } catch (e) {
-      alert("Erro ao excluir. Verifique se o aluno possui matrículas vinculadas.");
+      alert("Erro ao excluir.");
     }
   };
 
-  // --- AUXILIARES ---
   const prepararEdicao = (aluno) => {
     const dataFormatada = aluno.dataNascimento ? String(aluno.dataNascimento).split("T")[0] : "";
     setForm({ ...aluno, dataNascimento: dataFormatada });
@@ -104,11 +114,17 @@ export default function Alunos() {
     return valor;
   };
 
+  const formatarDataTabela = (data) => {
+    if (!data) return "";
+    const [ano, mes, dia] = data.split("T")[0].split("-");
+    return `${dia}/${mes}/${ano}`;
+  };
+
   return (
     <div className="container-alunos">
       <div className="card">
-        <div className="header-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2>{editandoId ? "Editar Aluno" : "Gerenciar Alunos"}</h2>
+        <div className="header-card">
+          <h2>{editandoId ? "Editar Aluno" : exibindoForm ? "Novo Aluno" : "Gerenciar Alunos"}</h2>
           {!exibindoForm && (
             <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
               <FaUserPlus /> Novo Aluno
@@ -117,10 +133,10 @@ export default function Alunos() {
         </div>
 
         {exibindoForm && (
-          <form onSubmit={salvar} className="form-grid conteudo-pagina" style={{ marginTop: "20px" }}>
+          <form onSubmit={salvar} className="form-grid">
             <div className="input-group campo-medio">
               <label>Nome Completo:</label>
-              <input required name="nome" value={form.nome} onChange={handleChange} className="input-field" />
+              <input ref={inputNomeRef} required name="nome" value={form.nome} onChange={handleChange} className="input-field" autoComplete="off" />
             </div>
 
             <div className="input-group">
@@ -182,7 +198,7 @@ export default function Alunos() {
       </div>
 
       <div className="tabela-container">
-        <div className="filtro-container">
+        <div className="filtro-container-flex">
           <div className="grupo-abas">
             {["Ativos", "Inativos", "Todos"].map((aba) => (
               <button key={aba} className={`aba-item ${filtroAba === aba ? "ativa" : ""}`} onClick={() => setFiltroAba(aba)}>
@@ -190,10 +206,28 @@ export default function Alunos() {
               </button>
             ))}
           </div>
+
+          <div className="busca-nome-container">
+            <FaSearch className="icon-search" />
+            <input
+              type="text"
+              placeholder="    Pesquisar por nome..."
+              value={buscaNome}
+              onChange={(e) => setBuscaNome(e.target.value)}
+              className="input-busca-field"
+            />
+            {buscaNome && <FaTimes className="icon-clear" onClick={() => setBuscaNome("")} />}
+          </div>
+
+          <div className="contadores-matricula">
+            <span className="count-item">
+              <FaListOl /> Total: <strong>{totalExibido}</strong> registros
+            </span>
+          </div>
         </div>
 
         {carregando ? (
-          <p style={{ textAlign: "center", padding: "20px" }}>Carregando dados...</p>
+          <p className="txt-carregando">Carregando dados...</p>
         ) : (
           <table className="tabela">
             <thead>
@@ -211,9 +245,12 @@ export default function Alunos() {
                   <tr key={a.id}>
                     <td>
                       <strong>{a.nome}</strong>
+                      <small style={{ color: "#c41010" }}>
+                       <br /> End.: {a.rua}, - {a.bairro}
+                      </small>
                     </td>
                     <td>{mascaraTelefone(a.telefone)}</td>
-                    <td>{mascaraTelefone(a.dataNascimento)}</td>
+                    <td>{formatarDataTabela(a.dataNascimento)}</td>
                     <td>
                       <span className={`badge-status ${a.ativo ? "status-presente" : "status-falta"}`}>{a.ativo ? "ATIVO" : "INATIVO"}</span>
                     </td>
@@ -229,7 +266,7 @@ export default function Alunos() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" style={{ textAlign: "center", padding: "20px" }}>
+                  <td colSpan="5" className="txt-vazio">
                     Nenhum aluno encontrado.
                   </td>
                 </tr>

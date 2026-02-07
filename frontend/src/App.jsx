@@ -13,12 +13,14 @@ import Home from "./pages/Home/index";
 import Login from "./pages/Login";
 import Alunos from "./pages/Alunos/index.jsx";
 import Cursos from "./pages/Cursos/index.jsx";
+import Mapa from "./pages/Mapa/index.jsx";
 import Matriculas from "./pages/Matriculas/index.jsx";
 import Agenda from "./pages/Agenda/index.jsx";
 import Financeiro from "./pages/Financeiro/index.jsx";
 import Usuarios from "./pages/Usuarios/index.jsx";
 import PaginaFantasma from "./pages/Template/index.jsx"; //pagina modelo
 import Boletim from "./pages/Boletim";
+
 
 // 🛡️ Componente de Proteção Geral
 function PrivateRoute({ children }) {
@@ -59,6 +61,7 @@ export default function App() {
                       <Route path="/alunos" element={<Alunos />} />
                       <Route path="/boletim/:termoId" element={<Boletim />} />
                       <Route path="/cursos" element={<Cursos />} />
+                      <Route path="/mapa" element={<Mapa />} />
                       <Route path="/matriculas" element={<Matriculas />} />
                       <Route path="/agenda" element={<Agenda />} />
                       <Route path="/financeiro" element={<Financeiro />} />

@@ -4,6 +4,7 @@ import { useAuth } from "../../hooks/useAuth.js";
 import {
   FaUserGraduate,
   FaBook,
+  FaTable,
   FaFileSignature,
   FaCalendarAlt,
   FaWallet,
@@ -27,6 +28,7 @@ export default function Menu() {
     { to: "/agenda", label: "Agenda", icon: <FaCalendarAlt /> },
     { to: "/alunos", label: "Alunos", icon: <FaUserGraduate /> },
     { to: "/cursos", label: "Cursos", icon: <FaBook /> },
+    { to: "/mapa", label: "Mapa de Horários", icon: <FaTable /> },
     { to: "/matriculas", label: "Matrículas", icon: <FaFileSignature /> },
     // Itens Restritos:
     { to: "/financeiro", label: "Financeiro", icon: <FaWallet />, adminOnly: true },

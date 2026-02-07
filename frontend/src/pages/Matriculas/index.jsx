@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
+// Local: src/pages/Matriculas/index.jsx
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { FaTrash, FaGraduationCap, FaMoneyBillWave, FaPen, FaSave, FaTimes, FaPlus, FaPrint, FaCheck, FaUndo, FaListOl } from "react-icons/fa";
 import api from "../../services/api";
 import InputMoeda from "../../components/InputMoeda";
@@ -11,11 +12,12 @@ export default function Matriculas() {
   const [dados, setDados] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [exibindoForm, setExibindoForm] = useState(false);
+  const inputFocoRef = useRef(null);
   const [editandoId, setEditandoId] = useState(null);
   const [alunos, setAlunos] = useState([]);
   const [cursos, setCursos] = useState([]);
   const [filtroSituacao, setFiltroSituacao] = useState("Em Andamento");
-  const [filtroProfessor, setFiltroProfessor] = useState("Todas"); // Novo estado de filtro
+  const [filtroProfessor, setFiltroProfessor] = useState("Todas");
   const [finSelecionado, setFinSelecionado] = useState(null);
   const [listaParcelas, setListaParcelas] = useState([]);
   const [configCarne, setConfigCarne] = useState(null);
@@ -41,7 +43,7 @@ export default function Matriculas() {
     professor: "Cristiane",
   });
 
-  // --- FUNÇÃO PADRÃO: CARREGAR ---
+  // --- CARREGAMENTO ---
   const carregar = useCallback(async () => {
     try {
       setCarregando(true);
@@ -60,7 +62,17 @@ export default function Matriculas() {
     carregar();
   }, [carregar]);
 
-  // --- LÓGICA DE FILTRAGEM E CONTAGEM DINÂMICA ---
+  // --- FOCO AUTOMÁTICO ---
+  useEffect(() => {
+    if (exibindoForm) {
+      const timer = setTimeout(() => {
+        inputFocoRef.current?.focus();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [exibindoForm]);
+
+  // --- LÓGICA DE FILTRAGEM ---
   const listaExibida = dados
     .filter((m) => {
       const matchSituacao = filtroSituacao === "Todos" ? true : m.situacao === filtroSituacao;
@@ -71,7 +83,7 @@ export default function Matriculas() {
 
   const totalDaAba = listaExibida.length;
 
-  // --- FUNÇÃO PADRÃO: SALVAR ---
+  // --- FUNÇÕES DE MANIPULAÇÃO ---
   const salvar = async (e) => {
     e.preventDefault();
     const payload = {
@@ -95,7 +107,6 @@ export default function Matriculas() {
     }
   };
 
-  // --- FUNÇÃO PADRÃO: EXCLUIR ---
   const excluir = async (id) => {
     if (window.confirm("Deseja realmente excluir esta matrícula?")) {
       try {
@@ -191,7 +202,7 @@ export default function Matriculas() {
     <div className="container-matriculas">
       <div className="card">
         <div className="header-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2>{editandoId ? "Editar Matrícula" : "Gerenciar Matrículas"}</h2>
+          <h2>{editandoId ? "Editar Matrícula" : exibindoForm ? "Nova Matrícula" : "Gerenciar Matrículas"}</h2>
           {!exibindoForm && (
             <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
               <FaPlus /> Nova Matrícula
@@ -203,7 +214,7 @@ export default function Matriculas() {
           <form onSubmit={salvar} className="form-grid conteudo-pagina" style={{ marginTop: "20px" }}>
             <div className="input-group full-width">
               <label>Aluno:</label>
-              <select required name="aluno" value={form.aluno} onChange={handleChange} className="input-field">
+              <select ref={inputFocoRef} required name="aluno" value={form.aluno} onChange={handleChange} className="input-field">
                 <option value="">Selecione...</option>
                 {alunos
                   .filter((a) => a.ativo)
@@ -240,7 +251,7 @@ export default function Matriculas() {
               <select name="diaSemana" value={form.diaSemana} onChange={handleChange} className="input-field">
                 {["Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"].map((d) => (
                   <option key={d} value={d}>
-                    {d}
+                    {d === "Terca" ? "Terça" : d === "Sabado" ? "Sábado" : d}
                   </option>
                 ))}
               </select>
@@ -356,7 +367,7 @@ export default function Matriculas() {
 
           <div className="contadores-matricula">
             <span className="count-item">
-              <FaListOl /> Total nesta seleção: <strong>{totalDaAba}</strong> registros
+              <FaListOl /> Total: <strong>{totalDaAba}</strong> registros
             </span>
           </div>
         </div>
@@ -377,16 +388,12 @@ export default function Matriculas() {
                 <td>
                   <strong>{m.aluno?.nome}</strong>
                   <br />
-                  <small className="txt-secundario" style={{ fontSize: "0.75rem", color: "#c41010", marginTop: "2px" }}>
-                    Profa. {m.professor}
-                  </small>
+                  <small style={{ color: "#c41010" }}>Profa. {m.professor}</small>
                 </td>
                 <td>
                   <strong>{m.curso?.nome}</strong>
                   <br />
-                  <small className="txt-secundario" style={{ fontSize: "0.75rem", color: "#c41010", marginTop: "2px" }}>
-                    {m.termo_atual} Termo
-                  </small>
+                  <small>{m.termo_atual}º Termo</small>
                 </td>
                 <td>
                   {m.diaSemana} - {m.horario} Hs
@@ -398,7 +405,7 @@ export default function Matriculas() {
                   <button onClick={() => prepararEdicao(m)} className="btn-icon btn-edit" title="Editar">
                     <FaPen />
                   </button>
-                  <button onClick={() => setConfigCarne(m)} className="btn-icon btn-print" title="Imprimir Carnê">
+                  <button onClick={() => setConfigCarne(m)} className="btn-icon btn-print" title="Carnê">
                     <FaPrint />
                   </button>
                   <button onClick={() => navigate(`/boletim/${m.id}`)} className="btn-icon btn-boletim" title="Boletim">
@@ -417,6 +424,7 @@ export default function Matriculas() {
         </table>
       </div>
 
+      {/* --- MODAL CONFIGURAÇÃO CARNÊ --- */}
       {configCarne && (
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: "400px" }}>
@@ -457,6 +465,7 @@ export default function Matriculas() {
         </div>
       )}
 
+      {/* --- MODAL FINANCEIRO --- */}
       {finSelecionado && (
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: "800px" }}>
@@ -476,6 +485,8 @@ export default function Matriculas() {
                 style={{ width: "80px", marginRight: "10px" }}
               />
               <button
+                className="btn btn-primary"
+                style={{ width: "auto", padding: "5px 15px" }}
                 onClick={() => {
                   api
                     .gerarParcelaIndividual({ matriculaId: Number(finSelecionado.id), ano: Number(anoGeracao) })
@@ -485,8 +496,6 @@ export default function Matriculas() {
                     })
                     .catch(() => alert("Erro ao gerar parcelas."));
                 }}
-                className="btn btn-primary"
-                style={{ width: "auto", padding: "5px 15px" }}
               >
                 Gerar Parcelas
               </button>
