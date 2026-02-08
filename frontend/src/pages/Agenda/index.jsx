@@ -1,14 +1,29 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import api from "../../services/api";
-import { FaCheck, FaTimes, FaCalendarAlt, FaHistory, FaExclamationTriangle, FaUndoAlt, FaClock, FaTrash, FaMagic } from "react-icons/fa";
+import { FaCheck, FaTimes, FaCalendarAlt, FaHistory, FaExclamationTriangle, FaUndoAlt, FaClock, FaTrash, FaMagic, FaSearch } from "react-icons/fa";
 import "./styles.css";
 
 export default function Agenda() {
+  // --- LÓGICA DE DATAS PADRÃO ---
+  const hoje = new Date().toISOString().split("T")[0];
+  const trintaAtras = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toISOString().split("T")[0];
+  })();
+
   // --- ESTADOS PADRONIZADOS ---
   const [dados, setDados] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [abaAtiva, setAbaAtiva] = useState("dia");
-  const [dataFiltro, setDataFiltro] = useState(new Date().toISOString().split("T")[0]);
+
+  // Filtros de Data
+  const [dataFiltro, setDataFiltro] = useState(hoje);
+  const [dataInicio, setDataInicio] = useState(trintaAtras);
+  const [dataFim, setDataFim] = useState(hoje);
+
+  // Filtro de Nome
+  const [filtroNome, setFiltroNome] = useState("");
 
   const [mesGerar, setMesGerar] = useState(new Date().getMonth());
   const [anoGerar, setAnoGerar] = useState(new Date().getFullYear());
@@ -23,15 +38,20 @@ export default function Agenda() {
     return dias[dateObj.getDay()];
   };
 
-  // --- FUNÇÃO PADRÃO: CARREGAR (Corrigida com dataFiltro) ---
+  // --- FUNÇÃO CARREGAR (Atualizada com múltiplos parâmetros) ---
   const carregar = useCallback(async () => {
     setCarregando(true);
     try {
-      // Ajuste para garantir que reposicoes use a lógica correta no backend
       const tipoBusca = abaAtiva === "faltas" ? "reposicoes" : abaAtiva;
 
-      // Passamos abaAtiva e dataFiltro para a API
-      const res = await api.getAgenda(tipoBusca, dataFiltro);
+      // Montamos o objeto de filtros para o backend
+      const filtros = {
+        data: abaAtiva === "historico" ? dataInicio : dataFiltro,
+        dataFim: abaAtiva === "historico" ? dataFim : null,
+        nome: filtroNome,
+      };
+
+      const res = await api.getAgenda(tipoBusca, filtros);
       setDados(Array.isArray(res) ? res : []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
@@ -39,12 +59,11 @@ export default function Agenda() {
     } finally {
       setCarregando(false);
     }
-  }, [abaAtiva, dataFiltro]); // Importante: carregar depende da aba e da data
+  }, [abaAtiva, dataFiltro, dataInicio, dataFim, filtroNome]);
 
-  // --- EFFECT: DISPARA CARREGAR SEMPRE QUE ABA OU DATA MUDAR ---
   useEffect(() => {
     carregar();
-  }, [carregar]); // Como carregar tem abaAtiva e dataFiltro como deps, o efeito rodará sempre que elas mudarem
+  }, [carregar]);
 
   // --- AÇÕES ---
   const registrarAcao = async (id, tipoAcao) => {
@@ -111,35 +130,75 @@ export default function Agenda() {
                 </option>
               ))}
             </select>
-
             <input type="number" value={anoGerar} onChange={(e) => setAnoGerar(Number(e.target.value))} className="input-field input-ano" />
-
             <button onClick={handleGerarAgenda} className="btn-primary" disabled={carregando}>
               <FaMagic /> Gerar
             </button>
           </div>
         </div>
 
-        <div className="painel-filtros linha-unica">
-          <div className="grupo-abas">
-            <button className={`aba-item ${abaAtiva === "dia" ? "ativa" : ""}`} onClick={() => setAbaAtiva("dia")}>
-              <FaCalendarAlt /> Agenda
-            </button>
-            <button className={`aba-item ${abaAtiva === "pendentes" ? "ativa" : ""}`} onClick={() => setAbaAtiva("pendentes")}>
-              <FaExclamationTriangle /> Esquecidas
-            </button>
-            <button className={`aba-item ${abaAtiva === "faltas" ? "ativa" : ""}`} onClick={() => setAbaAtiva("faltas")}>
-              <FaUndoAlt /> Reposições
-            </button>
-            <button className={`aba-item ${abaAtiva === "historico" ? "ativa" : ""}`} onClick={() => setAbaAtiva("historico")}>
-              <FaHistory /> Histórico
-            </button>
+        <div className="painel-filtros-agenda">
+          <div className="linha-filtros-superior">
+            <div className="grupo-abas">
+              <button className={`aba-item ${abaAtiva === "dia" ? "ativa" : ""}`} onClick={() => setAbaAtiva("dia")}>
+                <FaCalendarAlt /> Agenda
+              </button>
+              <button className={`aba-item ${abaAtiva === "pendentes" ? "ativa" : ""}`} onClick={() => setAbaAtiva("pendentes")}>
+                <FaExclamationTriangle /> Esquecidas
+              </button>
+              <button className={`aba-item ${abaAtiva === "faltas" ? "ativa" : ""}`} onClick={() => setAbaAtiva("faltas")}>
+                <FaUndoAlt /> Reposições
+              </button>
+              <button className={`aba-item ${abaAtiva === "historico" ? "ativa" : ""}`} onClick={() => setAbaAtiva("historico")}>
+                <FaHistory /> Histórico
+              </button>
+            </div>
+
+            {/* Filtro por Nome - Estilo compactado */}
+            <div className="busca-nome-container">
+              <FaSearch className="icon-busca" />
+              <input
+                type="text"
+                placeholder="Pesquisar aluno..."
+                value={filtroNome}
+                onChange={(e) => setFiltroNome(e.target.value)}
+                className="input-busca-nome"
+              />
+            </div>
           </div>
 
-          {(abaAtiva === "dia" || abaAtiva === "historico") && (
-            <div className="agenda-data-seletor">
-              <input type="date" value={dataFiltro} onChange={(e) => setDataFiltro(e.target.value)} className="input-field" />
-              <span className="dia-semana-label">{getDiaSemanaExtenso(dataFiltro)}</span>
+          <div className="linha-filtros-inferior">
+            {abaAtiva === "dia" && (
+              <div className="agenda-data-seletor">
+                <span className="label-filtro">Data:</span>
+                <input type="date" value={dataFiltro} onChange={(e) => setDataFiltro(e.target.value)} className="input-field" />
+                <span className="dia-semana-label">{getDiaSemanaExtenso(dataFiltro)}</span>
+              </div>
+            )}
+
+            {abaAtiva === "historico" && (
+              <div className="periodo-seletor">
+                <span className="label-filtro">Período:</span>
+                <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="input-field" />
+                <span className="divisor-data">até</span>
+                <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="input-field" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/*  R E S U M O    C O N T A D O R    D E    R E G I S T R O S */}
+        <div className="resumo-resultados">
+          <span>
+            Mostrando <strong>{dados.length}</strong> {dados.length === 1 ? "registro" : "registros"}
+          </span>
+
+          {/* Opcional: Um resumo rápido por status se estiver no histórico */}
+          {abaAtiva === "historico" && dados.length > 0 && (
+            <div className="mini-badges-resumo">
+              <small className="status-presente">Presentes: {dados.filter((d) => d.status === "Presente").length}</small>
+              <small className="status-falta">Faltas: {dados.filter((d) => d.status === "Falta").length}</small>
+              <small className="status-pendente">Pendente: {dados.filter((d) => d.status === "Pendente").length}</small>
             </div>
           )}
         </div>
@@ -181,9 +240,7 @@ export default function Agenda() {
 
                       <td>
                         <strong>{aula.termo?.matricula?.aluno?.nome || aula.aluno_nome}</strong>
-                        <div className="sub-texto" style={{ fontSize: "0.75rem", color: "#666" }}>
-                          Prof(a): {aula.termo?.matricula?.professor || "Não atribuído"}
-                        </div>
+                        <div className="sub-texto">Prof(a): {aula.termo?.matricula?.professor || "Não atribuído"}</div>
                         {abaAtiva === "historico" && aula.obs && (
                           <div className="icon-aula-obs">
                             <FaExclamationTriangle /> {aula.obs}
@@ -193,7 +250,7 @@ export default function Agenda() {
 
                       <td className="sub-texto">
                         <strong>{aula.termo?.matricula?.curso?.nome || "Curso"}</strong>
-                        <div style={{ fontSize: "0.75rem", color: "#666", marginTop: "2px" }}>{aula.termo?.numeroTermo}º Termo</div>
+                        <div>{aula.termo?.numeroTermo}º Termo</div>
                       </td>
                       <td>
                         <span className={`badge status-${aula.status?.toLowerCase()}`}>{aula.status}</span>

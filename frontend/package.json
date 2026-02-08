@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "deploy": "pm2 restart web-escola",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",

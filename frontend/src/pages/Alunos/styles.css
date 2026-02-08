@@ -128,6 +128,26 @@
   color: #fa5252;
 }
 
+.whatsapp {  font-size: 1.0rem;
+  color: #25d366;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+
+}
+
+.btn-whatsapp:hover {
+  color: #128C7E;
+  text-decoration: none;
+}
+
+/* Garante que o restante da tabela continue alinhado */
+.tabela-alunos td {
+  vertical-align: middle;
+}
+
 @media (max-width: 768px) {
   .campo-medio {
     grid-column: span 1;
@@ -143,3 +163,4 @@
     margin-left: 0;
   }
 }
+

@@ -74,6 +74,7 @@ export default function Mapa() {
           </div>
         </div>
 
+        {/* INICIO TBODY - CABEÇALHO    */}
         <div className="tabela-scroll">
           <table className="tabela-mapa">
             <thead>
@@ -84,6 +85,8 @@ export default function Mapa() {
                 ))}
               </tr>
             </thead>
+
+            {/* INICIO TBODY - DADOS    */}
             <tbody>
               {horarios.map((hora) => (
                 <tr key={hora}>
@@ -98,7 +101,7 @@ export default function Mapa() {
                             <span className="curso">{m.curso?.nome}</span>
                             <span className="prof">Prof: {m.professor || "---"}</span>
                             <a
-                              href={`https://wa.me/55${m.aluno?.telefone?.replace(/\D/g, "")}`}
+                              href={`https://wa.me/55${m.aluno?.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${m.aluno?.nome?.split(" ")[0]}, passando para confirmar sua aula de ${m.curso?.nome} hoje, às ${m.horario} hs !`)}`}
                               target="_blank"
                               rel="noreferrer"
                               className="whatsapp"
@@ -113,6 +116,7 @@ export default function Mapa() {
                 </tr>
               ))}
             </tbody>
+
           </table>
         </div>
       </div>

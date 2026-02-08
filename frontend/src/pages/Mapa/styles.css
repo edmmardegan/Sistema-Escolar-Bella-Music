@@ -1,10 +1,40 @@
-.container-mapa { padding: 20px; }
-.tabela-scroll { overflow-x: auto; margin-top: 15px; border-radius: 8px; border: 1px solid #ddd; }
-.tabela-mapa { width: 100%; border-collapse: collapse; min-width: 1000px; background: #fff; }
-.tabela-mapa th { background: #f4f4f4; padding: 12px; border: 1px solid #ddd; color: #333; }
-.th-hora { width: 80px; }
-.coluna-hora { font-weight: bold; text-align: center; background: #fafafa; border: 1px solid #ddd; }
-.slot-dia { border: 1px solid #ddd; vertical-align: top; padding: 5px; min-height: 80px; width: 15.5%; }
+.container-mapa {
+  padding: 20px;
+}
+.tabela-scroll {
+  overflow-x: auto;
+  margin-top: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+.tabela-mapa {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+  background: #fff;
+}
+.tabela-mapa th {
+  background: #f4f4f4;
+  padding: 12px;
+  border: 1px solid #ddd;
+  color: #333;
+}
+.th-hora {
+  width: 80px;
+}
+.coluna-hora {
+  font-weight: bold;
+  text-align: center;
+  background: #fafafa;
+  border: 1px solid #ddd;
+}
+.slot-dia {
+  border: 1px solid #ddd;
+  vertical-align: top;
+  padding: 5px;
+  min-height: 80px;
+  width: 15.5%;
+}
 
 .card-aluno-mapa {
   background: #f0f7ff;
@@ -14,14 +44,33 @@
   font-size: 0.75rem; /* Fonte levemente menor para caber mais info */
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.card-aluno-mapa .nome { font-weight: bold; font-size: 0.85rem; color: #0056b3; }
-.card-aluno-mapa .curso { font-size: 0.75rem; color: #666; }
-.card-aluno-mapa .prof { font-size: 0.7rem; color: #888; border-top: 1px solid #eee; margin-top: 4px; padding-top: 2px; }
-.card-aluno-mapa .whatsapp { 
-  font-size: 0.7rem; color: #25d366; text-decoration: none; display: flex; align-items: center; gap: 4px; margin-top: 4px;
+.card-aluno-mapa .nome {
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #0056b3;
+}
+.card-aluno-mapa .curso {
+  font-size: 0.75rem;
+  color: #666;
+}
+.card-aluno-mapa .prof {
+  font-size: 0.7rem;
+  color: #888;
+  border-top: 1px solid #eee;
+  margin-top: 4px;
+  padding-top: 2px;
+}
+.card-aluno-mapa .whatsapp {
+  font-size: 0.7rem;
+  color: #25d366;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
 }
 
 /* Faz as linhas de :30 terem uma cor levemente diferente para guiar o olho */
@@ -31,7 +80,6 @@
 
 /* Diminui um pouco a altura mínima dos slots para a tela não ficar gigante */
 .slot-dia {
-  min-height: 50px; 
+  min-height: 50px;
   padding: 4px;
 }
-

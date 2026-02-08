@@ -3,7 +3,7 @@
 import axios from "axios";
 
 // 1. CONFIGURAÇÃO BASE
-const api_url = "http://localhost:3000"; // Ajuste o IP/Porta se necessário
+const api_url = "http://192.168.15.79:3000"; // Ajuste o IP/Porta se necessário
 
 const axiosInstance = axios.create({
   baseURL: api_url,
@@ -47,9 +47,14 @@ const api = {
 
   // === 📅 AGENDA (Frequência e Aulas) ===
   // Tipos: 'dia', 'pendentes', 'reposicoes', 'historico'
-  getAgenda: async (tipo, data) => {
-    // Verifique se a URL está passando o parâmetro ?data=
-    const resposta = await axiosInstance.get(`/agenda?tipo=${tipo}&data=${data}`);
+  getAgenda: async (tipo, filtros) => {
+    // O Axios transforma esse objeto automaticamente em: ?tipo=...&data=...&nome=...
+    const resposta = await axiosInstance.get(`/agenda`, {
+      params: {
+        tipo: tipo,
+        ...filtros,
+      },
+    });
     return resposta.data;
   },
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { FaTrash, FaPen, FaUserPlus, FaSave, FaTimes, FaSearch, FaListOl } from "react-icons/fa";
+import { FaWhatsapp, FaTrash, FaPen, FaUserPlus, FaSave, FaTimes, FaSearch, FaListOl } from "react-icons/fa";
 import api from "../../services/api.js";
 import InputMask from "../../components/InputMask";
 import "./styles.css";
@@ -104,14 +104,6 @@ export default function Alunos() {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm({ ...form, [name]: type === "checkbox" ? checked : value });
-  };
-
-  const mascaraTelefone = (valor) => {
-    if (!valor) return "";
-    valor = valor.replace(/\D/g, "").substring(0, 11);
-    valor = valor.replace(/^(\d{2})(\d)/g, "($1) $2");
-    valor = valor.replace(/(\d)(\d{4})$/, "$1-$2");
-    return valor;
   };
 
   const formatarDataTabela = (data) => {
@@ -246,10 +238,18 @@ export default function Alunos() {
                     <td>
                       <strong>{a.nome}</strong>
                       <small style={{ color: "#c41010" }}>
-                       <br /> End.: {a.rua}, - {a.bairro}
+                        <br /> End.: {a.rua}, - {a.bairro}
                       </small>
                     </td>
-                    <td>{mascaraTelefone(a.telefone)}</td>
+                    <a
+                      href={`https://wa.me/55${a.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${a.nome}, tudo bem? Aqui é da Escola Bella Music.`)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="whatsapp"
+                    >
+                      <FaWhatsapp /> {a.telefone}
+                    </a>
+
                     <td>{formatarDataTabela(a.dataNascimento)}</td>
                     <td>
                       <span className={`badge-status ${a.ativo ? "status-presente" : "status-falta"}`}>{a.ativo ? "ATIVO" : "INATIVO"}</span>
