@@ -1,122 +1,69 @@
+/* ================= ESPECÍFICO DE ALUNOS ================= */
+
 .container-alunos {
-  padding: 20px;
+  padding: 10px;
 }
 
 .header-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
-/* Formulário */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  background: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  margin-top: 20px;
-}
-
-.campo-medio {
-  grid-column: span 2;
-}
-
-.input-field {
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
+/* Checkbox diferenciado */
 .checkbox-group {
   display: flex;
   align-items: center;
   gap: 10px;
+  height: 38px; /* Alinha com a altura dos inputs */
 }
 
+/* Rodapé do formulário */
 .acoes-form {
   grid-column: 1 / -1;
   display: flex;
-  gap: 10px;
+  gap: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
 }
 
-/* Header de Filtros (Igual à Matrículas) */
+/* ================= CABEÇALHO DE FILTROS ================= */
 .filtro-container-flex {
   display: flex;
   align-items: center;
   gap: 20px;
   margin-bottom: 15px;
-  flex-wrap: wrap;
 }
 
-/* Busca Compacta */
 .busca-nome-container {
   position: relative;
-  width: 250px; /* Campo menor como solicitado */
+  width: 280px; /* Largura compacta sugerida */
 }
 
 .input-busca-field {
   width: 100%;
-  padding: 6px 30px;
-  font-size: 0.9rem;
+  height: 34px;
+  padding: 0 35px;
   border: 1px solid #ccc;
   border-radius: 4px;
-  outline-color: #007bff;
-}
-
-.icon-search,
-.icon-clear {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #999;
-  font-size: 0.85rem;
 }
 
 .icon-search {
+  position: absolute;
   left: 10px;
-}
-.icon-clear {
-  right: 10px;
-  cursor: pointer;
-}
-
-/* Contador (Cores idênticas à matrícula) */
-.contadores-matricula {
-  margin-left: auto; /* Joga para a direita */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
 }
 
-.count-item {
-  background-color: #e9ecef;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  color: #495057;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid #dee2e6;
-}
-
-.count-item strong {
-  color: #c41010; /* Vermelho padrão que você usa */
-}
-
-/* Tabela e Badges */
-.tabela-container {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
+/* ================= BADGES E STATUS ================= */
 .badge-status {
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: bold;
+  text-transform: uppercase;
 }
 
 .status-presente {
@@ -128,39 +75,44 @@
   color: #fa5252;
 }
 
-.whatsapp {  font-size: 1.0rem;
+/* Contador de Registros */
+.contadores-matricula {
+  margin-left: auto;
+}
+
+.count-item {
+  background-color: #e9ecef;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 13px;
+  border: 1px solid #dee2e6;
+}
+
+.tabela-registros {
+  font-size: 16px;
+}
+
+.tabela-registros-complemento {
+  color: #c41010;
+}
+
+/* WhatsApp Link */
+.whatsapp {
   color: #25d366;
   text-decoration: none;
+  font-size: 16px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-
+  gap: 5px;
 }
 
-.btn-whatsapp:hover {
-  color: #128C7E;
-  text-decoration: none;
-}
-
-/* Garante que o restante da tabela continue alinhado */
-.tabela-alunos td {
-  vertical-align: middle;
-}
-
+/* Responsividade específica */
 @media (max-width: 768px) {
-  .campo-medio {
-    grid-column: span 1;
-  }
   .filtro-container-flex {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
   .busca-nome-container {
     width: 100%;
   }
-  .contadores-matricula {
-    margin-left: 0;
-  }
 }
-

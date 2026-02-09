@@ -36,6 +36,38 @@ export default function Cursos() {
     carregar();
   }, [carregar]);
 
+  // --- ATALHOS DE TECLADO ---
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // F2 - Novo Registro
+      if (e.key === "F2") {
+        e.preventDefault();
+        if (!exibindoForm) setExibindoForm(true);
+      }
+
+      // F4 - Salvar (Gatilho pelo ID do botão)
+      if (e.key === "F4") {
+        e.preventDefault();
+        if (exibindoForm) {
+          document.getElementById("btn-salvar")?.click();
+        }
+      }
+
+      // Escape - Cancelar e Fechar
+      if (e.key === "Escape") {
+        if (exibindoForm) {
+          // Em Matrículas, usamos o limparForm que já reseta tudo
+          limparECancelar();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    // Incluímos as dependências para o F3 e F4 funcionarem com dados atuais
+  }, [exibindoForm, setExibindoForm]);
+
   // --- FUNÇÃO PADRÃO: SALVAR ---
   const salvar = async (e) => {
     e.preventDefault();
@@ -88,19 +120,19 @@ export default function Cursos() {
           <h2>Gerenciar Cursos</h2>
           {!exibindoForm && (
             <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
-              <FaPlus /> Novo Curso
+              <FaPlus /> Novo Curso [F2]
             </button>
           )}
         </div>
 
         {exibindoForm && (
           <form onSubmit={salvar} className="form-grid">
-            <div className="input-group campo-medio">
+            <div className="input-group campo-curto">
               <label>Nome do Curso:</label>
               <input required name="nome" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} className="input-field" />
             </div>
 
-            <div className="input-group">
+            <div className="input-group campo-curto">
               <InputMoeda
                 label="Valor Mensalidade:"
                 value={form.valorMensalidade}
@@ -109,7 +141,7 @@ export default function Cursos() {
               />
             </div>
 
-            <div className="input-group">
+            <div className="input-group campo-curto">
               <label>Qtde Termos/Módulos:</label>
               <input
                 type="number"
@@ -122,11 +154,11 @@ export default function Cursos() {
             </div>
 
             <div className="acoes-form">
-              <button type="submit" className="btn btn-primary">
-                <FaSave /> Salvar
+              <button id="btn-salvar" type="submit" className="btn btn-primary">
+                <FaSave /> Salvar [F4]
               </button>
-              <button type="button" className="btn btn-cancelar" onClick={limparECancelar}>
-                <FaTimes /> Cancelar
+              <button type="button" className="btn btn-secondary" onClick={limparECancelar}>
+                <FaTimes /> Cancelar [Esc]
               </button>
             </div>
           </form>

@@ -25,12 +25,11 @@ import { MatriculaTermo } from './entities/matricula-termo.entity';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: '127.0.0.1',
-      port: 5433,
-      username: 'postgres',
-      password: '123456',
-      database: 'escolaron',
-      // Listamos todas as entidades aqui para o TypeORM criar as tabelas
+      host: process.env.DB_HOST || '127.0.0.1',
+      port: Number(process.env.DB_PORT) || 5432,
+      username: process.env.DB_USERNAME || 'evandro',
+      password: String(process.env.DB_PASSWORD || '123456'),
+      database: process.env.DB_DATABASE || 'escolaron',
       entities: [
         User,
         Aluno,
@@ -40,8 +39,9 @@ import { MatriculaTermo } from './entities/matricula-termo.entity';
         Matricula,
         MatriculaTermo,
       ],
-      synchronize: true, // Mantém o banco sincronizado com as Entities
+      synchronize: true,
     }),
+
     // Módulos do Sistema
     UsersModule,
     AuthModule,

@@ -24,23 +24,6 @@
   margin-bottom: 10px;
 }
 
-/* GRID DO FORMULÁRIO (Mantendo seu auto-fit) */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.full-width {
-  grid-column: 1 / -1;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-}
-
 .input-field {
   padding: 8px;
   border: 1px solid #ccc;
@@ -49,24 +32,8 @@
   font-size: 14px;
 }
 
-/* BOTÕES PRINCIPAIS */
 
-.btn-primary {
-  background-color: #007bff;
-  color: white;
-}
 
-/* BOTÃO CANCELAR (Com o efeito vermelho solicitado) */
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-  transition: all 0.3s ease;
-}
-
-.btn-secondary:hover {
-  background-color: #dc3545 !important;
-  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.25);
-}
 
 .acoes-form {
   display: flex;
@@ -149,15 +116,6 @@
 }
 .bg-finalizado {
   background-color: #28a745;
-}
-
-/* BOLETIM - Inputs Pequenos */
-.input-pequeno {
-  width: 60px;
-  padding: 4px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 4px;
 }
 
 /* MODAL */

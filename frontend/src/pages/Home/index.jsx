@@ -1,19 +1,11 @@
 import React from "react";
-
+import "./styles.css"
 export default function Home() {
   return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '80vh', 
-      flexDirection: 'column', 
-      color: '#bdc3c7' 
-    }}>
+    <div className="pagina-principal">
       {/* Quando tiver a imagem da logo, use: <img src={logoImg} alt="Logo" style={{ width: '300px' }} /> */}
-      <h1 style={{ fontSize: '3rem', margin: 0 }}>SUA LOGO</h1>
-      <p style={{ fontSize: '1.2rem' }}>Bem-vindo ao Sistema Escolar</p>
-      <small>Selecione uma opção no menu lateral para começar.</small>
+      <img className="logo" src="/src/assets/logo.jpg" alt="Logo"/>
+      <h1 className="nome-escola">Bem-vindo a Bella Music</h1>
     </div>
   );
 }

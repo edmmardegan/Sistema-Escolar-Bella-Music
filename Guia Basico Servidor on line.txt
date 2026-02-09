@@ -1,0 +1,82 @@
+###############################################################################
+#             GUIA DE MANUTENÇÃO: SISTEMA ESCOLA BELLA MUSIC                  #
+#             Localização: Servidor Linux (Ubuntu/Debian)                     #
+###############################################################################
+
+# --- 1. COMANDOS DO BANCO DE DADOS (DOCKER) ---
+
+# Ver se o container está rodando
+docker ps
+
+# Iniciar o banco caso ele esteja parado
+docker start db_escola
+
+# Garantir que o banco ligue sozinho com o computador (Já configurado)
+docker update --restart unless-stopped db_escola
+
+# Entrar no terminal do Banco para comandos SQL (Reset de senha, etc)
+docker exec -it db_escola psql -U evandro -d escolaron
+
+# Resetar senha do admin para 'admin' (Rodar direto no terminal do Linux)
+docker exec -it db_escola psql -U evandro -d escolaron -c "UPDATE usuarios SET password = '\$2b\$10\$RLqAH/5zFP.YKwUaJlvR7OXtQ3B3VH8uc1.70uGc30h7359JovmBW' WHERE email = 'admin@admin.com';"
+
+
+# --- 2. COMANDOS DO BACKEND (NESTJS) ---
+
+# Pasta do Projeto: ~/Documentos/Treinamento/Sistema-Escola-Bella-Music/backend
+
+# Como atualizar o Backend após mudar o código:
+cd ~/Documentos/Treinamento/Sistema-Escola-Bella-Music/backend
+npm run build              # Compila o projeto
+pm2 restart api-escola     # Reinicia o serviço no PM2
+
+
+# --- 3. COMANDOS DO FRONTEND (REACT/VITE) ---
+
+# Pasta do Projeto: ~/Documentos/Treinamento/Sistema-Escola-Bella-Music/frontend
+
+# Como iniciar o Frontend permitindo acesso pelo Windows (--host):
+# (Importante: Use as aspas e os dois traços -- como no exemplo abaixo)
+pm2 start "npm run dev -- --host" --name "web-escola"
+
+# Como atualizar o Frontend após mudar o código (ex: mudar o IP no api.js):
+cd ~/Documentos/Treinamento/Sistema-Escola-Bella-Music/frontend
+npm run build              # Apenas se houver erro no dev, geralmente o 'dev' atualiza sozinho
+pm2 restart web-escola
+
+
+# --- 4. GESTÃO DE PROCESSOS (PM2) ---
+
+# Ver o status de tudo o que está rodando
+pm2 status
+
+# Ver logs (erros ou mensagens do sistema)
+pm2 logs                   # De todos
+pm2 logs api-escola        # Só do backend
+pm2 logs web-escola        # Só do frontend
+
+# Limpar logs antigos para economizar espaço
+pm2 flush
+
+# SALVAR CONFIGURAÇÃO (Essencial para ligar sozinho com o PC)
+# Sempre que você adicionar um processo novo ou mudar um nome, rode:
+pm2 save
+
+
+# --- 5. REDE E ACESSO ---
+
+# Descobrir o IP atual do Linux para configurar no Windows
+hostname -I
+
+# Desativar Firewall (Caso o Windows não consiga conectar)
+sudo ufw disable
+
+
+# --- 6. FLUXO DE REINICIALIZAÇÃO COMPLETA (EM CASO DE ERRO) ---
+
+# Se nada estiver funcionando, rode esta sequência:
+pm2 stop all
+docker restart db_escola
+pm2 start all
+pm2 save
+###############################################################################

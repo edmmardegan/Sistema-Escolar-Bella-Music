@@ -72,6 +72,38 @@ export default function Matriculas() {
     }
   }, [exibindoForm]);
 
+// para as teclas de atalho
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // F2 - Novo Registro: Abre o form se estiver fechado
+      if (e.key === "F2") {
+        e.preventDefault();
+        if (!exibindoForm) setExibindoForm(true);
+      }
+
+      // F4 - Salvar: Clica no botão de salvar se o form estiver aberto
+      if (e.key === "F4") {
+        e.preventDefault();
+        if (exibindoForm) {
+          // Busca o botão pelo ID que você colocar nele
+          document.getElementById("btn-salvar")?.click();
+        }
+      }
+
+      // Escape - Cancelar: Fecha o form se estiver aberto
+      if (e.key === "Escape") {
+        if (exibindoForm) limparForm(); // Ou limparForm() em Matrículas
+      }
+    };
+
+    // Adiciona o "ouvido" no navegador
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Limpa o "ouvido" quando você sai da página (muito importante!)
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [exibindoForm]);
+
+
   // --- LÓGICA DE FILTRAGEM ---
   const listaExibida = dados
     .filter((m) => {
@@ -205,7 +237,7 @@ export default function Matriculas() {
           <h2>{editandoId ? "Editar Matrícula" : exibindoForm ? "Nova Matrícula" : "Gerenciar Matrículas"}</h2>
           {!exibindoForm && (
             <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
-              <FaPlus /> Nova Matrícula
+              <FaPlus /> Nova Matrícula [F2]
             </button>
           )}
         </div>
@@ -335,11 +367,11 @@ export default function Matriculas() {
             </div>
 
             <div className="acoes-form full-width">
-              <button type="submit" className="btn btn-primary">
-                <FaSave /> Salvar
+              <button id="btn-salvar" type="submit" className="btn btn-primary">
+                <FaSave /> Salvar [F4]
               </button>
               <button type="button" className="btn btn-secondary" onClick={limparForm}>
-                <FaTimes /> Cancelar
+                <FaTimes /> Cancelar [Esc]
               </button>
             </div>
           </form>

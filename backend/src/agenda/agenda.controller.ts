@@ -17,8 +17,13 @@ export class AgendaController {
   constructor(private readonly service: AgendaService) {}
 
   @Get()
-  async findAll(@Query('tipo') tipo: string, @Query('data') data: string) {
-    return this.service.findAll(tipo, data);
+  async findAll(
+    @Query('tipo') tipo: string,
+    @Query('data') data?: string,
+    @Query('dataFim') dataFim?: string,
+    @Query('nome') nome?: string,
+  ) {
+    return this.service.findAll(tipo, data, dataFim, nome);
   }
 
   @Post('gerar')

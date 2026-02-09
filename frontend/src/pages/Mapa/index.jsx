@@ -101,7 +101,7 @@ export default function Mapa() {
                             <span className="curso">{m.curso?.nome}</span>
                             <span className="prof">Prof: {m.professor || "---"}</span>
                             <a
-                              href={`https://wa.me/55${m.aluno?.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${m.aluno?.nome?.split(" ")[0]}, passando para confirmar sua aula de ${m.curso?.nome} hoje, às ${m.horario} hs !`)}`}
+                              href={`https://wa.me/55${m.aluno?.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${m.aluno?.nome?.split(" ")[0]}, passando para confirmar sua aula de ${m.curso?.nome?.split(" ")[0]} hoje, às ${m.horario}hs, posso confirmar ?`)}`}
                               target="_blank"
                               rel="noreferrer"
                               className="whatsapp"
@@ -116,7 +116,6 @@ export default function Mapa() {
                 </tr>
               ))}
             </tbody>
-
           </table>
         </div>
       </div>

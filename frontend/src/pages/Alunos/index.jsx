@@ -51,6 +51,37 @@ export default function Alunos() {
     }
   }, [exibindoForm]);
 
+  // para as teclas de atalho
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // F2 - Novo Registro: Abre o form se estiver fechado
+      if (e.key === "F2") {
+        e.preventDefault();
+        if (!exibindoForm) setExibindoForm(true);
+      }
+
+      // F4 - Salvar: Clica no botão de salvar se o form estiver aberto
+      if (e.key === "F4") {
+        e.preventDefault();
+        if (exibindoForm) {
+          // Busca o botão pelo ID que você colocar nele
+          document.getElementById("btn-salvar")?.click();
+        }
+      }
+
+      // Escape - Cancelar: Fecha o form se estiver aberto
+      if (e.key === "Escape") {
+        if (exibindoForm) fecharFormulario(); // Ou limparForm() em Matrículas
+      }
+    };
+
+    // Adiciona o "ouvido" no navegador
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Limpa o "ouvido" quando você sai da página (muito importante!)
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [exibindoForm]);
+
   // --- FILTRAGEM ---
   const listaExibida = dados
     .filter((aluno) => {
@@ -114,24 +145,25 @@ export default function Alunos() {
 
   return (
     <div className="container-alunos">
+      {/* titlo e botao novo registro */}
       <div className="card">
         <div className="header-card">
           <h2>{editandoId ? "Editar Aluno" : exibindoForm ? "Novo Aluno" : "Gerenciar Alunos"}</h2>
           {!exibindoForm && (
             <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
-              <FaUserPlus /> Novo Aluno
+              <FaUserPlus /> Novo Aluno [F2]
             </button>
           )}
         </div>
-
+        {/* Formulario de dados - inputs */}
         {exibindoForm && (
           <form onSubmit={salvar} className="form-grid">
-            <div className="input-group campo-medio">
+            <div className="input-group campo-curto">
               <label>Nome Completo:</label>
               <input ref={inputNomeRef} required name="nome" value={form.nome} onChange={handleChange} className="input-field" autoComplete="off" />
             </div>
 
-            <div className="input-group">
+            <div className="input-group campo-curto">
               <InputMask
                 label="Telefone:"
                 mask="(99) 99999-9999"
@@ -142,32 +174,32 @@ export default function Alunos() {
               />
             </div>
 
-            <div className="input-group">
+            <div className="input-group campo-curto">
               <label>Data Nasc:</label>
               <input type="date" name="dataNascimento" value={form.dataNascimento} onChange={handleChange} className="input-field" />
             </div>
 
-            <div className="input-group campo-medio">
+            <div className="input-group campo-curto">
               <label>Rua:</label>
               <input name="rua" value={form.rua} onChange={handleChange} className="input-field" />
             </div>
 
-            <div className="input-group">
+            <div className="input-group campo-curto">
               <label>Bairro:</label>
               <input name="bairro" value={form.bairro} onChange={handleChange} className="input-field" />
             </div>
 
-            <div className="input-group">
+            <div className="input-group campo-curto">
               <label>Cidade:</label>
               <input name="cidade" value={form.cidade} onChange={handleChange} className="input-field" />
             </div>
 
-            <div className="input-group campo-medio">
+            <div className="input-group campo-curto">
               <label>Nome do Pai:</label>
               <input name="nomePai" value={form.nomePai} onChange={handleChange} className="input-field" />
             </div>
 
-            <div className="input-group campo-medio">
+            <div className="input-group campo-curto">
               <label>Nome da Mãe:</label>
               <input name="nomeMae" value={form.nomeMae} onChange={handleChange} className="input-field" />
             </div>
@@ -178,19 +210,22 @@ export default function Alunos() {
             </div>
 
             <div className="acoes-form">
-              <button type="submit" className="btn btn-primary">
-                <FaSave /> Salvar Ficha
+              <button id="btn-salvar" type="submit" className="btn btn-primary">
+                <FaSave /> Salvar Ficha [F4]
               </button>
               <button type="button" className="btn btn-secondary" onClick={fecharFormulario}>
-                <FaTimes /> Cancelar
+                <FaTimes /> Cancelar [Esc]
               </button>
             </div>
           </form>
         )}
       </div>
 
+      {/* container de dados */}
       <div className="tabela-container">
+        {/* Cabeçalho Superior */}
         <div className="filtro-container-flex">
+          {/* Aba de filtros */}
           <div className="grupo-abas">
             {["Ativos", "Inativos", "Todos"].map((aba) => (
               <button key={aba} className={`aba-item ${filtroAba === aba ? "ativa" : ""}`} onClick={() => setFiltroAba(aba)}>
@@ -199,6 +234,7 @@ export default function Alunos() {
             ))}
           </div>
 
+          {/* Pesquisa por nome */}
           <div className="busca-nome-container">
             <FaSearch className="icon-search" />
             <input
@@ -211,6 +247,7 @@ export default function Alunos() {
             {buscaNome && <FaTimes className="icon-clear" onClick={() => setBuscaNome("")} />}
           </div>
 
+          {/* contador de registo */}
           <div className="contadores-matricula">
             <span className="count-item">
               <FaListOl /> Total: <strong>{totalExibido}</strong> registros
@@ -218,6 +255,7 @@ export default function Alunos() {
           </div>
         </div>
 
+        {/* registros da tabela */}
         {carregando ? (
           <p className="txt-carregando">Carregando dados...</p>
         ) : (
@@ -232,12 +270,13 @@ export default function Alunos() {
               </tr>
             </thead>
             <tbody>
+              {/* inicio dos registros */}
               {listaExibida.length > 0 ? (
                 listaExibida.map((a) => (
                   <tr key={a.id}>
                     <td>
-                      <strong>{a.nome}</strong>
-                      <small style={{ color: "#c41010" }}>
+                      <strong className="tabela-registros" >{a.nome}</strong>
+                      <small className="tabela-registros-complemento">
                         <br /> End.: {a.rua}, - {a.bairro}
                       </small>
                     </td>
@@ -250,10 +289,16 @@ export default function Alunos() {
                       <FaWhatsapp /> {a.telefone}
                     </a>
 
-                    <td>{formatarDataTabela(a.dataNascimento)}</td>
+                    <td>
+                      {" "}
+                      <small className="tabela-registros"> {formatarDataTabela(a.dataNascimento)} </small>{" "}
+                    </td>
+
                     <td>
                       <span className={`badge-status ${a.ativo ? "status-presente" : "status-falta"}`}>{a.ativo ? "ATIVO" : "INATIVO"}</span>
                     </td>
+
+                    {/* botões de ação por registro */}
                     <td className="acoes">
                       <button onClick={() => prepararEdicao(a)} className="btn-icon btn-edit" title="Editar">
                         <FaPen />
