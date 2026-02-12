@@ -1,238 +1,103 @@
-/* --- LAYOUT PRINCIPAL --- */
-.container-agenda {
-  width: 100%;
-  max-width: 1150px;
-  margin: 10px auto 0 0 !important;
-  padding: 0 20px;
-}
+/* src/pages/Agenda/styles.css */
 
-.header-agenda {
+.bloco-geracao-compacto {
   display: flex;
-  justify-content: space-between;
+  gap: 8px;
   align-items: center;
-  margin-bottom: 20px;
 }
 
-/* --- PAINEL DE FILTROS --- */
+.input-ano {
+  width: 85px !important;
+}
+.select-mes {
+  width: 130px !important;
+}
+
 .painel-filtros-agenda {
-  background: #fdfdfd;
-  padding: 15px;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  margin-bottom: 20px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.linha-filtros-superior {
-  display: flex;
-  justify-content: flex-start;
   align-items: center;
-  flex-wrap: wrap;
   gap: 15px;
+  margin-top: 15px;
 }
 
-.linha-filtros-inferior {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.linha-datas-agenda {
+  margin-top: 15px;
   padding-top: 10px;
   border-top: 1px dashed #eee;
 }
 
-/* --- GRUPO DE ABAS --- */
-.grupo-abas {
-  display: flex;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
-  overflow: hidden;
-}
-
-.aba-item {
-  padding: 8px 15px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-right: 1px solid #ddd;
-  font-size: 0.9rem;
+.seletor-data-container {
   display: flex;
   align-items: center;
-  gap: 6px;
-  color: #666;
-  transition: 0.2s;
-}
-
-.aba-item:last-child { border-right: none; }
-
-.aba-item.ativa {
-  background: #007bff;
-  color: white;
-}
-
-/* --- BUSCA POR NOME --- */
-.busca-nome-container {
-  display: flex;
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 4px 10px;
-  background: #fff;
-  width: 400px;
-}
-
-.input-busca-nome {
-  border: none;
-  outline: none;
-  width: 100%;
-  font-size: 0.85rem;
-  padding-left: 5px;
-  margin: 0 10px;
-}
-
-.icon-busca {
-  color: #aaa;
-  font-size: 0.8rem;
-}
-
-/* --- SELETORES DE DATA --- */
-.periodo-seletor,
-.agenda-data-seletor {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-}
-
-.label-filtro {
-  font-weight: bold;
-  color: #555;
-}
-
-.dia-semana-label {
-  white-space: nowrap !important;
-  display: inline-block;
-  min-width: max-content;
-  color: #007bff;
-  font-weight: 600;
-  margin-left: 5px;
-}
-
-.input-field {
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-/* --- STATUS BADGES --- */
-.badge-status {
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: bold;
-  display: inline-block;
-}
-
-.status-presente { background: #d4edda; color: #155724; }
-.status-falta { background: #f8d7da; color: #721c24; }
-.status-pendente { background: #ffc107; color: #000; border: 1px solid #e0a800; }
-
-/* --- CONTADOR ADMINISTRATIVO --- */
-.resumo-resultados {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding: 0 5px;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.resumo-resultados strong { color: #007bff; }
-
-.mini-badges-resumo {
-  display: flex;
   gap: 10px;
+  font-size: 14px;
 }
 
-.mini-badges-resumo small {
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+.label-dia-semana {
+  color: var(--primary);
   font-weight: 600;
+  min-width: 120px;
 }
 
-/* --- TABELA --- */
-.tabela-container {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow-x: auto;
+/* STATUS COLORS */
+.status-pendente {
+  background: #fff3bf;
+  color: #f08c00;
+  border: 1px solid #ffe066;
+}
+.status-presente {
+  background: #e6fcf5;
+  color: #0ca678;
+}
+.status-falta {
+  background: #fff5f5;
+  color: #fa5252;
+}
+.status-reposicao {
+  background: #e7f5ff;
+  color: #1c7ed6;
 }
 
-.tabela {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.tabela th {
-  background: #f8f9fa;
-  padding: 12px;
-  text-align: left;
-  font-size: 0.9rem;
-}
-
-.tabela td {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-  font-size: 0.9rem;
-}
-
-/* --- BOTÕES E AÇÕES --- */
-.btn-icon {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-right: 8px;
-  display: inline-flex;
+.txt-negrito {
+  font-weight: bold;
+  display: flex;
   align-items: center;
 }
-
-.btn-confirm { color: #28a745; }
-.btn-not-confirm { color: #dc3545; }
-.btn-excluir { color: #6c757d; }
-
-/* AJUSTE SOLICITADO: BOTÃO REPOSIÇÃO ESTICADO */
-.btn-reposicao {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 6px 15px !important;
-  width: auto !important;
-  min-width: max-content; /* Força o botão a caber o texto */
-  background-color: #17a2b8;
-  color: white !important;
-  border-radius: 4px;
-  white-space: nowrap;
-  font-weight: 600;
-  text-decoration: none;
+.sub-texto-obs {
+  font-size: 12px;
+  color: #777;
+  margin-top: 2px;
+}
+.txt-obs-alerta {
+  font-size: 11px;
+  color: #e67e22;
+  font-weight: 500;
+  margin-top: 3px;
 }
 
-.btn-reposicao small {
-  font-size: 0.85rem;
-  margin: 0;
-}
-
-.btn-reposicao:hover {
-  background-color: #138496;
-  filter: brightness(95%);
+.btn-pequeno {
+  padding: 5px 12px;
+  font-size: 11px;
 }
 
 .texto-centralizado {
   text-align: center;
-  padding: 20px;
+  padding: 40px;
   color: #999;
+}
+
+.icon-search {
+  color: #aaa;
+}
+
+/* Responsividade */
+@media (max-width: 1100px) {
+  .painel-filtros-agenda {
+    flex-wrap: wrap;
+  }
+  .contadores-flex {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
 }

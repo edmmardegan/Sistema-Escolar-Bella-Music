@@ -1,18 +1,22 @@
+/* src/pages/Alunos/index.jsx */
+
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { FaWhatsapp, FaTrash, FaPen, FaUserPlus, FaSave, FaTimes, FaSearch, FaListOl } from "react-icons/fa";
+import { FaWhatsapp, FaTrash, FaPen, FaUserPlus, FaSave, FaTimes, FaSearch, FaListOl, FaUserGraduate } from "react-icons/fa";
 import api from "../../services/api.js";
 import InputMask from "../../components/InputMask";
 import "./styles.css";
 
 export default function Alunos() {
-  // --- ESTADOS ---
-  const [dados, setDados] = useState([]);
-  const [carregando, setCarregando] = useState(false);
+  // 1. ESTADOS BÁSICOS (Padronizados)
+  const [registros, setRegistros] = useState([]);
   const [exibindoForm, setExibindoForm] = useState(false);
-  const inputNomeRef = useRef(null);
   const [editandoId, setEditandoId] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // 2. ESTADOS ESPECÍFICOS
   const [filtroAba, setFiltroAba] = useState("Ativos");
   const [buscaNome, setBuscaNome] = useState("");
+  const inputNomeRef = useRef(null);
 
   const [form, setForm] = useState({
     nome: "",
@@ -26,15 +30,16 @@ export default function Alunos() {
     cidade: "",
   });
 
+  // --- CARREGAMENTO DE DADOS ---
   const carregar = useCallback(async () => {
     try {
-      setCarregando(true);
+      setLoading(true);
       const resposta = await api.getAlunos();
-      setDados(Array.isArray(resposta) ? resposta : []);
+      setRegistros(Array.isArray(resposta) ? resposta : []);
     } catch (e) {
       console.error("Erro ao carregar alunos:", e);
     } finally {
-      setCarregando(false);
+      setLoading(false);
     }
   }, []);
 
@@ -42,6 +47,7 @@ export default function Alunos() {
     carregar();
   }, [carregar]);
 
+  // --- FOCO E ATALHOS ---
   useEffect(() => {
     if (exibindoForm) {
       const timer = setTimeout(() => {
@@ -51,49 +57,32 @@ export default function Alunos() {
     }
   }, [exibindoForm]);
 
-  // para as teclas de atalho
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // F2 - Novo Registro: Abre o form se estiver fechado
       if (e.key === "F2") {
         e.preventDefault();
         if (!exibindoForm) setExibindoForm(true);
       }
-
-      // F4 - Salvar: Clica no botão de salvar se o form estiver aberto
       if (e.key === "F4") {
         e.preventDefault();
-        if (exibindoForm) {
-          // Busca o botão pelo ID que você colocar nele
-          document.getElementById("btn-salvar")?.click();
-        }
+        if (exibindoForm) document.getElementById("btn-salvar-aluno")?.click();
       }
-
-      // Escape - Cancelar: Fecha o form se estiver aberto
       if (e.key === "Escape") {
-        if (exibindoForm) fecharFormulario(); // Ou limparForm() em Matrículas
+        if (exibindoForm) fecharFormulario();
       }
     };
-
-    // Adiciona o "ouvido" no navegador
     window.addEventListener("keydown", handleKeyDown);
-
-    // Limpa o "ouvido" quando você sai da página (muito importante!)
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [exibindoForm]);
 
-  // --- FILTRAGEM ---
-  const listaExibida = dados
+  // --- LÓGICA DE FILTRAGEM ---
+  const listaExibida = registros
     .filter((aluno) => {
       const bateAba = filtroAba === "Ativos" ? aluno.ativo === true : filtroAba === "Inativos" ? aluno.ativo === false : true;
-
       const bateNome = (aluno.nome || "").toLowerCase().includes(buscaNome.toLowerCase());
-
       return bateAba && bateNome;
     })
     .sort((a, b) => (a.nome || "").localeCompare(b.nome || ""));
-
-  const totalExibido = listaExibida.length;
 
   // --- AÇÕES ---
   const salvar = async (e) => {
@@ -144,182 +133,184 @@ export default function Alunos() {
   };
 
   return (
-    <div className="container-alunos">
-      {/* titlo e botao novo registro */}
-      <div className="card">
-        <div className="header-card">
-          <h2>{editandoId ? "Editar Aluno" : exibindoForm ? "Novo Aluno" : "Gerenciar Alunos"}</h2>
-          {!exibindoForm && (
-            <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
-              <FaUserPlus /> Novo Aluno [F2]
-            </button>
+    <main className="conteudo-principal">
+      <div className="container-principal">
+        {/* CARD DE FORMULÁRIO */}
+        <div className="card-principal">
+          <div className="header-card">
+            <h2>
+              <FaUserGraduate /> {editandoId ? "Editar Aluno" : exibindoForm ? "Novo Aluno" : "Gerenciar Alunos"}
+            </h2>
+            {!exibindoForm && (
+              <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
+                <FaUserPlus /> Novo Aluno [F2]
+              </button>
+            )}
+          </div>
+
+          {exibindoForm && (
+            <form onSubmit={salvar} className="form-grid">
+              <div className="input-group campo-medio">
+                <label>Nome Completo:</label>
+                <input ref={inputNomeRef} required name="nome" value={form.nome} onChange={handleChange} className="input-field" autoComplete="off" />
+              </div>
+
+              <div className="input-group campo-curto">
+                <InputMask
+                  label="Telefone:"
+                  mask="(99) 99999-9999"
+                  name="telefone"
+                  value={form.telefone || ""}
+                  onChange={(e) => setForm({ ...form, telefone: e.target.value })}
+                  placeholder="(00) 00000-0000"
+                />
+              </div>
+
+              <div className="input-group campo-curto">
+                <label>Data Nasc:</label>
+                <input type="date" name="dataNascimento" value={form.dataNascimento} onChange={handleChange} className="input-field" />
+              </div>
+
+              <div className="input-group campo-medio">
+                <label>Rua:</label>
+                <input name="rua" value={form.rua} onChange={handleChange} className="input-field" />
+              </div>
+
+              <div className="input-group campo-curto">
+                <label>Bairro:</label>
+                <input name="bairro" value={form.bairro} onChange={handleChange} className="input-field" />
+              </div>
+
+              <div className="input-group campo-curto">
+                <label>Cidade:</label>
+                <input name="cidade" value={form.cidade} onChange={handleChange} className="input-field" />
+              </div>
+
+              <div className="input-group campo-medio">
+                <label>Nome do Pai:</label>
+                <input name="nomePai" value={form.nomePai} onChange={handleChange} className="input-field" />
+              </div>
+
+              <div className="input-group campo-medio">
+                <label>Nome da Mãe:</label>
+                <input name="nomeMae" value={form.nomeMae} onChange={handleChange} className="input-field" />
+              </div>
+
+              <div className="input-group checkbox-group">
+                <input type="checkbox" name="ativo" id="ativo" checked={form.ativo} onChange={handleChange} />
+                <label htmlFor="ativo">Aluno Ativo?</label>
+              </div>
+
+              <div className="acoes-form">
+                <button id="btn-salvar-aluno" type="submit" className="btn btn-primary">
+                  <FaSave /> Salvar Ficha [F4]
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={fecharFormulario}>
+                  <FaTimes /> Cancelar [Esc]
+                </button>
+              </div>
+            </form>
           )}
         </div>
-        {/* Formulario de dados - inputs */}
-        {exibindoForm && (
-          <form onSubmit={salvar} className="form-grid">
-            <div className="input-group campo-curto">
-              <label>Nome Completo:</label>
-              <input ref={inputNomeRef} required name="nome" value={form.nome} onChange={handleChange} className="input-field" autoComplete="off" />
+
+        {/* LISTAGEM E TABELA */}
+        <div className="tabela-container">
+          <div className="filtro-container-flex">
+            <div className="grupo-abas">
+              {["Ativos", "Inativos", "Todos"].map((aba) => (
+                <button key={aba} className={`aba-item ${filtroAba === aba ? "ativa" : ""}`} onClick={() => setFiltroAba(aba)}>
+                  {aba}
+                </button>
+              ))}
             </div>
 
-            <div className="input-group campo-curto">
-              <InputMask
-                label="Telefone:"
-                mask="(99) 99999-9999"
-                name="telefone"
-                value={form.telefone || ""}
-                onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-                placeholder="(00) 00000-0000"
+            <div className="busca-nome-container">
+              <FaSearch className="icon-search" />
+              <input
+                type="text"
+                placeholder="Pesquisar por nome..."
+                value={buscaNome}
+                onChange={(e) => setBuscaNome(e.target.value)}
+                className="input-field"
               />
+              {buscaNome && (
+                <FaTimes
+                  className="icon-clear"
+                  onClick={() => setBuscaNome("")}
+                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#999" }}
+                />
+              )}
             </div>
 
-            <div className="input-group campo-curto">
-              <label>Data Nasc:</label>
-              <input type="date" name="dataNascimento" value={form.dataNascimento} onChange={handleChange} className="input-field" />
+            <div className="contadores-flex">
+              <span className="count-badge">
+                <FaListOl /> Total: <strong>{listaExibida.length}</strong> registros
+              </span>
             </div>
-
-            <div className="input-group campo-curto">
-              <label>Rua:</label>
-              <input name="rua" value={form.rua} onChange={handleChange} className="input-field" />
-            </div>
-
-            <div className="input-group campo-curto">
-              <label>Bairro:</label>
-              <input name="bairro" value={form.bairro} onChange={handleChange} className="input-field" />
-            </div>
-
-            <div className="input-group campo-curto">
-              <label>Cidade:</label>
-              <input name="cidade" value={form.cidade} onChange={handleChange} className="input-field" />
-            </div>
-
-            <div className="input-group campo-curto">
-              <label>Nome do Pai:</label>
-              <input name="nomePai" value={form.nomePai} onChange={handleChange} className="input-field" />
-            </div>
-
-            <div className="input-group campo-curto">
-              <label>Nome da Mãe:</label>
-              <input name="nomeMae" value={form.nomeMae} onChange={handleChange} className="input-field" />
-            </div>
-
-            <div className="input-group checkbox-group">
-              <input type="checkbox" name="ativo" id="ativo" checked={form.ativo} onChange={handleChange} className="checkbox-field" />
-              <label htmlFor="ativo">Aluno Ativo?</label>
-            </div>
-
-            <div className="acoes-form">
-              <button id="btn-salvar" type="submit" className="btn btn-primary">
-                <FaSave /> Salvar Ficha [F4]
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={fecharFormulario}>
-                <FaTimes /> Cancelar [Esc]
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
-
-      {/* container de dados */}
-      <div className="tabela-container">
-        {/* Cabeçalho Superior */}
-        <div className="filtro-container-flex">
-          {/* Aba de filtros */}
-          <div className="grupo-abas">
-            {["Ativos", "Inativos", "Todos"].map((aba) => (
-              <button key={aba} className={`aba-item ${filtroAba === aba ? "ativa" : ""}`} onClick={() => setFiltroAba(aba)}>
-                {aba}
-              </button>
-            ))}
           </div>
 
-          {/* Pesquisa por nome */}
-          <div className="busca-nome-container">
-            <FaSearch className="icon-search" />
-            <input
-              type="text"
-              placeholder="    Pesquisar por nome..."
-              value={buscaNome}
-              onChange={(e) => setBuscaNome(e.target.value)}
-              className="input-busca-field"
-            />
-            {buscaNome && <FaTimes className="icon-clear" onClick={() => setBuscaNome("")} />}
-          </div>
-
-          {/* contador de registo */}
-          <div className="contadores-matricula">
-            <span className="count-item">
-              <FaListOl /> Total: <strong>{totalExibido}</strong> registros
-            </span>
-          </div>
-        </div>
-
-        {/* registros da tabela */}
-        {carregando ? (
-          <p className="txt-carregando">Carregando dados...</p>
-        ) : (
-          <table className="tabela">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Telefone</th>
-                <th>Data Nascto</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* inicio dos registros */}
-              {listaExibida.length > 0 ? (
-                listaExibida.map((a) => (
-                  <tr key={a.id}>
-                    <td>
-                      <strong className="tabela-registros" >{a.nome}</strong>
-                      <small className="tabela-registros-complemento">
-                        <br /> End.: {a.rua}, - {a.bairro}
-                      </small>
-                    </td>
-                    <a
-                      href={`https://wa.me/55${a.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${a.nome}, tudo bem? Aqui é da Escola Bella Music.`)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="whatsapp"
-                    >
-                      <FaWhatsapp /> {a.telefone}
-                    </a>
-
-                    <td>
-                      {" "}
-                      <small className="tabela-registros"> {formatarDataTabela(a.dataNascimento)} </small>{" "}
-                    </td>
-
-                    <td>
-                      <span className={`badge-status ${a.ativo ? "status-presente" : "status-falta"}`}>{a.ativo ? "ATIVO" : "INATIVO"}</span>
-                    </td>
-
-                    {/* botões de ação por registro */}
-                    <td className="acoes">
-                      <button onClick={() => prepararEdicao(a)} className="btn-icon btn-edit" title="Editar">
-                        <FaPen />
-                      </button>
-                      <button onClick={() => excluir(a.id)} className="btn-icon btn-excluir" title="Excluir">
-                        <FaTrash />
-                      </button>
+          {loading ? (
+            <p className="txt-carregando">Carregando dados...</p>
+          ) : (
+            <table className="tabela">
+              <thead>
+                <tr>
+                  <th>Nome / Endereço</th>
+                  <th>Telefone</th>
+                  <th>Nascimento</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {listaExibida.length > 0 ? (
+                  listaExibida.map((a) => (
+                    <tr key={a.id}>
+                      <td>
+                        <strong style={{ fontSize: "16px" }}>{a.nome}</strong>
+                        <br />
+                        <small className="txt-detalhe-vermelho">
+                          End.: {a.rua}, {a.bairro}
+                        </small>
+                      </td>
+                      <td>
+                        <a
+                          href={`https://wa.me/55${a.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${a.nome}, tudo bem? Aqui é da Escola Bella Music.`)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="link-whatsapp"
+                        >
+                          <FaWhatsapp /> {a.telefone}
+                        </a>
+                      </td>
+                      <td>
+                        <small>{formatarDataTabela(a.dataNascimento)}</small>
+                      </td>
+                      <td>
+                        <span className={`badge-status ${a.ativo ? "status-ativo" : "status-inativo"}`}>{a.ativo ? "ATIVO" : "INATIVO"}</span>
+                      </td>
+                      <td className="acoes">
+                        <button onClick={() => prepararEdicao(a)} className="btn-icon btn-edit" title="Editar">
+                          <FaPen />
+                        </button>
+                        <button onClick={() => excluir(a.id)} className="btn-icon btn-excluir" title="Excluir">
+                          <FaTrash />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
+                      Nenhum aluno encontrado.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="txt-vazio">
-                    Nenhum aluno encontrado.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        )}
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

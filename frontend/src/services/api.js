@@ -3,8 +3,8 @@
 import axios from "axios";
 
 // 1. CONFIGURAÇÃO BASE
-const api_url = "http://192.168.15.79:3000"; // Ajuste o IP/Porta se necessário
-
+//const api_url = "http://192.168.15.79:3000"; // Ajuste o IP/Porta se necessário
+const api_url = "http://187.34.126.224:3001";
 const axiosInstance = axios.create({
   baseURL: api_url,
 });

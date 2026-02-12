@@ -1,196 +1,89 @@
-.container-financeiro {
-  width: 100%;
-  max-width: 1150px;
-}
+/* src/pages/Financeiro/styles.css */
 
-.header-financeiro {
+.bloco-geracao-compacto {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.btn-global {
-  background-color: #6f42c1;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
-.painel-filtros {
-  margin: 20px 0;
-  align-items: flex-end;
-}
-
-.resumo-cards {
+.resumo-financeiro-grid {
   display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
-.card-resumo {
-  flex: 1;
-  padding: 20px;
+.resumo-box {
+  flex: 0 1 250px;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
   border-radius: 8px;
-  text-align: center;
+  gap: 12px;
 }
 
-.resumo-titulo {
-  font-weight: bold;
-  display: block;
-  margin-bottom: 5px;
+.resumo-box.pago {
+  background: #e6fcf5;
+  border: 1px solid #c3fae8;
+  color: #087f5b;
 }
-.resumo-valor {
-  font-size: 1.8rem;
-  font-weight: bold;
+.resumo-box.aberto {
+  background: #fff9db;
+  border: 1px solid #fff3bf;
+  color: #f08c00;
 }
-
-.linha-paga {
-  opacity: 0.6;
-}
-.txt-secundario {
-  font-size: 0.85rem;
-  color: #555;
-}
-.txt-valor {
-  font-weight: bold;
-}
-
-.bg-paga {
-  background-color: #28a745;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-.bg-aberta {
-  background-color: #ffc107;
-  color: #333;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-.bg-vencida {
-  background-color: red;
-  color: #333;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.btn-detalhes {
-  background-color: #6c757d;
-  color: white;
-}
-
-/* Container do bloco de geração */
-.bloco-geracao {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #e9ecef;
-  padding: 10px;
-  border: 1px solid #ced4da;
-}
-
-/* Rótulo "GERAR LOTE" */
-.bloco-geracao .label-geracao {
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #495057;
-  text-transform: uppercase;
-}
-
-/* Ajuste específico para os campos dentro do bloco */
-.bloco-geracao .select-mes {
-  width: 120px;
-}
-
-.bloco-geracao .input-ano {
-  width: 85px;
-}
-
-/* Responsividade: em telas pequenas, o bloco se ajusta */
-@media (max-width: 768px) {
-  .bloco-geracao {
-    margin-left: 0;
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-
-.resumo-financeiro-cards {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 25px;
-}
-
-.card-resumo {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  padding: 15px 20px;
-  border-radius: 10px;
-  color: #fff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.card-resumo.pago {
-  background: #a8e9b7;
-} /* Verde */
-.card-resumo.aberto {
-  background: #f7f0ba;
-  color: #333;
-} /* Amarelo */
 
 .resumo-icon {
-  font-size: 2rem;
-  margin-right: 15px;
-  opacity: 0.8;
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+.resumo-txt span {
+  display: block;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.resumo-txt strong {
+  font-size: 1.2rem;
 }
 
-.resumo-info span {
-  display: block;
-  font-size: 0.85rem;
-  text-transform: uppercase;
+.painel-filtros-linha {
+  display: flex;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #eee;
+  align-items: flex-end;
+}
+
+.status-pago {
+  background: #d3f9d8;
+  color: #2b8a3e;
+}
+.status-aberto {
+  background: #fff3bf;
+  color: #e67700;
+}
+.status-vencido {
+  background: #fff5f5;
+  color: #fa5252;
+  border: 1px solid #ffc9c9;
+}
+
+.txt-negrito {
   font-weight: bold;
 }
-
-.resumo-info strong {
-  font-size: 1.4rem;
+.texto-centralizado {
+  text-align: center;
+  padding: 40px;
+  color: #999;
 }
 
-/* Container dos filtros em linha única */
-.painel-filtros.linha-unica {
-  display: flex;
-  flex-wrap: nowrap; /* Impede que os campos pulem para baixo */
-  gap: 10px;
-  align-items: flex-end;
-  background: #fdfdfd;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  border: 1px solid #eee;
-}
-
-/* Redução geral do tamanho das labels */
-.painel-filtros.linha-unica label {
-  font-size: 0.75rem;
-  margin-bottom: 4px;
-}
-
-/* Larguras específicas para cada tipo de dado */
-.painel-filtros.linha-unica .campo-mes { width: 140px; }
-.painel-filtros.linha-unica .campo-ano { width: 80px; }
-.painel-filtros.linha-unica .campo-prof { width: 150px; }
-.painel-filtros.linha-unica .campo-status { width: 130px; }
-
-/* Ajuste nos inputs para não terem margem lateral sobrando */
-.painel-filtros.linha-unica .input-field {
-  padding: 6px 8px;
-  font-size: 0.85rem;
+@media (max-width: 900px) {
+  .resumo-financeiro-grid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .painel-filtros-linha {
+    flex-wrap: wrap;
+  }
 }

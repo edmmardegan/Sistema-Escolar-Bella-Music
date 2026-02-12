@@ -1,15 +1,15 @@
-// Local: src/usuarios/index.jsx
+/* src/pages/Usuarios/index.jsx */
 
 import React, { useState, useEffect, useCallback } from "react";
-import api from "../../services/api";
 import { FaUserPlus, FaKey, FaTrash, FaUserShield, FaTimes, FaPen, FaSave } from "react-icons/fa";
+import api from "../../services/api";
 import "./styles.css";
 
 const Usuarios = () => {
-  // --- ESTADOS PADRONIZADOS ---
-  const [dados, setDados] = useState([]);
-  const [carregando, setCarregando] = useState(false);
-  const [exibirForm, setExibirForm] = useState(false);
+  // 1. ESTADOS PADRONIZADOS
+  const [registros, setRegistros] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [exibindoForm, setExibindoForm] = useState(false);
   const [editandoId, setEditandoId] = useState(null);
 
   const [form, setForm] = useState({
@@ -18,17 +18,17 @@ const Usuarios = () => {
     role: "user",
   });
 
-  // --- FUNÇÃO PADRÃO: CARREGAR ---
+  // --- CARREGAMENTO DE DADOS ---
   const carregar = useCallback(async () => {
     try {
-      setCarregando(true);
+      setLoading(true);
       const res = await api.getUsuarios();
       const lista = Array.isArray(res) ? res : res.usuarios || res.data || [];
-      setDados(lista);
+      setRegistros(lista);
     } catch (e) {
       console.error("Erro ao carregar usuários:", e);
     } finally {
-      setCarregando(false);
+      setLoading(false);
     }
   }, []);
 
@@ -36,47 +36,31 @@ const Usuarios = () => {
     carregar();
   }, [carregar]);
 
+  // --- ATALHOS DE TECLADO [F2, F4, Esc] ---
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "F2" && !exibindoForm) {
+        e.preventDefault();
+        setExibindoForm(true);
+      }
+      if (e.key === "F4" && exibindoForm) {
+        e.preventDefault();
+        document.getElementById("btn-salvar-usuario")?.click();
+      }
+      if (e.key === "Escape" && exibindoForm) {
+        limparForm();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [exibindoForm]);
 
-  // para as teclas de atalho
-    useEffect(() => {
-      const handleKeyDown = (e) => {
-        // F2 - Novo Registro: Abre o form se estiver fechado
-        if (e.key === "F2") {
-          e.preventDefault();
-          if (!exibirForm) setExibirForm(true);
-        }
-  
-        // F4 - Salvar: Clica no botão de salvar se o form estiver aberto
-        if (e.key === "F4") {
-          e.preventDefault();
-          if (exibirForm) {
-            // Busca o botão pelo ID que você colocar nele
-            document.getElementById("btn-salvar")?.click();
-          }
-        }
-  
-        // Escape - Cancelar: Fecha o form se estiver aberto
-        if (e.key === "Escape") {
-          if (exibirForm) limparForm(); // Ou limparForm() em Matrículas
-        }
-      };
-  
-      // Adiciona o "ouvido" no navegador
-      window.addEventListener("keydown", handleKeyDown);
-  
-      // Limpa o "ouvido" quando você sai da página (muito importante!)
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [exibirForm]);
-
-
-  // --- FUNÇÃO PADRÃO: SALVAR ---
+  // --- AÇÕES ---
   const salvar = async (e) => {
     if (e) e.preventDefault();
     try {
-      setCarregando(true);
+      setLoading(true);
       const payload = { ...form, username: form.email };
-
-      // Se for novo, envia a senha padrão
       const dadosEnviar = editandoId ? payload : { ...payload, senha: "123456" };
 
       await api.saveUsuario(dadosEnviar, editandoId);
@@ -87,27 +71,25 @@ const Usuarios = () => {
     } catch (e) {
       alert("Erro ao salvar usuário.");
     } finally {
-      setCarregando(false);
+      setLoading(false);
     }
   };
 
-  // --- FUNÇÃO PADRÃO: EXCLUIR ---
   const excluir = async (id) => {
     if (!window.confirm("Deseja realmente excluir este usuário?")) return;
     try {
       await api.deleteUsuario(id);
-      alert("Usuário removido!");
       carregar();
     } catch (e) {
-      alert("Erro ao excluir. Verifique se o usuário possui registros vinculados.");
+      alert("Erro ao excluir.");
     }
   };
 
-  // --- AUXILIARES ---
   const prepararEdicao = (u) => {
     setEditandoId(u.id);
     setForm({ nome: u.nome, email: u.email, role: u.role });
-    setExibirForm(true);
+    setExibindoForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleReset = async (id, nome) => {
@@ -123,84 +105,84 @@ const Usuarios = () => {
   const limparForm = () => {
     setForm({ nome: "", email: "", role: "user" });
     setEditandoId(null);
-    setExibirForm(false);
+    setExibindoForm(false);
   };
 
   return (
-    <div className="container-usuarios">
-      <div className="header-pagina">
-        <h2>
-          <FaUserShield /> Gestão de Usuários
-        </h2>
-        {!exibirForm && (
-          <button className="btn btn-primary" onClick={() => setExibirForm(true)}>
-            <FaUserPlus /> Novo Usuário [F2]
-          </button>
-        )}
-      </div>
-
-      {exibirForm && (
-        <form className="form-cadastro-usuario" onSubmit={salvar}>
-          <div className="form-header-sessao">
-            <h3>{editandoId ? "Editar Usuário" : "Cadastrar Novo Usuário"}</h3>
+    <main className="conteudo-principal">
+      <div className="container-principal">
+        <section className="card-principal">
+          <div className="header-card">
+            <h2>
+              <FaUserShield /> {editandoId ? "Editar Usuário" : "Gestão de Usuários"}
+            </h2>
+            {!exibindoForm && (
+              <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
+                <FaUserPlus /> Novo Usuário [F2]
+              </button>
+            )}
           </div>
 
-          <div className="form-grid-inputs">
-            <div className="input-group">
-              <label>Nome Completo</label>
-              <input required name="nome" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} className="input-reset" />
-            </div>
-            <div className="input-group">
-              <label>E-mail (Login)</label>
-              <input
-                required
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="input-reset"
-              />
-            </div>
-            <div className="input-group">
-              <label>Nível de Acesso</label>
-              <select name="role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="input-reset">
-                <option value="user">Usuário</option>
-                <option value="admin">Administrador</option>
-              </select>
-            </div>
-          </div>
+          {exibindoForm && (
+            <form className="form-grid" onSubmit={salvar}>
+              <div className="input-group campo-medio">
+                <label>Nome Completo</label>
+                <input required name="nome" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} className="input-field" />
+              </div>
+              <div className="input-group campo-medio">
+                <label>E-mail (Login)</label>
+                <input
+                  required
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="input-field"
+                />
+              </div>
+              <div className="input-group campo-curto">
+                <label>Nível de Acesso</label>
+                <select name="role" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="input-field">
+                  <option value="user">Usuário</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
 
-          <div className="form-actions-row">
-            <button id="btn-salvar" type="submit" className="btn btn-success" disabled={carregando}>
-              <FaSave /> Salvar [F4]
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={limparForm}>
-              <FaTimes /> Cancelar [Esc]
-            </button>
-          </div>
-        </form>
-      )}
+              <div className="acoes-form">
+                <button id="btn-salvar-usuario" type="submit" className="btn btn-primary" disabled={loading}>
+                  <FaSave /> Salvar [F4]
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={limparForm}>
+                  <FaTimes /> Cancelar [Esc]
+                </button>
+              </div>
+            </form>
+          )}
+        </section>
 
-      <div className="tabela-responsiva">
-        <table className="tabela-padrao">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>E-mail</th>
-              <th>Cargo</th>
-              <th style={{ textAlign: "center" }}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!carregando &&
-              dados.map((u) => (
+        <section className="tabela-container">
+          {loading && <p style={{ padding: "10px" }}>Processando...</p>}
+
+          <table className="tabela">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Acesso</th>
+                <th style={{ textAlign: "center", width: "150px" }}>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {registros.map((u) => (
                 <tr key={u.id}>
-                  <td>{u.nome}</td>
+                  <td>
+                    <strong>{u.nome}</strong>
+                  </td>
                   <td>{u.email}</td>
                   <td>
-                    <span className={`badge ${u.role === "admin" ? "bg-danger" : "bg-info"}`}>{u.role}</span>
+                    <span className={`badge-status ${u.role === "admin" ? "status-inativo" : "status-ativo"}`}>{u.role.toUpperCase()}</span>
                   </td>
-                  <td className="acoes-cell">
+                  <td className="acoes">
                     <button className="btn-icon btn-edit" onClick={() => prepararEdicao(u)} title="Editar">
                       <FaPen />
                     </button>
@@ -213,11 +195,11 @@ const Usuarios = () => {
                   </td>
                 </tr>
               ))}
-          </tbody>
-        </table>
-        {carregando && <p style={{ padding: "20px" }}>Carregando...</p>}
+            </tbody>
+          </table>
+        </section>
       </div>
-    </div>
+    </main>
   );
 };
 

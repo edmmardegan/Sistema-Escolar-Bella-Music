@@ -1,78 +1,94 @@
-.input-field {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
+/* src/pages/Cursos/styles.css */
+/* Também serve para Alunos se você importar no arquivo correspondente */
 
-.card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-.header-card {
-  margin-bottom: 20px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.full-width {
-  grid-column: 1 / -1;
-}
-
-.input-group {
+.checkbox-group {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+}
+
+.filtro-container-flex {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.busca-nome-container {
+  position: relative;
+  flex: 1;
+  max-width: 350px;
+}
+
+.busca-nome-container .icon-search {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+.busca-nome-container .input-field {
+  padding-left: 35px;
+}
+
+.link-whatsapp {
+  color: #25d366;
+  text-decoration: none;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
   gap: 5px;
 }
 
-.input-group label {
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.input-field {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-}
-
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+.badge-status {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
   font-weight: bold;
 }
 
-/* Tabela e Botões */
-.tabela-container {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+.status-ativo { background: #e6fcf5; color: #0ca678; }
+.status-inativo { background: #fff5f5; color: #fa5252; }
+
+.count-badge {
+  background-color: #f1f3f5;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  border: 1px solid #dee2e6;
 }
 
-.tabela {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.tabela th, .tabela td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.acoes {
+.grupo-abas {
   display: flex;
-  gap: 15px;
+  gap: 4px;
 }
+
+.aba-item {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.aba-item.ativa {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.txt-detalhe-vermelho {
+  color: #c41010;
+  font-size: 12px;
+}
+
+.contadores-flex {
+  margin-left: auto;
+}
+
+/* Campos com travas de largura para não esticarem demais */
+.campo-curto { max-width: 250px; }
+.campo-medio { max-width: 500px; }

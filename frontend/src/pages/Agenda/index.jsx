@@ -1,6 +1,20 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+/* src/pages/Agenda/index.jsx */
+
+import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api";
-import { FaCheck, FaTimes, FaCalendarAlt, FaHistory, FaExclamationTriangle, FaUndoAlt, FaClock, FaTrash, FaMagic, FaSearch } from "react-icons/fa";
+import {
+  FaCheck,
+  FaTimes,
+  FaCalendarAlt,
+  FaHistory,
+  FaExclamationTriangle,
+  FaUndoAlt,
+  FaClock,
+  FaTrash,
+  FaMagic,
+  FaSearch,
+  FaListOl,
+} from "react-icons/fa";
 import "./styles.css";
 
 export default function Agenda() {
@@ -13,17 +27,15 @@ export default function Agenda() {
   })();
 
   // --- ESTADOS PADRONIZADOS ---
-  const [dados, setDados] = useState([]);
-  const [carregando, setCarregando] = useState(false);
+  const [registros, setRegistros] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [abaAtiva, setAbaAtiva] = useState("dia");
 
-  // Filtros de Data
+  // Filtros
   const [dataFiltro, setDataFiltro] = useState(hoje);
   const [dataInicio, setDataInicio] = useState(trintaAtras);
   const [dataFim, setDataFim] = useState(hoje);
-
-  // Filtro de Nome
-  const [filtroNome, setFiltroNome] = useState("");
+  const [buscaNome, setBuscaNome] = useState("");
 
   const [mesGerar, setMesGerar] = useState(new Date().getMonth());
   const [anoGerar, setAnoGerar] = useState(new Date().getFullYear());
@@ -38,28 +50,27 @@ export default function Agenda() {
     return dias[dateObj.getDay()];
   };
 
-  // --- FUNÇÃO CARREGAR (Atualizada com múltiplos parâmetros) ---
+  // --- CARREGAR DADOS ---
   const carregar = useCallback(async () => {
-    setCarregando(true);
     try {
+      setLoading(true);
       const tipoBusca = abaAtiva === "faltas" ? "reposicoes" : abaAtiva;
 
-      // Montamos o objeto de filtros para o backend
       const filtros = {
         data: abaAtiva === "historico" ? dataInicio : dataFiltro,
         dataFim: abaAtiva === "historico" ? dataFim : null,
-        nome: filtroNome,
+        nome: buscaNome,
       };
 
       const res = await api.getAgenda(tipoBusca, filtros);
-      setDados(Array.isArray(res) ? res : []);
+      setRegistros(Array.isArray(res) ? res : []);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
-      setDados([]);
+      setRegistros([]);
     } finally {
-      setCarregando(false);
+      setLoading(false);
     }
-  }, [abaAtiva, dataFiltro, dataInicio, dataFim, filtroNome]);
+  }, [abaAtiva, dataFiltro, dataInicio, dataFim, buscaNome]);
 
   useEffect(() => {
     carregar();
@@ -102,43 +113,43 @@ export default function Agenda() {
     if (!confirmar) return;
 
     try {
-      setCarregando(true);
+      setLoading(true);
       const resultado = await api.gerarAgenda(mesGerar, anoGerar);
       alert(resultado.message || "Processado com sucesso!");
       carregar();
     } catch (err) {
       alert("Erro ao gerar agenda");
     } finally {
-      setCarregando(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="container-agenda">
-      <div className="card">
-        <div className="header-agenda">
-          <h2>
-            <FaCalendarAlt /> Controle de Frequência
-          </h2>
-
-          <div className="bloco-geracao">
-            <span className="label-geracao">Gerar Lote:</span>
-            <select value={mesGerar} onChange={(e) => setMesGerar(Number(e.target.value))} className="input-field select-mes">
-              {mesesExibicao.map((m, idx) => (
-                <option key={idx} value={idx}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <input type="number" value={anoGerar} onChange={(e) => setAnoGerar(Number(e.target.value))} className="input-field input-ano" />
-            <button onClick={handleGerarAgenda} className="btn-primary" disabled={carregando}>
-              <FaMagic /> Gerar
-            </button>
+    <main className="conteudo-principal">
+      <div className="container-principal">
+        {/* CABEÇALHO E GERAÇÃO EM LOTE */}
+        <section className="card-principal">
+          <div className="header-card">
+            <h2>
+              <FaCalendarAlt /> Controle de Frequência
+            </h2>
+            <div className="bloco-geracao-compacto">
+              <span style={{ fontSize: "13px", fontWeight: "bold" }}>Gerar Lote:</span>
+              <select value={mesGerar} onChange={(e) => setMesGerar(Number(e.target.value))} className="input-field select-mes">
+                {mesesExibicao.map((m, idx) => (
+                  <option key={idx} value={idx}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+              <input type="number" value={anoGerar} onChange={(e) => setAnoGerar(Number(e.target.value))} className="input-field input-ano" />
+              <button onClick={handleGerarAgenda} className="btn btn-primary" disabled={loading}>
+                <FaMagic /> Gerar
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className="painel-filtros-agenda">
-          <div className="linha-filtros-superior">
+          <div className="painel-filtros-agenda">
             <div className="grupo-abas">
               <button className={`aba-item ${abaAtiva === "dia" ? "ativa" : ""}`} onClick={() => setAbaAtiva("dia")}>
                 <FaCalendarAlt /> Agenda
@@ -154,124 +165,114 @@ export default function Agenda() {
               </button>
             </div>
 
-            {/* Filtro por Nome - Estilo compactado */}
             <div className="busca-nome-container">
-              <FaSearch className="icon-busca" />
+              <FaSearch className="icon-search" />
               <input
                 type="text"
                 placeholder="Pesquisar aluno..."
-                value={filtroNome}
-                onChange={(e) => setFiltroNome(e.target.value)}
-                className="input-busca-nome"
+                value={buscaNome}
+                onChange={(e) => setBuscaNome(e.target.value)}
+                className="input-field"
               />
+            </div>
+
+            <div className="contadores-flex">
+              <span className="count-badge">
+                <FaListOl /> Total: <strong>{registros.length}</strong>
+              </span>
             </div>
           </div>
 
-          <div className="linha-filtros-inferior">
+          <div className="linha-datas-agenda">
             {abaAtiva === "dia" && (
-              <div className="agenda-data-seletor">
-                <span className="label-filtro">Data:</span>
-                <input type="date" value={dataFiltro} onChange={(e) => setDataFiltro(e.target.value)} className="input-field" />
-                <span className="dia-semana-label">{getDiaSemanaExtenso(dataFiltro)}</span>
+              <div className="seletor-data-container">
+                <label>Data:</label>
+                <input type="date" value={dataFiltro} onChange={(e) => setDataFiltro(e.target.value)} className="input-data" />
+                <span className="label-dia-semana">{getDiaSemanaExtenso(dataFiltro)}</span>
               </div>
             )}
 
             {abaAtiva === "historico" && (
-              <div className="periodo-seletor">
-                <span className="label-filtro">Período:</span>
-                <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="input-field" />
-                <span className="divisor-data">até</span>
-                <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="input-field" />
+              <div className="seletor-data-container">
+                <label>Período:</label>
+                <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="input-data" />
+                <span style={{ fontSize: "13px" }}>até</span>
+                <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="input-data" />
               </div>
             )}
           </div>
-        </div>
+        </section>
 
-        {/*  R E S U M O    C O N T A D O R    D E    R E G I S T R O S */}
-        <div className="resumo-resultados">
-          <span>
-            Mostrando <strong>{dados.length}</strong> {dados.length === 1 ? "registro" : "registros"}
-          </span>
-
-          {/* Opcional: Um resumo rápido por status se estiver no histórico */}
-          {abaAtiva === "historico" && dados.length > 0 && (
-            <div className="mini-badges-resumo">
-              <small className="status-presente">Presentes: {dados.filter((d) => d.status === "Presente").length}</small>
-              <small className="status-falta">Faltas: {dados.filter((d) => d.status === "Falta").length}</small>
-              <small className="status-pendente">Pendente: {dados.filter((d) => d.status === "Pendente").length}</small>
-            </div>
-          )}
-        </div>
-
-        <div className="tabela-container">
+        {/* TABELA DE REGISTROS */}
+        <section className="tabela-container">
           <table className="tabela">
             <thead>
               <tr>
                 <th>Data / Dia</th>
                 <th>Horário</th>
-                <th>Aluno / Prof.</th>
-                <th>Curso</th>
+                <th>Aluno / Professor</th>
+                <th>Curso / Termo</th>
                 <th>Status</th>
-                <th>Ações</th>
+                <th style={{ textAlign: "center" }}>Ações</th>
               </tr>
             </thead>
-
             <tbody>
-              {carregando ? (
+              {loading ? (
                 <tr>
                   <td colSpan="6" className="texto-centralizado">
-                    Carregando...
+                    Carregando dados...
                   </td>
                 </tr>
-              ) : dados.length > 0 ? (
-                dados.map((aula) => {
+              ) : registros.length > 0 ? (
+                registros.map((aula) => {
                   const dataLocal = new Date(aula.data);
                   return (
                     <tr key={aula.id}>
                       <td>
-                        {dataLocal.toLocaleDateString("pt-BR", { timeZone: "UTC" })}
-                        <div className="sub-texto">{getDiaSemanaExtenso(new Date(aula.data).toISOString().split("T")[0])}</div>
+                        <strong>{dataLocal.toLocaleDateString("pt-BR", { timeZone: "UTC" })}</strong>
+                        <div className="txt-detalhe-vermelho">{getDiaSemanaExtenso(new Date(aula.data).toISOString().split("T")[0])}</div>
                       </td>
 
-                      <td className="texto-negrito">
-                        <FaClock className="icon-pequeno" />
+                      <td className="txt-negrito">
+                        <FaClock style={{ marginRight: "5px", color: "#888" }} />
                         {dataLocal.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
                       </td>
 
                       <td>
                         <strong>{aula.termo?.matricula?.aluno?.nome || aula.aluno_nome}</strong>
-                        <div className="sub-texto">Prof(a): {aula.termo?.matricula?.professor || "Não atribuído"}</div>
+                        <div className="sub-texto-obs">Prof: {aula.termo?.matricula?.professor || "Não atribuído"}</div>
                         {abaAtiva === "historico" && aula.obs && (
-                          <div className="icon-aula-obs">
+                          <div className="txt-obs-alerta">
                             <FaExclamationTriangle /> {aula.obs}
                           </div>
                         )}
                       </td>
 
-                      <td className="sub-texto">
-                        <strong>{aula.termo?.matricula?.curso?.nome || "Curso"}</strong>
-                        <div>{aula.termo?.numeroTermo}º Termo</div>
-                      </td>
                       <td>
-                        <span className={`badge status-${aula.status?.toLowerCase()}`}>{aula.status}</span>
+                        <div style={{ fontWeight: "500" }}>{aula.termo?.matricula?.curso?.nome || "Curso"}</div>
+                        <div className="sub-texto-obs">{aula.termo?.numeroTermo}º Termo</div>
                       </td>
 
-                      <td className="acoes">
+                      <td>
+                        <span className={`badge-status status-${aula.status?.toLowerCase()}`}>{aula.status}</span>
+                      </td>
+
+                      <td className="acoes" style={{ justifyContent: "center" }}>
                         {abaAtiva === "faltas" ? (
-                          <button onClick={() => registrarAcao(aula.id, "reposicao")} className="btn-icon btn-reposicao">
-                            <FaCheck /> <small>Reposição</small>
+                          <button onClick={() => registrarAcao(aula.id, "reposicao")} className="btn btn-primary btn-pequeno">
+                            <FaCheck /> Reposição
                           </button>
                         ) : (
                           <>
                             {aula.status === "Pendente" && (
                               <>
-                                <button onClick={() => registrarAcao(aula.id, "presenca")} className="btn-icon btn-confirm" title="Presença">
+                                <button onClick={() => registrarAcao(aula.id, "presenca")} className="btn-icon btn-edit" title="Presença">
                                   <FaCheck />
                                 </button>
-                                <button onClick={() => registrarAcao(aula.id, "falta")} className="btn-icon btn-not-confirm" title="Falta">
+                                <button onClick={() => registrarAcao(aula.id, "falta")} className="btn-icon btn-excluir" title="Falta">
                                   <FaTimes />
                                 </button>
-                                <button onClick={() => excluir(aula)} className="btn-icon btn-excluir" title="Excluir">
+                                <button onClick={() => excluir(aula)} className="btn-icon btn-secondary" title="Remover Aula">
                                   <FaTrash />
                                 </button>
                               </>
@@ -285,14 +286,14 @@ export default function Agenda() {
               ) : (
                 <tr>
                   <td colSpan="6" className="texto-centralizado">
-                    Nenhum registro encontrado.
+                    Nenhum registro encontrado para este filtro.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
