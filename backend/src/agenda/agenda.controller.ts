@@ -11,6 +11,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { AgendaService } from './agenda.service';
+import { RegistrarFrequenciaDto } from './dto/registrar-frequencia.dto';
+import { GerarCicloDto } from './dto/gerar-ciclo.dto';
 
 @Controller('agenda')
 export class AgendaController {
@@ -27,15 +29,15 @@ export class AgendaController {
   }
 
   @Post('gerar')
-  gerarMensal(@Body() corpo: { mes: number; ano: number }) {
+  gerarMensal(@Body() corpo: GerarCicloDto) {
+    // Agora usa o DTO
     return this.service.gerarCicloMensal(corpo.mes, corpo.ano);
   }
 
   @Patch(':id/frequencia')
   atualizarFrequencia(
     @Param('id') id: string,
-    @Body()
-    corpo: { acao: 'presenca' | 'falta' | 'reposicao'; motivo?: string },
+    @Body() corpo: RegistrarFrequenciaDto, // Agora usa o DTO
   ) {
     return this.service.registrarFrequencia(+id, corpo.acao, corpo.motivo);
   }

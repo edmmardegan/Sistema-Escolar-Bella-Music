@@ -60,7 +60,7 @@ const Usuarios = () => {
     if (e) e.preventDefault();
     try {
       setLoading(true);
-      const payload = { ...form, username: form.email };
+      const payload = { ...form };
       const dadosEnviar = editandoId ? payload : { ...payload, senha: "123456" };
 
       await api.saveUsuario(dadosEnviar, editandoId);

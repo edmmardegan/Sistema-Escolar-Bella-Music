@@ -1,11 +1,12 @@
-//Local: src/matricula/matricula.service.ts
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DeepPartial } from 'typeorm';
 import { Matricula } from '../entities/matricula.entity';
 import { MatriculaTermo } from '../entities/matricula-termo.entity';
 import { Aula } from '../entities/aula.entity';
+import { CreateMatriculaDto } from './dto/create-matricula.dto';
+import { UpdateTermoDto } from './dto/update-termo.dto';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class MatriculaService {
@@ -25,49 +26,49 @@ export class MatriculaService {
     });
   }
 
-  // PADRÃO: Criar (Com automação de aulas/termos)
-  async save(data: any) {
-    // CORREÇÃO: Tratamento para evitar erro de string vazia em campos de data no Postgres
+  async save(data: CreateMatriculaDto & { id?: number }) {
     const dataTerminoLimpa =
       data.dataTermino && String(data.dataTermino).trim() !== ''
         ? data.dataTermino
         : null;
 
-    // Se tiver ID, é atualização simples
     if (data.id) {
-      await this.repository.update(data.id, {
-        ...data,
+      const id = data.id;
+
+      // Criamos uma cópia e deletamos o id de dentro dela
+      const dadosParaAtualizar = { ...data };
+      delete (dadosParaAtualizar as any).id;
+
+      await this.repository.update(id, {
+        ...dadosParaAtualizar,
         dataTermino: dataTerminoLimpa,
-      });
+      } as QueryDeepPartialEntity<Matricula>);
 
       return this.repository.findOne({
-        where: { id: data.id },
+        where: { id },
         relations: ['aluno', 'curso'],
       });
     }
 
-    // Se não tiver ID, é criação com automação
-    // Espalhamos o data mas sobrescrevemos a dataTermino com o valor limpo
+    // Na criação, usamos DeepPartial para o .create()
     const nova = this.repository.create({
       ...data,
       dataTermino: dataTerminoLimpa,
-    } as Matricula);
+    } as DeepPartial<Matricula>);
 
     const salvo = await this.repository.save(nova);
 
+    // ... restante da lógica de automação de aulas (mantém igual)
     const matCompleta = await this.repository.findOne({
       where: { id: salvo.id },
       relations: ['curso'],
     });
 
-    // Se a matrícula não foi encontrada por algum erro bizarro, paramos aqui
     if (!matCompleta) return null;
 
-    // Automação de Termos e Aulas
     if (matCompleta.curso?.qtdeTermos) {
       const dataAula = new Date(matCompleta.dataInicio);
-      dataAula.setHours(12, 0, 0, 0); // Evita problemas de fuso horário
-
+      dataAula.setHours(12, 0, 0, 0);
       const intervalo = matCompleta.frequencia === 'Quinzenal' ? 14 : 7;
 
       for (let i = 1; i <= matCompleta.curso.qtdeTermos; i++) {
@@ -88,28 +89,28 @@ export class MatriculaService {
         }
       }
     }
-
     return matCompleta;
   }
 
-  // PADRÃO: Remover
-  async remove(id: number) {
-    return await this.repository.delete(id);
-  }
-
-  // ESPECÍFICO: Boletim e Termos
-  async updateTermo(id: number, data: any) {
+  async updateTermo(id: number, data: UpdateTermoDto) {
+    // CORREÇÃO: Tipamos aqui também para evitar o aviso
     await this.termoRepo.update(id, {
       nota1: data.nota1,
       nota2: data.nota2,
       dataProva1: data.dataProva1,
       dataProva2: data.dataProva2,
       obs: data.obs,
-    });
+    } as QueryDeepPartialEntity<MatriculaTermo>);
+
     return await this.termoRepo.findOne({
       where: { id },
       relations: ['matricula.aluno'],
     });
+  }
+
+  // PADRÃO: Remover
+  async remove(id: number) {
+    return await this.repository.delete(id);
   }
 
   async getDetalhesBoletim(termoId: number) {
@@ -125,7 +126,6 @@ export class MatriculaService {
       order: { termos: { numeroTermo: 'ASC' } },
     });
 
-    // CORREÇÃO DO ERRO 'possibly null':
     if (!fullMat) {
       throw new NotFoundException('Matrícula não encontrada para este termo');
     }
@@ -135,7 +135,6 @@ export class MatriculaService {
       cursoNome: fullMat.curso?.nome || 'Curso',
       todosOsTermos: fullMat.termos.map((t) => ({
         ...t,
-        // Usamos o '?' aqui também por segurança
         aulasRealizadas:
           t.aulas?.filter((a) => a.status === 'Presente').length || 0,
       })),

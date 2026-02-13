@@ -42,7 +42,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     // Buscamos no banco para garantir que o usuário ainda existe
-    const user = await this.usersService.findByEmail(payload.username);
+    const user = await this.usersService.findOne(payload.username);
 
     if (!user) {
       throw new UnauthorizedException('Usuário não encontrado ou inativo');

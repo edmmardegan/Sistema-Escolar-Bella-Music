@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@nestjs/mapped-types": "^2.1.0",
+    "cpf-cnpj-validator": "^1.0.3"
+  }
+}

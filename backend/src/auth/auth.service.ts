@@ -1,7 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UsersService } from '../users/users.service'; // Ajustei o caminho para o padrão relativo
+import { UsersService } from '../users/users.service';
+import { User } from '../entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -13,44 +14,49 @@ export class AuthService {
   async validateUser(
     loginInformado: string,
     senhaDigitada: string,
-  ): Promise<any> {
+  ): Promise<Partial<User> | null> {
     const user = await this.usersService.findOne(loginInformado);
 
     if (!user) {
-      console.log('LOG: Usuário não encontrado no banco:', loginInformado);
+      console.log('LOG: Usuário não encontrado:', loginInformado);
       return null;
     }
 
     const isMatch = await bcrypt.compare(senhaDigitada, user.senha);
 
     if (isMatch) {
-      const { senha, ...result } = user;
-      return result;
+      // 1. Criamos a cópia
+      const userSeguro = { ...user };
+
+      // 2. Extraímos a senha.
+      // Não tipamos o 'result' na declaração para evitar o conflito.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { senha: _, ...result } = userSeguro;
+
+      // 3. Retornamos fazendo o cast para o tipo que a função espera.
+      // Isso diz ao TS: "Pode confiar, esse objeto agora é um Usuário Parcial"
+      return result as Partial<User>;
     }
 
-    console.log('LOG: Senha digitada não confere para:', loginInformado);
+    console.log('LOG: Senha incorreta para:', loginInformado);
     return null;
   }
 
-  // ESSA É A FUNÇÃO QUE ESTAVA FALTANDO:
-  async login(user: any) {
-    // 1. Colocamos as informações no Payload (o que vai dentro do Token)
+  async login(user: Partial<User>) {
     const payload = {
-      username: user.email,
       sub: user.id,
       role: user.role,
-      primeiroAcesso: user.primeiroAcesso, // Importante para segurança extra
+      primeiroAcesso: user.primeiroAcesso,
     };
 
     return {
       access_token: await this.jwtService.signAsync(payload),
-      // 2. Retornamos o objeto que o React vai salvar no localStorage
       user: {
         id: user.id,
         nome: user.nome,
         email: user.email,
         role: user.role,
-        primeiroAcesso: user.primeiroAcesso, // O Frontend vai ler isso aqui!
+        primeiroAcesso: user.primeiroAcesso,
       },
     };
   }

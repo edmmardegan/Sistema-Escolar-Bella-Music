@@ -1,5 +1,4 @@
-// Local: src/matricula/matricula.controller.ts
-
+// src/matricula/matricula.controller.ts
 import {
   Controller,
   Get,
@@ -11,6 +10,8 @@ import {
   Patch,
 } from '@nestjs/common';
 import { MatriculaService } from './matricula.service';
+import { CreateMatriculaDto } from './dto/create-matricula.dto';
+import { UpdateTermoDto } from './dto/update-termo.dto';
 
 @Controller('matriculas')
 export class MatriculaController {
@@ -21,28 +22,28 @@ export class MatriculaController {
     return this.service.findAll();
   }
 
+  @Post()
+  create(@Body() body: CreateMatriculaDto) {
+    return this.service.save(body);
+  }
+
+  @Put(':id')
+  update(@Param('id') id: string, @Body() body: CreateMatriculaDto) {
+    return this.service.save({ ...body, id: +id });
+  }
+
+  @Patch('termo/:id')
+  updateTermo(@Param('id') id: string, @Body() body: UpdateTermoDto) {
+    return this.service.updateTermo(+id, body);
+  }
+
   @Get('termo/:id')
   getBoletim(@Param('id') id: string) {
     return this.service.getDetalhesBoletim(+id);
   }
 
-  @Post()
-  create(@Body() body: any) {
-    return this.service.save(body);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() body: any) {
-    return this.service.save({ ...body, id: +id });
-  }
-
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.service.remove(+id);
-  }
-
-  @Patch('termo/:id')
-  updateTermo(@Param('id') id: string, @Body() body: any) {
-    return this.service.updateTermo(+id, body);
   }
 }

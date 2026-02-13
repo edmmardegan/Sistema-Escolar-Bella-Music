@@ -40,22 +40,6 @@
   padding-left: 38px; /* Espaço para o ícone de lupa */
 }
 
-/* Detalhes de Texto */
-.txt-detalhe-vermelho {
-  color: #c41010;
-  font-size: 12px;
-}
-
-.link-whatsapp {
-  color: #25d366;
-  text-decoration: none;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 15px;
-}
-
 /* Status e Badges */
 .badge-status {
   padding: 4px 10px;
@@ -121,4 +105,35 @@
     margin-left: 0;
     text-align: center;
   }
+}
+
+/* Container que agrupa o input e o ícone */
+.cpf-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.cpf-container .input-field {
+  padding-right: 40px; /* Espaço para o ícone não ficar em cima do número */
+  width: 100%;
+}
+
+.btn-toggle-cpf {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  transition: color 0.2s;
+}
+
+.btn-toggle-cpf:hover {
+  color: #000;
 }

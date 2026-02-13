@@ -12,9 +12,6 @@ export class User {
   email: string;
 
   @Column()
-  username: string; // Se o seu banco usa username, mantenha aqui
-
-  @Column()
   senha: string; // Nome que decidimos usar no código e no banco
 
   @Column({ default: 'user' })

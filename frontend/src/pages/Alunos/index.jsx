@@ -3,11 +3,15 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { FaWhatsapp, FaTrash, FaPen, FaUserPlus, FaSave, FaTimes, FaSearch, FaListOl, FaUserGraduate } from "react-icons/fa";
 import api from "../../services/api.js";
-import InputMask from "../../components/InputMask";
+import InputMask from  "../../components/InputMask";
+import {validarCPF} from "../../components/validateCPF"; // Ajuste o caminho
+
 import "./styles.css";
+import { Navigate } from "react-router-dom";
+
 
 export default function Alunos() {
-  // 1. ESTADOS BÁSICOS (Padronizados)
+  // 1. ESTADOS BÁSICOS
   const [registros, setRegistros] = useState([]);
   const [exibindoForm, setExibindoForm] = useState(false);
   const [editandoId, setEditandoId] = useState(null);
@@ -17,18 +21,23 @@ export default function Alunos() {
   const [filtroAba, setFiltroAba] = useState("Ativos");
   const [buscaNome, setBuscaNome] = useState("");
   const inputNomeRef = useRef(null);
+  const [exibirCpfReal, setExibirCpfReal] = useState(false);
 
-  const [form, setForm] = useState({
+  // Estado inicial padronizado (dataNascimento como null para o banco DATE)
+  const estadoInicial = {
     nome: "",
+    cpf: "",
     telefone: "",
-    dataNascimento: "",
+    dataNascimento: null,
     ativo: true,
     nomePai: "",
     nomeMae: "",
     rua: "",
     bairro: "",
     cidade: "",
-  });
+  };
+
+  const [form, setForm] = useState(estadoInicial);
 
   // --- CARREGAMENTO DE DADOS ---
   const carregar = useCallback(async () => {
@@ -87,13 +96,40 @@ export default function Alunos() {
   // --- AÇÕES ---
   const salvar = async (e) => {
     e.preventDefault();
+
+    // 1. Preparamos os dados limpando o que for necessário
+    const cpfLimpo = form.cpf ? form.cpf.replace(/\D/g, "") : null;
+
+    const dadosParaEnviar = {
+      ...form,
+      dataNascimento: form.dataNascimento === "" ? null : form.dataNascimento,
+      cpf: cpfLimpo,
+    };
+
+    // 2. Validações de Negócio (Front-end)
+    if (cpfLimpo) {
+      // Valida tamanho
+      if (cpfLimpo.length !== 11) {
+        alert("O CPF deve ter exatamente 11 números.");
+        return;
+      }
+      // Valida a matemática (importada do seu functions.js)
+      if (!validarCPF(cpfLimpo)) {
+        alert("O CPF digitado é matematicamente inválido. Por favor, verifique.");
+        return;
+      }
+    }
+
+    // 3. Envio para a API
     try {
-      await api.saveAluno(form, editandoId);
+      await api.saveAluno(dadosParaEnviar, editandoId);
       alert("Aluno salvo com sucesso!");
       fecharFormulario();
       carregar();
-    } catch (e) {
-      alert("Erro ao salvar aluno.");
+    } catch (error) {
+      console.error("Erro completo:", error);
+      const mensagem = error.response?.data?.message || "Erro interno no servidor";
+      alert("Erro ao salvar: " + (Array.isArray(mensagem) ? mensagem.join(", ") : mensagem));
     }
   };
 
@@ -108,7 +144,8 @@ export default function Alunos() {
   };
 
   const prepararEdicao = (aluno) => {
-    const dataFormatada = aluno.dataNascimento ? String(aluno.dataNascimento).split("T")[0] : "";
+    // Formata a data vinda do banco (ISO) para o formato do input (YYYY-MM-DD)
+    const dataFormatada = aluno.dataNascimento ? aluno.dataNascimento.split("T")[0] : "";
     setForm({ ...aluno, dataNascimento: dataFormatada });
     setEditandoId(aluno.id);
     setExibindoForm(true);
@@ -116,18 +153,44 @@ export default function Alunos() {
   };
 
   const fecharFormulario = () => {
-    setForm({ nome: "", telefone: "", dataNascimento: "", ativo: true, nomePai: "", nomeMae: "", rua: "", bairro: "", cidade: "" });
+    setForm(estadoInicial);
     setEditandoId(null);
     setExibindoForm(false);
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+    let valorFinal = type === "checkbox" ? checked : value;
+
+    // Aplica a máscara apenas se o campo for o CPF
+    if (name === "cpf") {
+      valorFinal = aplicarMascaraCPF(value);
+    }
+
+    setForm({ ...form, [name]: valorFinal });
+  };
+
+  // Função auxiliar para a máscara (coloque fora do componente)
+  const aplicarMascaraCPF = (value) => {
+    return value
+      .replace(/\D/g, "") // Remove tudo que não é número
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2")
+      .slice(0, 14);
+  };
+
+  const ocultarCPF = (cpf) => {
+    if (!cpf) return "";
+    // Se o CPF já vier com máscara ou sem, limpamos e aplicamos a lógica
+    const limpo = cpf.replace(/\D/g, "");
+    if (limpo.length !== 11) return cpf; // Caso esteja incompleto, mostra o que tem
+
+    return `***.${limpo.substring(3, 6)}.${limpo.substring(6, 9)}-**`;
   };
 
   const formatarDataTabela = (data) => {
-    if (!data) return "";
+    if (!data) return "---";
     const [ano, mes, dia] = data.split("T")[0].split("-");
     return `${dia}/${mes}/${ano}`;
   };
@@ -156,6 +219,33 @@ export default function Alunos() {
               </div>
 
               <div className="input-group campo-curto">
+                <label>CPF:</label>
+                <div className="cpf-container">
+                  <input
+                    type="text"
+                    name="cpf"
+                    className="input-field"
+                    maxLength="14"
+                    // Lógica de exibição:
+                    value={exibirCpfReal ? form.cpf : ocultarCPF(form.cpf)}
+                    onChange={handleChange}
+                    // Desabilitamos a edição se estiver oculto para evitar salvar asteriscos
+                    readOnly={!exibirCpfReal}
+                    placeholder="000.000.000-00"
+                  />
+                  <button
+                    type="button"
+                    className="btn-toggle-cpf"
+                    onClick={() => setExibirCpfReal(!exibirCpfReal)}
+                    title={exibirCpfReal ? "Ocultar CPF" : "Mostrar CPF"}
+                  >
+                    {exibirCpfReal ? "👁️" : "🙈"}
+                  </button>
+                </div>
+                {!exibirCpfReal && form.cpf && <small style={{ fontSize: "10px", color: "#999" }}>Clique no ícone para editar</small>}
+              </div>
+
+              <div className="input-group campo-curto">
                 <InputMask
                   label="Telefone:"
                   mask="(99) 99999-9999"
@@ -168,32 +258,32 @@ export default function Alunos() {
 
               <div className="input-group campo-curto">
                 <label>Data Nasc:</label>
-                <input type="date" name="dataNascimento" value={form.dataNascimento} onChange={handleChange} className="input-field" />
+                <input type="date" name="dataNascimento" value={form.dataNascimento || ""} onChange={handleChange} className="input-field" />
               </div>
 
               <div className="input-group campo-medio">
                 <label>Rua:</label>
-                <input name="rua" value={form.rua} onChange={handleChange} className="input-field" />
+                <input name="rua" value={form.rua || ""} onChange={handleChange} className="input-field" />
               </div>
 
               <div className="input-group campo-curto">
                 <label>Bairro:</label>
-                <input name="bairro" value={form.bairro} onChange={handleChange} className="input-field" />
+                <input name="bairro" value={form.bairro || ""} onChange={handleChange} className="input-field" />
               </div>
 
               <div className="input-group campo-curto">
                 <label>Cidade:</label>
-                <input name="cidade" value={form.cidade} onChange={handleChange} className="input-field" />
+                <input name="cidade" value={form.cidade || ""} onChange={handleChange} className="input-field" />
               </div>
 
               <div className="input-group campo-medio">
                 <label>Nome do Pai:</label>
-                <input name="nomePai" value={form.nomePai} onChange={handleChange} className="input-field" />
+                <input name="nomePai" value={form.nomePai || ""} onChange={handleChange} className="input-field" />
               </div>
 
               <div className="input-group campo-medio">
                 <label>Nome da Mãe:</label>
-                <input name="nomeMae" value={form.nomeMae} onChange={handleChange} className="input-field" />
+                <input name="nomeMae" value={form.nomeMae || ""} onChange={handleChange} className="input-field" />
               </div>
 
               <div className="input-group checkbox-group">
@@ -233,13 +323,7 @@ export default function Alunos() {
                 onChange={(e) => setBuscaNome(e.target.value)}
                 className="input-field"
               />
-              {buscaNome && (
-                <FaTimes
-                  className="icon-clear"
-                  onClick={() => setBuscaNome("")}
-                  style={{ position: "absolute", right: "10px", top: "50%", transform: "translateY(-50%)", cursor: "pointer", color: "#999" }}
-                />
-              )}
+              {buscaNome && <FaTimes className="icon-clear" onClick={() => setBuscaNome("")} className="icon-clear-search" />}
             </div>
 
             <div className="contadores-flex">
@@ -267,11 +351,9 @@ export default function Alunos() {
                   listaExibida.map((a) => (
                     <tr key={a.id}>
                       <td>
-                        <strong style={{ fontSize: "16px" }}>{a.nome}</strong>
+                        <strong className="txt-registros">{a.nome}</strong>
                         <br />
-                        <small className="txt-detalhe-vermelho">
-                          End.: {a.rua}, {a.bairro}
-                        </small>
+                        <small className="txt-registros txt-complemento">{a.rua ? `End.: ${a.rua} - ${a.bairro}` : "Sem endereço cadastrado"}</small>
                       </td>
                       <td>
                         <a
@@ -280,11 +362,11 @@ export default function Alunos() {
                           rel="noreferrer"
                           className="link-whatsapp"
                         >
-                          <FaWhatsapp /> {a.telefone}
+                          <FaWhatsapp /> {a.telefone || "Sem fone"}
                         </a>
                       </td>
                       <td>
-                        <small>{formatarDataTabela(a.dataNascimento)}</small>
+                        <small className="txt-registros">{formatarDataTabela(a.dataNascimento)}</small>
                       </td>
                       <td>
                         <span className={`badge-status ${a.ativo ? "status-ativo" : "status-inativo"}`}>{a.ativo ? "ATIVO" : "INATIVO"}</span>

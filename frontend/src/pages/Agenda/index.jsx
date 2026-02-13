@@ -1,5 +1,4 @@
 /* src/pages/Agenda/index.jsx */
-
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api";
 import {
@@ -16,6 +15,7 @@ import {
   FaListOl,
 } from "react-icons/fa";
 import "./styles.css";
+import { MESES } from "../../components/selecionarMeses";
 
 export default function Agenda() {
   // --- LÓGICA DE DATAS PADRÃO ---
@@ -37,10 +37,9 @@ export default function Agenda() {
   const [dataFim, setDataFim] = useState(hoje);
   const [buscaNome, setBuscaNome] = useState("");
 
+  // Estados para geração automática
   const [mesGerar, setMesGerar] = useState(new Date().getMonth());
   const [anoGerar, setAnoGerar] = useState(new Date().getFullYear());
-
-  const mesesExibicao = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
   // --- FUNÇÕES AUXILIARES ---
   const getDiaSemanaExtenso = (data) => {
@@ -84,10 +83,12 @@ export default function Agenda() {
         motivo = prompt("Motivo da falta:");
         if (motivo === null) return;
       }
+
+      // O backend espera { acao, motivo }
       await api.saveFrequencia(id, tipoAcao, motivo);
       carregar();
     } catch (err) {
-      alert("Erro ao registrar ação.");
+      alert(err.response?.data?.message || "Erro ao registrar ação.");
     }
   };
 
@@ -109,16 +110,31 @@ export default function Agenda() {
   };
 
   const handleGerarAgenda = async () => {
-    const confirmar = window.confirm(`Deseja gerar a agenda para todos os alunos em ${mesesExibicao[mesGerar]}/${anoGerar}?`);
+    // Usamos o array MESES que você importou do seu componente de validação
+    const nomeMes = MESES[mesGerar];
+    const confirmar = window.confirm(`Deseja gerar a agenda para todos os alunos em ${nomeMes}/${anoGerar}?`);
+
     if (!confirmar) return;
 
     try {
       setLoading(true);
-      const resultado = await api.gerarAgenda(mesGerar, anoGerar);
-      alert(resultado.message || "Processado com sucesso!");
-      carregar();
+
+      // O payload agora é um objeto, exatamente como o GerarCicloDto espera
+      const payload = {
+        mes: Number(mesGerar),
+        ano: Number(anoGerar),
+      };
+
+      // Chamada para a API passando o objeto único
+      const resultado = await api.gerarAgenda(payload);
+
+      alert(resultado.message || "Agenda gerada com sucesso!");
+      carregar(); // Recarrega a lista para mostrar as novas aulas
     } catch (err) {
-      alert("Erro ao gerar agenda");
+      console.error("Erro ao gerar agenda:", err);
+      // Tratamento amigável para os erros de validação do NestJS
+      const msg = err.response?.data?.message || "Erro interno ao processar ciclo.";
+      alert(Array.isArray(msg) ? msg.join(", ") : msg);
     } finally {
       setLoading(false);
     }
@@ -134,9 +150,9 @@ export default function Agenda() {
               <FaCalendarAlt /> Controle de Frequência
             </h2>
             <div className="bloco-geracao-compacto">
-              <span style={{ fontSize: "13px", fontWeight: "bold" }}>Gerar Lote:</span>
+              <span className="label-lote">Gerar Lote:</span>
               <select value={mesGerar} onChange={(e) => setMesGerar(Number(e.target.value))} className="input-field select-mes">
-                {mesesExibicao.map((m, idx) => (
+                {MESES.map((m, idx) => (
                   <option key={idx} value={idx}>
                     {m}
                   </option>
@@ -196,7 +212,7 @@ export default function Agenda() {
               <div className="seletor-data-container">
                 <label>Período:</label>
                 <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="input-data" />
-                <span style={{ fontSize: "13px" }}>até</span>
+                <span style={{ margin: "0 10px", fontSize: "13px" }}>até</span>
                 <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="input-data" />
               </div>
             )}
@@ -230,7 +246,7 @@ export default function Agenda() {
                     <tr key={aula.id}>
                       <td>
                         <strong>{dataLocal.toLocaleDateString("pt-BR", { timeZone: "UTC" })}</strong>
-                        <div className="txt-detalhe-vermelho">{getDiaSemanaExtenso(new Date(aula.data).toISOString().split("T")[0])}</div>
+                        <div className="txt-complemento">{getDiaSemanaExtenso(new Date(aula.data).toISOString().split("T")[0])}</div>
                       </td>
 
                       <td className="txt-negrito">
@@ -239,18 +255,18 @@ export default function Agenda() {
                       </td>
 
                       <td>
-                        <strong>{aula.termo?.matricula?.aluno?.nome || aula.aluno_nome}</strong>
-                        <div className="sub-texto-obs">Prof: {aula.termo?.matricula?.professor || "Não atribuído"}</div>
-                        {abaAtiva === "historico" && aula.obs && (
-                          <div className="txt-obs-alerta">
+                        <strong>{aula.termo?.matricula?.aluno?.nome || "Aluno não identificado"}</strong>
+                        <div className="txt-complemento">Prof: {aula.termo?.matricula?.professor || "Não atribuído"}</div>
+                        {aula.obs && (
+                          <div className="txt-complemento txt-alerta">
                             <FaExclamationTriangle /> {aula.obs}
                           </div>
                         )}
                       </td>
 
                       <td>
-                        <div style={{ fontWeight: "500" }}>{aula.termo?.matricula?.curso?.nome || "Curso"}</div>
-                        <div className="sub-texto-obs">{aula.termo?.numeroTermo}º Termo</div>
+                        <div className="txt-registro">{aula.termo?.matricula?.curso?.nome || "Curso"}</div>
+                        <div className="txt-complemento">{aula.termo?.numeroTermo}º Termo</div>
                       </td>
 
                       <td>

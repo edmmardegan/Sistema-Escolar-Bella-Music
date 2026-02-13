@@ -37,25 +37,28 @@ export default function Menu() {
 
   // 2. Filtramos: se for adminOnly, só passa se user.role for admin
   const menuItems = allItems
-    .filter(item => !item.adminOnly || user?.role?.toLowerCase() === "admin")
+    .filter((item) => !item.adminOnly || user?.role?.toLowerCase() === "admin")
     .sort((a, b) => a.label.localeCompare(b.label));
 
   return (
     <nav className="sidebar-menu">
+
+      <div className="logo" onClick={() => navigate("/")} >
+
+          <img className="logo-mini" src="/src/assets/logo2.jpg" alt="Logo"/>
+          <span> - Home</span>
+        
+      </div>
+
       <div className="user-info">
-        <span >Logado como:</span>
+        <span>Logado como:</span>
         <strong className="user-status"> {user?.nome || "Usuário"}</strong>
       </div>
 
       <hr className="menu-divider" />
-
       <div className="menu-links">
         {menuItems.map((item) => (
-          <Link
-            key={item.to}
-            to={item.to}
-            className={`menu-link-item ${location.pathname === item.to ? "active" : ""}`}
-          >
+          <Link key={item.to} to={item.to} className={`menu-link-item ${location.pathname === item.to ? "active" : ""}`}>
             <span className="menu-icon">{item.icon}</span>
             <span className="menu-label">{item.label}</span>
           </Link>

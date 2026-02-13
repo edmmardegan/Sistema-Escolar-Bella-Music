@@ -15,6 +15,7 @@
 }
 
 .user-info {
+  margin-top: 20px;
   text-align: center;
   margin-bottom: 10px;
 }
@@ -75,4 +76,25 @@
   justify-content: center;
   gap: 5px;
   font-size: 0.85rem;
+}
+/* O container que segura a imagem e o texto */
+.logo {
+  display: flex;          /* Habilita o alinhamento flexível */
+  align-items: center;    /* Centraliza imagem e texto verticalmente entre si */
+  gap: 10px;              /* Espaço entre a imagem e o texto "- Home" */
+  cursor: pointer;
+  margin-top: 20px;       /* Mantém o espaço que você queria no topo */
+  padding: 10px;
+}
+
+.logo-mini {
+  width: 30px;
+  height: auto;
+  display: block;         /* Remove espaços extras abaixo da imagem */
+}
+
+.logo span {
+  font-weight: bold;
+  color: write;            /* Cor do seu texto "- Home" */
+  font-size: 1rem;
 }

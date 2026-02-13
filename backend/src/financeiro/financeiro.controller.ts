@@ -1,7 +1,8 @@
-// Local: src/financeiro/financeiro.controller.ts
-
+// src/financeiro/financeiro.controller.ts
 import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { FinanceiroService } from './financeiro.service';
+import { GerarLoteDto } from './dto/gerar-lote.dto';
+import { ReajusteAnualDto } from './dto/reajuste-anual.dto';
 
 @Controller('financeiro')
 export class FinanceiroController {
@@ -13,9 +14,15 @@ export class FinanceiroController {
   }
 
   @Post('gerar-lote-anual')
-  gerarLote(@Body() body: { mes: number; ano: number }) {
-    // Passamos os dois parâmetros para o service
-    return this.service.gerarCicloGlobal(body.mes, body.ano);
+  gerarLote(@Body() body: GerarLoteDto) {
+    // Passamos o objeto body inteiro para o service
+    return this.service.gerarCicloGlobal(body);
+  }
+
+  @Post('reajuste-global')
+  async reajuste(@Body() body: ReajusteAnualDto) {
+    // Passamos o objeto body inteiro para o service
+    return await this.service.aplicarReajusteAnual(body);
   }
 
   @Post(':id/pagar')
@@ -26,11 +33,6 @@ export class FinanceiroController {
   @Post(':id/estornar')
   estornar(@Param('id') id: string) {
     return this.service.atualizarStatus(+id, 'Aberta');
-  }
-
-  @Post('reajuste-global')
-  async reajuste(@Body() body: { ano: number; aumento: number }) {
-    return await this.service.aplicarReajusteAnual(body.ano, body.aumento);
   }
 
   @Delete(':id')

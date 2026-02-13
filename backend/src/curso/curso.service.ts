@@ -1,9 +1,9 @@
-// Local: src/curso/curso.service.ts
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Curso } from '../entities/curso.entity';
+import { CreateCursoDto } from './dto/create-curso.dto';
+import { UpdateCursoDto } from './dto/update-curso.dto';
 
 @Injectable()
 export class CursoService {
@@ -12,17 +12,15 @@ export class CursoService {
     private readonly repository: Repository<Curso>,
   ) {}
 
-  // PADRÃO: Listar todos
   async findAll() {
     return await this.repository.find({ order: { nome: 'ASC' } });
   }
 
-  // PADRÃO: Salvar (Criar ou Atualizar)
-  async save(dados: Partial<Curso>) {
+  // Agora o TypeScript vai reconhecer o que é CreateCursoDto e UpdateCursoDto
+  async save(dados: CreateCursoDto | (UpdateCursoDto & { id?: number })) {
     return await this.repository.save(dados);
   }
 
-  // PADRÃO: Remover
   async remove(id: number) {
     const registro = await this.repository.findOneBy({ id });
     if (!registro) throw new NotFoundException('Curso não encontrado');

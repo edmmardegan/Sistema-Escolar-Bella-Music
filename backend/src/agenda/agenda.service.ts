@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan, Raw, Between } from 'typeorm'; // Adicionado Between
+import { Repository } from 'typeorm'; // Adicionado Between
 import { Aula } from '../entities/aula.entity';
 import { Matricula } from '../entities/matricula.entity';
 import { MatriculaTermo } from '../entities/matricula-termo.entity';

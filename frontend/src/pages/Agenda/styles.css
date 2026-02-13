@@ -58,23 +58,6 @@
   color: #1c7ed6;
 }
 
-.txt-negrito {
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-}
-.sub-texto-obs {
-  font-size: 12px;
-  color: #777;
-  margin-top: 2px;
-}
-.txt-obs-alerta {
-  font-size: 11px;
-  color: #e67e22;
-  font-weight: 500;
-  margin-top: 3px;
-}
-
 .btn-pequeno {
   padding: 5px 12px;
   font-size: 11px;

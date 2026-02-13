@@ -423,12 +423,12 @@ export default function Matriculas() {
                     <td>
                       <strong>{m.aluno?.nome}</strong>
                       <br />
-                      <small className="txt-detalhe-vermelho">Profa. {m.professor}</small>
+                      <small className="txt-complemento">Profa. {m.professor}</small>
                     </td>
                     <td>
                       <strong>{m.curso?.nome}</strong>
                       <br />
-                      <small>{m.termo_atual}º Termo</small>
+                      <small className="txt-complemento">{m.termo_atual}º Termo</small>
                     </td>
                     <td>
                       {m.diaSemana} - {m.horario}h

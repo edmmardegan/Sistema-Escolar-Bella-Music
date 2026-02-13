@@ -1,33 +1,21 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UnauthorizedException,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+// src/auth/auth.controller.ts
+import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() body: any) {
-    // 1. Validamos o usuário
-    const user = await this.authService.validateUser(
-      body.username || body.email,
-      body.password,
-    );
+  async login(@Body() body: LoginDto) {
+    // Agora o corpo é validado automaticamente
+    const user = await this.authService.validateUser(body.email, body.password);
 
     if (!user) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new UnauthorizedException('E-mail ou senha incorretos');
     }
 
-    // 2. Resolvemos o "Unsafe return": Guardamos o resultado em uma constante
-    // e garantimos ao TS que o que sai daqui é um objeto seguro.
-    const loginResponse = await this.authService.login(user);
-
-    return loginResponse; // Retornando a constante, o erro de "type error" some.
+    return await this.authService.login(user);
   }
 }

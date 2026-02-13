@@ -1,5 +1,3 @@
-// Local: src/curso/curso.controller.ts
-
 import {
   Controller,
   Get,
@@ -10,6 +8,8 @@ import {
   Delete,
 } from '@nestjs/common';
 import { CursoService } from './curso.service';
+import { CreateCursoDto } from './dto/create-curso.dto';
+import { UpdateCursoDto } from './dto/update-curso.dto';
 
 @Controller('cursos')
 export class CursoController {
@@ -21,13 +21,14 @@ export class CursoController {
   }
 
   @Post()
-  create(@Body() dados: any) {
+  create(@Body() dados: CreateCursoDto) {
+    // Blindado
     return this.service.save(dados);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dados: any) {
-    // Garantimos que o ID do parâmetro seja injetado no objeto
+  update(@Param('id') id: string, @Body() dados: UpdateCursoDto) {
+    // Blindado
     return this.service.save({ ...dados, id: +id });
   }
 
