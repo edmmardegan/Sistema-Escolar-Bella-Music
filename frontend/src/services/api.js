@@ -98,7 +98,7 @@ const api = {
   estornar: async (id) => (await axiosInstance.post(`/financeiro/${id}/estornar`)).data,
   deleteParcela: async (id) => (await axiosInstance.delete(`/financeiro/${id}`)).data,
   gerarParcelaGlobal: async (dados) => (await axiosInstance.post("/financeiro/gerar-lote-anual", dados)).data,
-  gerarParcelaIndividual: async (dados) => (await axiosInstance.post("/financeiro/gerar-individual", dados)).data,
+  gerarParcelaIndividual: async (id, ano) => (await axiosInstance.post(`/matriculas/${id}/gerar-financeiro`, { ano })).data,
   aplicarReajusteGlobal: async (dados) => (await axiosInstance.post("/financeiro/reajuste-global", dados)).data,
 
   // === 📊 BOLETIM / TERMOS ===

@@ -1,18 +1,25 @@
+// src/matricula/matricula.module.ts
+
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Matricula } from '../entities/matricula.entity';
-import { MatriculaTermo } from '../entities/matricula-termo.entity';
-import { Aula } from '../entities/aula.entity'; // Certifique-se de importar a entidade
 import { MatriculaService } from './matricula.service';
 import { MatriculaController } from './matricula.controller';
-import { AgendaService } from '../agenda/agenda.service'; // Importar o Service
-import { AgendaController } from '../agenda/agenda.controller'; // Importar o Controller que criamos agora
+import { Matricula } from '../entities/matricula.entity';
+import { MatriculaTermo } from '../entities/matricula-termo.entity';
+import { Financeiro } from '../entities/financeiro.entity'; // <-- Importe a entidade
+import { Aula } from '../entities/aula.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Matricula, MatriculaTermo, Aula]), // Certifique-se que Matricula está aqui
+    TypeOrmModule.forFeature([
+      Matricula,
+      MatriculaTermo,
+      Financeiro, // <-- ADICIONE ISSO AQUI
+      Aula,
+    ]),
   ],
-  controllers: [MatriculaController, AgendaController],
-  providers: [MatriculaService, AgendaService],
+  controllers: [MatriculaController],
+  providers: [MatriculaService],
+  exports: [MatriculaService],
 })
 export class MatriculaModule {}

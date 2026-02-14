@@ -87,3 +87,41 @@
     flex-wrap: wrap;
   }
 }
+
+.painel-filtros-linha {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background: #fdfdfd;
+  border-top: 1px dashed #ddd;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.input-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.input-field:focus {
+  border-color: #228be6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 139, 230, 0.1);
+}
+
+/* Ajuste do badge para vencido */
+.status-vencido {
+  background: #fff5f5;
+  color: #fa5252;
+  border: 1px solid #ffc9c9;
+  font-weight: bold;
+}
+
+.txt-detalhe-vermelho {
+  color: #e03131;
+  font-size: 11px;
+  margin-top: 2px;
+}

@@ -1,6 +1,7 @@
+// src/agenda/agenda.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm'; // Adicionado Between
+import { Repository } from 'typeorm';
 import { Aula } from '../entities/aula.entity';
 import { Matricula } from '../entities/matricula.entity';
 import { MatriculaTermo } from '../entities/matricula-termo.entity';
@@ -18,11 +19,14 @@ export class AgendaService {
     private readonly termoRepo: Repository<MatriculaTermo>,
   ) {}
 
-  // PADRÃO: Listar (Read) - Atualizado para suportar Período e Nome
-  async findAll(tipo: string, data?: string, dataFim?: string, nome?: string) {
+  async findAll(
+    tipo: string,
+    data?: string,
+    dataFim?: string,
+    nome?: string,
+  ): Promise<Aula[]> {
     const hoje = new Date().toISOString().split('T')[0];
 
-    // 1. Iniciamos a consulta trazendo todas as tabelas relacionadas (Joins)
     const query = this.repository
       .createQueryBuilder('aula')
       .leftJoinAndSelect('aula.termo', 'termo')
@@ -30,20 +34,15 @@ export class AgendaService {
       .leftJoinAndSelect('matricula.aluno', 'aluno')
       .leftJoinAndSelect('matricula.curso', 'curso');
 
-    // 2. Filtros por Aba (Tipo)
     if (tipo === 'dia') {
-      // Busca apenas um dia específico (ou hoje)
       query.where('CAST(aula.data AS DATE) = :data', { data: data || hoje });
     } else if (tipo === 'pendentes') {
-      // Aulas que passaram da data e ninguém deu presença/falta
       query
         .where('aula.status = :status', { status: 'Pendente' })
         .andWhere('aula.data < :hoje', { hoje: new Date() });
     } else if (tipo === 'reposicoes') {
-      // Aulas marcadas como Falta que precisam de reposição
       query.where('aula.status = :status', { status: 'Falta' });
     } else if (tipo === 'historico') {
-      // Filtro por período (Data Inicial até Data Final)
       if (data && dataFim) {
         query.where('CAST(aula.data AS DATE) BETWEEN :inicio AND :fim', {
           inicio: data,
@@ -54,27 +53,20 @@ export class AgendaService {
       }
     }
 
-    // 3. Filtro Global por Nome (Se digitar algo na busca, filtra o resultado da aba)
     if (nome && nome.trim() !== '') {
-      // Convertemos o campo do banco e o parâmetro para minúsculo
       query.andWhere('LOWER(aluno.nome) LIKE LOWER(:nome)', {
         nome: `%${nome}%`,
       });
     }
-    // 4. Ordenação (Onde a mágica da organização visual acontece)
-    // Primeiro ordena por data (mais recente primeiro no histórico)
-    // Dentro da mesma data, ordena os alunos de A a Z
+
     query
       .orderBy('aula.data', tipo === 'historico' ? 'DESC' : 'ASC')
       .addOrderBy('aluno.nome', 'ASC');
 
-    // 5. Executa a busca no banco de dados
     return await query.getMany();
   }
 
-  // ... (restante dos métodos: remove, registrarFrequencia, gerarCicloMensal permanecem iguais)
-
-  async remove(id: number) {
+  async remove(id: number): Promise<{ success: boolean }> {
     const aula = await this.repository.findOne({ where: { id } });
     if (!aula) throw new NotFoundException('Aula não encontrada');
     if (aula.status !== 'Pendente')
@@ -88,7 +80,7 @@ export class AgendaService {
     id: number,
     acao: 'presenca' | 'falta' | 'reposicao',
     motivo?: string,
-  ) {
+  ): Promise<any> {
     const aula = await this.repository.findOne({ where: { id } });
     if (!aula) throw new NotFoundException('Aula não encontrada');
 
@@ -112,7 +104,8 @@ export class AgendaService {
     }
   }
 
-  async gerarCicloMensal(mes: number, ano: number) {
+  // NOME AJUSTADO PARA MINÚSCULO E TIPADO
+  async gerarMensal(mes: number, ano: number): Promise<{ message: string }> {
     const matriculas = await this.matriculaRepo.find({
       where: { situacao: 'Em Andamento' },
       relations: ['aluno', 'curso'],

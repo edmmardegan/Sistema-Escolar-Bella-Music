@@ -1,11 +1,12 @@
 // src/financeiro/financeiro.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, MoreThanOrEqual } from 'typeorm';
+import { Repository, MoreThanOrEqual } from 'typeorm';
 import { Financeiro } from '../entities/financeiro.entity';
 import { Matricula } from '../entities/matricula.entity';
 import { GerarLoteDto } from './dto/gerar-lote.dto';
 import { ReajusteAnualDto } from './dto/reajuste-anual.dto';
+import { FinanceiroCalculoUtil } from './utils/financeiro-calculo.util';
 
 @Injectable()
 export class FinanceiroService {
@@ -17,53 +18,81 @@ export class FinanceiroService {
   ) {}
 
   async findAll() {
-    return await this.repository.find({
-      relations: ['matricula', 'aluno', 'matricula.aluno'],
+    console.log('--- CHAMANDO FINDALL FINANCEIRO ---');
+    const dados = await this.repository.find({
+      relations: ['aluno', 'matricula'], // Força o Join com as duas tabelas
+      order: { dataVencimento: 'ASC' },
+    });
+
+    // Esse log vai aparecer no terminal onde o seu NestJS está rodando.
+    // Se aqui aparecer o nome do aluno, o backend está corrigido!
+    console.log('PRIMEIRO REGISTRO:', dados[0]);
+
+    return dados;
+  }
+
+  async findByMatricula(matriculaId: number): Promise<Financeiro[]> {
+    return this.repository.find({
+      where: { matricula: { id: matriculaId } },
+      relations: ['aluno', 'matricula'],
       order: { dataVencimento: 'ASC' },
     });
   }
 
-  async atualizarStatus(id: number, status: 'Paga' | 'Aberta') {
+  async atualizarStatus(
+    id: number,
+    status: 'Paga' | 'Aberta',
+  ): Promise<Financeiro> {
     const parcela = await this.repository.findOne({ where: { id } });
     if (!parcela) throw new NotFoundException('Parcela não encontrada');
     parcela.status = status;
     return await this.repository.save(parcela);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<any> {
     return await this.repository.delete(id);
   }
 
-  // Recebe o objeto validado pelo DTO
-  async gerarCicloGlobal(dto: GerarLoteDto) {
+  // --- 1. ROTINA GLOBAL (OTIMIZADA) ---
+  async gerarParcelaGlobal(
+    dto: GerarLoteDto,
+  ): Promise<{ gerados: number; totalParcelas: number }> {
     const { mes: mesInicio, ano } = dto;
 
     const matriculas = await this.matriculaRepo.find({
       where: { situacao: 'Em Andamento' },
-      relations: ['aluno'],
+      relations: ['aluno'], // Precisamos do aluno para vincular à parcela se sua entidade exigir
     });
 
+    const parcelasExistentes = await this.repository
+      .createQueryBuilder('f')
+      .select('f.matriculaId', 'matriculaId')
+      // Ajustado para buscar no ano correto de forma mais segura
+      .where('f.dataVencimento >= :inicio AND f.dataVencimento <= :fim', {
+        inicio: `${ano}-01-01`,
+        fim: `${ano}-12-31`,
+      })
+      .getRawMany<{ matriculaId: number }>();
+
+    const idsComParcela = new Set(parcelasExistentes.map((p) => p.matriculaId));
+    const todasAsNovasParcelas: Partial<Financeiro>[] = [];
     let totalGerado = 0;
+
     for (const mat of matriculas) {
-      const existe = await this.repository.count({
-        where: { matricula: { id: mat.id }, dataVencimento: Like(`${ano}%`) },
-      });
-
-      if (existe > 0) continue;
-
-      const novas: any[] = [];
-      // OU (Mais profissional):
-      //const novas: Partial<Financeiro>[] = [];
+      if (idsComParcela.has(mat.id)) continue;
 
       for (let mes = mesInicio; mes <= 12; mes++) {
-        const mesStr = String(mes).padStart(2, '0');
-        const dataVenc = `${ano}-${mesStr}-${String(mat.diaVencimento || 10).padStart(2, '0')}T12:00:00`;
+        const diaBase = Number(mat.diaVencimento || 10);
 
-        novas.push({
-          aluno: mat.aluno,
+        todasAsNovasParcelas.push({
           matricula: mat,
-          descricao: `Mensalidade ${mesStr}/${ano} (Lote)`,
-          dataVencimento: dataVenc,
+          aluno: mat.aluno, // Verifique se sua Entity Financeiro realmente tem esse campo
+          descricao: `Mensalidade ${String(mes).padStart(2, '0')}/${ano} (Lote)`,
+          dataVencimento: FinanceiroCalculoUtil.ajustarDataVencimento(
+            ano,
+            mes,
+            diaBase,
+          ),
           valorTotal:
             Number(mat.valorMensalidade || 0) +
             Number(mat.valorCombustivel || 0),
@@ -71,17 +100,20 @@ export class FinanceiroService {
           tipo: 'Receita',
         });
       }
-
-      if (novas.length > 0) {
-        await this.repository.save(novas);
-        totalGerado++;
-      }
+      totalGerado++;
     }
-    return { gerados: totalGerado };
+
+    if (todasAsNovasParcelas.length > 0) {
+      await this.repository.save(todasAsNovasParcelas as Financeiro[], {
+        chunk: 500,
+      });
+    }
+
+    return { gerados: totalGerado, totalParcelas: todasAsNovasParcelas.length };
   }
 
-  // Recebe o objeto validado pelo DTO
-  async aplicarReajusteAnual(dto: ReajusteAnualDto) {
+  // --- 2. REAJUSTE ANUAL (OTIMIZADO) ---
+  async aplicarReajusteAnual(dto: ReajusteAnualDto): Promise<any> {
     const { ano, aumento: valorAumento } = dto;
 
     const matriculas = await this.matriculaRepo.find({
@@ -92,7 +124,7 @@ export class FinanceiroService {
     let parcelasAtualizadas = 0;
 
     for (const mat of matriculas) {
-      mat.valorMensalidade = Number(mat.valorMensalidade) + valorAumento;
+      mat.valorMensalidade = Number(mat.valorMensalidade || 0) + valorAumento;
       await this.matriculaRepo.save(mat);
       matriculasAtualizadas++;
 
@@ -100,12 +132,12 @@ export class FinanceiroService {
         where: {
           matricula: { id: mat.id },
           status: 'Aberta',
-          dataVencimento: MoreThanOrEqual(`${ano}-05-01`),
+          dataVencimento: MoreThanOrEqual(`${ano}-01-01`),
         },
       });
 
       for (const parcela of parcelasParaReajustar) {
-        parcela.valorTotal = Number(parcela.valorTotal) + valorAumento;
+        parcela.valorTotal = Number(parcela.valorTotal || 0) + valorAumento;
         await this.repository.save(parcela);
         parcelasAtualizadas++;
       }

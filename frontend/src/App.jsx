@@ -20,7 +20,8 @@ import Agenda from "./pages/Agenda/index.jsx";
 import Financeiro from "./pages/Financeiro/index.jsx";
 import Usuarios from "./pages/Usuarios/index.jsx";
 import PaginaFantasma from "./pages/Template/index.jsx";
-import Boletim from "./pages/Boletim";
+import Boletim from "./pages/Boletim/index.jsx";
+import FinanceiroAluno from './pages/FinanceiroAluno/index.jsx'; // Verifique o caminho real!
 
 // 🎂 Componente de Notificação de Aniversariantes
 function NotificacaoAniversario() {
@@ -101,9 +102,10 @@ export default function App() {
                         <Route path="/matriculas" element={<Matriculas />} />
                         <Route path="/agenda" element={<Agenda />} />
                         <Route path="/financeiro" element={<Financeiro />} />
+                        <Route path="/financeiro-aluno/:id" element={<FinanceiroAluno />} />
                         <Route path="/usuarios" element={<Usuarios />} />
                         <Route path="/developer/template" element={<PaginaFantasma />} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
+                        {/*<Route path="*" element={<Navigate to="/" replace />} />*/}
                       </Routes>
                     </main>
                   </div>

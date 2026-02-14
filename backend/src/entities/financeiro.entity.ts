@@ -25,9 +25,9 @@ export class Financeiro {
   @Column({ default: 'Receita' })
   tipo: string;
 
-  @ManyToOne(() => Aluno)
+  @ManyToOne(() => Aluno, { eager: true }) // Eager true faz ele carregar o aluno sempre
   aluno: Aluno;
 
-  @ManyToOne(() => Matricula)
+  @ManyToOne(() => Matricula, { eager: true }) // Carrega a matrícula sempre
   matricula: Matricula;
 }
