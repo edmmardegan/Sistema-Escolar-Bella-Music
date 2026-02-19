@@ -1,0 +1,100 @@
+.sidebar-menu {
+  width: 150px;
+  min-width: 150px;
+  height: 100vh;
+  background-color: #2c3e50;
+  color: white;
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  position: fixed; /* Mantém o menu no lugar */
+  left: 0;
+  top: 0;
+  box-sizing: border-box; /* Crucial para o padding não aumentar a largura */
+  z-index: 100;
+}
+
+.user-info {
+  margin-top: 20px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.user-status {
+  display: block;
+  font-size: 1.2rem;
+  color: yellow;
+  background: black;
+}
+
+.user-name {
+  font-weight: bold;
+  font-size: 0.85rem;
+  word-break: break-word; /* Evita que nomes grandes quebrem o layout */
+}
+
+.menu-divider {
+  border: 0;
+  border-top: 1px solid #34495e;
+  margin: 10px 0;
+}
+.menu-label {
+  font-size: 15px;
+}
+
+.menu-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.menu-link-item {
+  color: #ecf0f1;
+  text-decoration: none;
+  padding: 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+
+.menu-link-item:hover { background-color: #34495e; }
+.menu-link-item.active { background-color: #3498db; }
+
+.btn-logout {
+  margin-top: 20px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 0.85rem;
+}
+/* O container que segura a imagem e o texto */
+.logo {
+  display: flex;          /* Habilita o alinhamento flexível */
+  align-items: center;    /* Centraliza imagem e texto verticalmente entre si */
+  gap: 10px;              /* Espaço entre a imagem e o texto "- Home" */
+  cursor: pointer;
+  margin-top: 20px;       /* Mantém o espaço que você queria no topo */
+  padding: 10px;
+}
+
+.logo-mini {
+  width: 30px;
+  height: auto;
+  display: block;         /* Remove espaços extras abaixo da imagem */
+}
+
+.logo span {
+  font-weight: bold;
+  color: write;            /* Cor do seu texto "- Home" */
+  font-size: 1rem;
+}

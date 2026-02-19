@@ -1,0 +1,351 @@
+como so consigo fazer upload de 1 arquivo, vou colocar todos aqui.
+
+problema, coloquei a tela de login e agora quando acesso a tela fica branca,utilizei outra IA
+e ficou quase 3 hs mandando fazer mudanças e não sai do mesmo lugar
+verifique o que esta errado
+
+arquivos enviados
+1) App.jsx
+2) Login.jsx
+3) menu.jsx
+4) AuthContext.js 
+5) AuthContext.jsx
+6) AuthProvider.jsx
+7) package.json
+
+1) app.jsx
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+// IMPORTAÇÃO IMPORTANTE: Pegamos o Provedor do arquivo .jsx
+import { AuthProvider } from "./contexts/AuthProvider";
+// Pegamos o Contexto do arquivo .js para usar no PrivateLayout
+import { AuthContext } from "./contexts/AuthContext";
+
+import "./App.css";
+
+// Componentes e Páginas
+import Menu from "./components/Menu";
+import Login from "./pages/Login";
+import Alunos from "./pages/Alunos";
+import Cursos from "./pages/Cursos";
+import Matriculas from "./pages/Matriculas";
+import Agenda from "./pages/Agenda";
+import FinanceiroGeral from "./pages/Financeiro";
+
+// --- COMPONENTE DE PROTEÇÃO DE ROTA ---
+const PrivateLayout = ({ children, roleRequired }) => {
+  const { authenticated, user, loading } = React.useContext(AuthContext);
+
+  if (loading) {
+    return <div style={{ padding: "20px" }}>Carregando acesso...</div>;
+  }
+
+  if (!authenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  // Se o role for 'admin' (conforme seu banco)
+  if (roleRequired && user?.role !== roleRequired) {
+    return <Navigate to="/alunos" />;
+  }
+
+  return (
+    <div style={{ display: "flex" }}>
+      <Menu />
+      <main style={{ flex: 1, padding: "20px", marginLeft: "40px" }}>
+        {children}
+      </main>
+    </div>
+  );
+};
+
+function AppContent() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Navigate to="/login" />} />
+
+      {/* Rotas Comuns */}
+      <Route path="/alunos" element={<PrivateLayout><Alunos /></PrivateLayout>} />
+      <Route path="/cursos" element={<PrivateLayout><Cursos /></PrivateLayout>} />
+      <Route path="/matriculas" element={<PrivateLayout><Matriculas /></PrivateLayout>} />
+      <Route path="/agenda" element={<PrivateLayout><Agenda /></PrivateLayout>} />
+
+      {/* Rota Administrativa */}
+      <Route
+        path="/financeiro"
+        element={
+          <PrivateLayout roleRequired="admin">
+            <FinanceiroGeral />
+          </PrivateLayout>
+        }
+      />
+
+      <Route path="*" element={<Navigate to="/login" />} />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
+  );
+}
+
+2) login.jsx
+import React, { useState, useContext } from 'react'; // useContext apenas uma vez!
+import { AuthContext } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
+import "./styles.css";
+
+export default function Login() {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const { login } = useContext(AuthContext);
+
+  // O 'async' entra aqui antes do (e)
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    try {
+      // 1. Faz a chamada ao backend aqui na página de Login
+      const response = await api.post("/auth/login", {
+        email: username, // Se o seu backend espera 'email', passamos o username aqui
+        senha: password,
+      });
+
+      // 2. Pega os dados que o NestJS enviou
+      const { user, access_token } = response.data;
+
+      // 3. Passa o objeto USER completo para o Contexto
+      // Assim o Contexto guarda o 'role' e o 'nome'
+      login(user, access_token);
+
+      // 4. Navega para a página de alunos
+      navigate("/alunos");
+    } catch (err) {
+      console.error(err);
+      alert("Usuário ou senha incorretos!");
+    }
+  }
+
+  return (
+    <div className="login-container">
+      <form className="login-form" onSubmit={handleSubmit}>
+        <h2>BEM VINDO</h2>
+        <h2>Acesso ao Sistema</h2>
+        <input
+          type="text"
+          placeholder="Usuário"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Senha"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button type="submit">Entrar</button>
+      </form>
+    </div>
+  );
+}
+
+3) menu.jsx
+import React, { useContext } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { AuthContext } from "../../contexts/AuthContext";
+import {
+  FaUser,
+  FaBook,
+  FaClipboardList,
+  FaCalendarAlt,
+  FaChartBar,
+  FaSignOutAlt, // Ícone para sair
+} from "react-icons/fa";
+import "./styles.css";
+
+export default function Menu() {
+  const location = useLocation();
+  const { user, logout } = useContext(AuthContext);
+
+  // Função para verificar se o link está ativo
+  const isActive = (path) => (location.pathname === path ? "active" : "");
+console.log("CONTEÚDO DO USUÁRIO:", user);
+  return (
+    <nav className="sidebar">
+      <div className="sidebar-header">
+        <h3>Sistema Escolar</h3>
+        {user && (
+          <small>
+            Logado como: {user.username} ({user.role})
+          </small>
+        )}
+      </div>
+
+      <ul className="nav-list">
+        <li>
+          <Link to="/alunos" className={isActive("/alunos")}>
+            <FaUser /> Alunos
+          </Link>
+        </li>
+        <li>
+          <Link to="/cursos" className={isActive("/cursos")}>
+            <FaBook /> Cursos
+          </Link>
+        </li>
+        <li>
+          <Link to="/matriculas" className={isActive("/matriculas")}>
+            <FaClipboardList /> Matrículas
+          </Link>
+        </li>
+        <li>
+          <Link to="/agenda" className={isActive("/agenda")}>
+            <FaCalendarAlt /> Agenda
+          </Link>
+        </li>
+
+        {/* --- ABA RESTRITA APENAS PARA ADM --- */}
+        {user?.role === "admin" && (
+          <>
+            <li>
+              <Link to="/financeiro" className={isActive("/financeiro")}>
+                <FaChartBar /> Financeiro Geral
+              </Link>
+            </li>
+            <li>
+              <Link to="/relatorios" className={isActive("/relatorios")}>
+                <FaChartBar /> Relatórios
+              </Link>
+            </li>
+          </>
+        )}
+
+        {/* --- BOTÃO DE SAIR --- */}
+        <li className="logout-item" style={{ marginTop: "20px" }}>
+          <button
+            onClick={logout}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#ff4d4d",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "10px 15px",
+              width: "100%",
+            }}
+          >
+            <FaSignOutAlt /> Sair do Sistema
+          </button>
+        </li>
+      </ul>
+    </nav>
+  );
+}
+
+4) AuthContext.js 
+import { createContext } from 'react';
+export const AuthContext = createContext({});
+
+5) AuthContext.jsx
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useState, useContext } from 'react';
+
+export const AuthContext = createContext({});
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(() => {
+    const recovered = localStorage.getItem('user');
+    return recovered ? JSON.parse(recovered) : null;
+  });
+
+  const login = (userData, token) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', token);
+    setUser(userData);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ authenticated: !!user, user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export const useAuth = () => useContext(AuthContext);
+
+6) AuthProvider.jsx
+import React, { useState } from 'react';
+import { AuthContext } from './AuthContext';
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(() => {
+    const recovered = localStorage.getItem('user');
+    return recovered ? JSON.parse(recovered) : null;
+  });
+  const login = (userData, token) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', token);
+    setUser(userData);
+  };
+  const logout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(null);
+  };
+  return (
+    <AuthContext.Provider value={{ authenticated: !!user, user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+7) package.json
+{
+  "name": "sistema-alunos",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "server": "json-server --watch db.json --port 3001"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.13.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "json-server": "^1.0.0-beta.5",
+    "vite": "^7.2.4"
+  }
+}

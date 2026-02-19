@@ -1,0 +1,102 @@
+/* src/pages/Matriculas/styles.css */
+
+.input-pequeno {
+  width: 80px;
+}
+
+.filtro-container-flex {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.input-group-filtro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.status-emandamento {
+  background: #e7f5ff;
+  color: #1c7ed6;
+}
+.status-trancado {
+  background: #fff9db;
+  color: #f08c00;
+}
+.status-finalizado {
+  background: #ebfbee;
+  color: #2f9e44;
+}
+
+.status-pago {
+  background: #d3f9d8;
+  color: #2b8a3e;
+}
+.status-aberto {
+  background: #fff3bf;
+  color: #e67700;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 95%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 12px 15px;
+  background: var(--dark);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.btn-fechar {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.txt-detalhe-vermelho {
+  color: #c41010;
+  font-size: 12px;
+}
+.txt-detalhe-azul {
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.texto-centralizado {
+  text-align: center;
+  padding: 30px;
+  color: #aaa;
+}

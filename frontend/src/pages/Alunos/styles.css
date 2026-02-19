@@ -1,0 +1,139 @@
+/* src/pages/Alunos/styles.css */
+
+/* Checkbox alinhado ao formulário */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+}
+
+.checkbox-group input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Cabeçalho de Filtros e Busca */
+.filtro-container-flex {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.busca-nome-container {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+}
+
+.busca-nome-container .icon-search {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+}
+
+.busca-nome-container .input-field {
+  padding-left: 38px; /* Espaço para o ícone de lupa */
+}
+
+/* Status e Badges */
+.badge-status {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-ativo {
+  background: #e6fcf5;
+  color: #0ca678;
+}
+.status-inativo {
+  background: #fff5f5;
+  color: #fa5252;
+}
+
+/* Contadores e Abas */
+.contadores-flex {
+  margin-left: auto;
+}
+
+.count-badge {
+  background-color: #e9ecef;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 13px;
+  border: 1px solid #dee2e6;
+}
+
+.grupo-abas {
+  display: flex;
+  gap: 5px;
+}
+
+.aba-item {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.2s;
+  font-weight: 500;
+}
+
+.aba-item.ativa {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Ajustes para telas menores */
+@media (max-width: 768px) {
+  .filtro-container-flex {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .busca-nome-container {
+    max-width: 100%;
+  }
+  .contadores-flex {
+    margin-left: 0;
+    text-align: center;
+  }
+}
+
+/* Container que agrupa o input e o ícone */
+.cpf-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.cpf-container .input-field {
+  padding-right: 40px; /* Espaço para o ícone não ficar em cima do número */
+  width: 100%;
+}
+
+.btn-toggle-cpf {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  transition: color 0.2s;
+}
+
+.btn-toggle-cpf:hover {
+  color: #000;
+}

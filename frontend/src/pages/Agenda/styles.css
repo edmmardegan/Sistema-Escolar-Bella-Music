@@ -1,0 +1,86 @@
+/* src/pages/Agenda/styles.css */
+
+.bloco-geracao-compacto {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.input-ano {
+  width: 85px !important;
+}
+.select-mes {
+  width: 130px !important;
+}
+
+.painel-filtros-agenda {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.linha-datas-agenda {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px dashed #eee;
+}
+
+.seletor-data-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.label-dia-semana {
+  color: var(--primary);
+  font-weight: 600;
+  min-width: 120px;
+}
+
+/* STATUS COLORS */
+.status-pendente {
+  background: #fff3bf;
+  color: #f08c00;
+  border: 1px solid #ffe066;
+}
+.status-presente {
+  background: #e6fcf5;
+  color: #0ca678;
+}
+.status-falta {
+  background: #fff5f5;
+  color: #fa5252;
+}
+.status-reposicao {
+  background: #e7f5ff;
+  color: #1c7ed6;
+}
+
+.btn-pequeno {
+  padding: 5px 12px;
+  font-size: 11px;
+}
+
+.texto-centralizado {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.icon-search {
+  color: #aaa;
+}
+
+/* Responsividade */
+@media (max-width: 1100px) {
+  .painel-filtros-agenda {
+    flex-wrap: wrap;
+  }
+  .contadores-flex {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

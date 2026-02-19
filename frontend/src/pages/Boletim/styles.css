@@ -1,0 +1,122 @@
+/* src/pages/Boletim/styles.css */
+
+.layout-boletim-flex {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+/* SIDEBAR DE TERMOS */
+.sidebar-modulos {
+  width: 260px;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.sidebar-modulos h3 {
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+}
+
+.lista-termos-scroll {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+
+.item-termo-card {
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.item-termo-card.ativo {
+  background: #e7f5ff;
+  border-left: 5px solid var(--primary);
+  border-color: var(--primary);
+}
+
+.termo-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge-aulas {
+  font-size: 10px;
+  background: #f1f3f5;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+/* PAINEL DE NOTAS */
+.painel-notas-central { flex: 1; }
+
+.alerta-modulo {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  border-left: 4px solid var(--primary);
+}
+
+.grid-notas-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 140px;
+  gap: 15px;
+}
+
+.form-row-compact {
+  display: flex;
+  gap: 8px;
+}
+
+.bloco-prova h4 {
+  font-size: 13px;
+  color: var(--dark);
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+/* MÉDIA E RESULTADO */
+.bloco-resultado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.circulo-media {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: bold;
+  border: 4px solid;
+}
+
+.aprovado { color: #2b8a3e; border-color: #2b8a3e; background: #ebfbee; }
+.reprovado { color: #c92a2a; border-color: #c92a2a; background: #fff5f5; }
+
+.txt-aulas-info { font-size: 12px; color: #666; margin-top: 8px; font-weight: 600; }
+
+.aviso-vazio {
+  text-align: center;
+  padding: 50px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #999;
+  border: 2px dashed #ddd;
+}

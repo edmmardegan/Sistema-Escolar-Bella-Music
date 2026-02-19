@@ -1,0 +1,36 @@
+/* src/pages/Usuarios/styles.css */
+
+/* Reutilizando os padrões de status para os níveis de acesso */
+.status-ativo {
+  background: #e7f5ff;
+  color: #1c7ed6;
+} /* Para User */
+.status-inativo {
+  background: #fff5f5;
+  color: #fa5252;
+} /* Para Admin */
+
+.btn-key {
+  background-color: var(--warning) !important;
+  color: #212529 !important;
+}
+
+.btn-key:hover {
+  filter: brightness(0.85);
+  transform: translateY(-1px);
+}
+
+/* Ajuste para o formulário de usuários não ficar muito "alto" */
+.form-grid {
+  align-items: flex-end;
+}
+
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .campo-medio,
+  .campo-curto {
+    max-width: 100%;
+  }
+}

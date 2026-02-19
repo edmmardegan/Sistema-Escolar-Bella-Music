@@ -1,0 +1,94 @@
+/* src/pages/Cursos/styles.css */
+/* Também serve para Alunos se você importar no arquivo correspondente */
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+}
+
+.filtro-container-flex {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+}
+
+.busca-nome-container {
+  position: relative;
+  flex: 1;
+  max-width: 350px;
+}
+
+.busca-nome-container .icon-search {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+.busca-nome-container .input-field {
+  padding-left: 35px;
+}
+
+.link-whatsapp {
+  color: #25d366;
+  text-decoration: none;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.badge-status {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.status-ativo { background: #e6fcf5; color: #0ca678; }
+.status-inativo { background: #fff5f5; color: #fa5252; }
+
+.count-badge {
+  background-color: #f1f3f5;
+  padding: 5px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.grupo-abas {
+  display: flex;
+  gap: 4px;
+}
+
+.aba-item {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.aba-item.ativa {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.txt-detalhe-vermelho {
+  color: #c41010;
+  font-size: 12px;
+}
+
+.contadores-flex {
+  margin-left: auto;
+}
+
+/* Campos com travas de largura para não esticarem demais */
+.campo-curto { max-width: 250px; }
+.campo-medio { max-width: 500px; }

@@ -1,0 +1,28 @@
+/* Estrutura de Card com a Borda Azul */
+.card-padrao {
+  background: #fff;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  border-left: 5px solid #007bff; /* Borda que você curte */
+}
+
+/* Grid do Formulário (2 colunas por padrão) */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Botões com cores padronizadas */
+.btn-save { background-color: #28a745; color: white; }
+.btn-cancel { background-color: #6c757d; color: white; }
+
+/* Tabela Limpa */
+.tabela-padrao {
+  width: 100%;
+  border-collapse: collapse;
+}
+.tabela-padrao th { border-bottom: 2px solid #eee; padding: 10px; text-align: left; }
+.tabela-padrao td { border-bottom: 1px solid #f5f5f5; padding: 12px; }

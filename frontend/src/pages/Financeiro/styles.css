@@ -1,0 +1,127 @@
+/* src/pages/Financeiro/styles.css */
+
+.bloco-geracao-compacto {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.resumo-financeiro-grid {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.resumo-box {
+  flex: 0 1 250px;
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  border-radius: 8px;
+  gap: 12px;
+}
+
+.resumo-box.pago {
+  background: #e6fcf5;
+  border: 1px solid #c3fae8;
+  color: #087f5b;
+}
+.resumo-box.aberto {
+  background: #fff9db;
+  border: 1px solid #fff3bf;
+  color: #f08c00;
+}
+
+.resumo-icon {
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+.resumo-txt span {
+  display: block;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.resumo-txt strong {
+  font-size: 1.2rem;
+}
+
+.painel-filtros-linha {
+  display: flex;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #eee;
+  align-items: flex-end;
+}
+
+.status-pago {
+  background: #d3f9d8;
+  color: #2b8a3e;
+}
+.status-aberto {
+  background: #fff3bf;
+  color: #e67700;
+}
+.status-vencido {
+  background: #fff5f5;
+  color: #fa5252;
+  border: 1px solid #ffc9c9;
+}
+
+.txt-negrito {
+  font-weight: bold;
+}
+.texto-centralizado {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+@media (max-width: 900px) {
+  .resumo-financeiro-grid {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .painel-filtros-linha {
+    flex-wrap: wrap;
+  }
+}
+
+.painel-filtros-linha {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background: #fdfdfd;
+  border-top: 1px dashed #ddd;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.input-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.input-field:focus {
+  border-color: #228be6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 139, 230, 0.1);
+}
+
+/* Ajuste do badge para vencido */
+.status-vencido {
+  background: #fff5f5;
+  color: #fa5252;
+  border: 1px solid #ffc9c9;
+  font-weight: bold;
+}
+
+.txt-detalhe-vermelho {
+  color: #e03131;
+  font-size: 11px;
+  margin-top: 2px;
+}

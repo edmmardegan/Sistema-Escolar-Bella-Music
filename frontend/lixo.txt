@@ -1,0 +1,107 @@
+carne
+
+formato papel: a4
+largura utilizada: 18 cm.
+altura utilizada: 28 cm
+
+dar espaco entre capa, matricula, mensalidade de 1 cm para poder cortar a folha
+
+--------------------------------------------------------
+capa: altura 5cm
+textos centralizado
+1 coluna 18 cm
+
+Carnê de pagamento (letras grandes pode usar 3 linhas)
+    linha em branco
+Aluno: Nome Vencimento: dia (letras media pode usar 2 linhas)
+    linha em branco
+Após 5 dias do vencimento será cobrado multa de R$ 5.00
+
+-------------------------------------------
+Matricula: altura 5cm
+textos centralizado
+3 colunas (1 coluna 6 cm, 2 coluna 2cm, 3 coluna 6cm)
+
+1 coluna com 8 linhas
+Recibo de Matricula
+    linha em branco
+    linha em branco
+Matricula (letras grande pode usar 2 linhas)
+    linha em branco
+    linha em branco
+Valor R$: 
+
+2 coluna em branco
+
+3 coluna com 8 linhas
+Recibo de Matricula
+    nome do aluno
+    linha em branco
+Matricula (letras grande pode usar 2 linhas)
+    linha em branco
+    linha em branco
+Valor R$: 
+
+------------------------------------
+Mensalidade: altura 5cm
+textos centralizado
+3 colunas (1 coluna 6 cm, 2 coluna 2cm, 3 coluna 6cm)
+
+1 coluna com 8 linhas
+Recibo de Pagamento
+    linha em branco
+    linha em branco
+Mensalidade mês
+nome mes / ano
+    linha em branco
+Vencimento: dd/mm/aa     Data Pagto
+Valor R$: valor total    __ / __ / __
+
+2 coluna em branco
+
+1 coluna com 8 linhas
+Recibo de Pagamento
+    Nome do aluno
+    linha em branco
+Mensalidade mês
+nome mes / ano
+    linha em branco
+Vencimento: dd/mm/aa     Data Pagto
+Valor R$: valor total    __ / __ / __
+
+-------------------------------------------------------
+padrao botoes
+
+<button onClick={() => handlePresenca(aula.id)} className="btn-icon btn-confirm" title="Presença"> <FaCheck /> </button>
+<button onClick={() => handleFalta(aula.id)} className="btn-icon btn-not-confirm" title="Falta"> <FaTimes /> </button>
+
+<button onClick={() => prepararEdicao(c)} className="btn-icon btn-edit" title="Editar"> <FaPen color="blue"/> </button>
+<button onClick={() => excluir(c.id)} className="btn-icon btn-excluir" title="Excluir"> <FaTrash color="red"/> </button>
+
+<button type="submit" className="btn btn-primary"><FaSave /> Salvar Ficha</button>
+<button type="button" className="btn btn-secondary" onClick={limparEFechar}> <FaTimes /> Cancelar </button>
+            
+
+<button onClick={() => prepararEdicao(m)} className="btn-icon btn-edit" Title="Editar"> <FaPen /> </button>
+<button onClick={() => setMatriculaSelecionada(m)} className="btn-icon btn-modal" Title="Boletim"> <FaFileInvoiceDollar /> </button>
+<button onClick={() => abrirFinanceiro(m)} className="btn-icon icon-FaMoneyBillWave" Title="Financeiro"> <FaMoneyBillWave /> </button>
+<button onClick={() => confirmarExclusão(m)} className="btn-icon btn-excluir" Title="Excluir"> <FaTrash /> </button>
+
+Ação,Classe,Ícone
+Presença,btn-icon btn-confirm,<FaCheck />
+Falta,btn-icon btn-not-confirm,<FaTimes />
+Editar,btn-icon btn-edit,<FaPen />
+Excluir,btn-icon btn-excluir,<FaTrash />
+Boletim,btn-icon btn-modal,<FaFileInvoiceDollar />
+Financeiro,btn-icon icon-FaMoneyBillWave,<FaMoneyBillWave />
+
+btn-icon btn-confirm verde
+btn-icon btn-edit verde
+btn-icon btn-pagar verde
+btn-icon btn-not-confirm vermelho
+btn-icon btn-excluir vermelho
+btn-icon btn-estornar laranjado
+btn-icon btn-print laranjado
+btn-icon btn-boletim roxo
+btn-icon btn-modal azul
+btn-icon btn-key amarelo
