@@ -3,16 +3,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-// --- IMPORTAÇÃO DAS ENTIDADES ---
-// Verifique se todos esses arquivos estão dentro da pasta src/entities/
+// --- ENTIDADES ---
 import { Aluno } from './entities/aluno.entity';
 import { User } from './entities/user.entity';
 import { Aula } from './entities/aula.entity';
 import { Curso } from './entities/curso.entity';
 import { Matricula } from './entities/matricula.entity';
 import { Financeiro } from './entities/financeiro.entity';
+import { MatriculaTermo } from './entities/matricula-termo.entity';
+import { AuditLog } from './entities/auditLog';
 
-// --- IMPORTAÇÃO DOS MÓDULOS ---
+// --- MÓDULOS ---
 import { AgendaModule } from './agenda/agenda.module';
 import { AlunoModule } from './aluno/aluno.module';
 import { CursoModule } from './curso/curso.module';
@@ -20,7 +21,9 @@ import { MatriculaModule } from './matricula/matricula.module';
 import { FinanceiroModule } from './financeiro/financeiro.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { MatriculaTermo } from './entities/matricula-termo.entity';
+
+// --- SUBSCRIBER ---
+import { AuditSubscriber } from './subscribers/AuditSubscriber';
 
 @Module({
   imports: [
@@ -30,7 +33,7 @@ import { MatriculaTermo } from './entities/matricula-termo.entity';
       port: Number(process.env.DB_PORT) || 5432,
       username: process.env.DB_USERNAME || 'evandro',
       password: String(process.env.DB_PASSWORD || '123456'),
-      database: process.env.DB_DATABASE || 'escolaron',
+      database: 'escolaron_dev',
       entities: [
         User,
         Aluno,
@@ -39,11 +42,13 @@ import { MatriculaTermo } from './entities/matricula-termo.entity';
         Financeiro,
         Matricula,
         MatriculaTermo,
+        AuditLog,
       ],
+      subscribers: [],
       synchronize: true,
     }),
-
-    // Módulos do Sistema
+    // ✅ Importante para o repositório de Log ser injetável
+    TypeOrmModule.forFeature([AuditLog]),
     AgendaModule,
     UsersModule,
     AuthModule,
@@ -53,6 +58,6 @@ import { MatriculaTermo } from './entities/matricula-termo.entity';
     FinanceiroModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AuditSubscriber],
 })
 export class AppModule {}

@@ -1,7 +1,8 @@
+//Local: /src/services/api.js
+
 import axios from "axios";
 
-// 1. CONFIGURAÇÃO BASE DINÂMICA
-/// Pega a URL do .env ou assume a 5000 se tudo falhar
+// 1. CONFIGURAÇÃO BASE
 const api_url = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const axiosInstance = axios.create({
@@ -9,13 +10,12 @@ const axiosInstance = axios.create({
 });
 
 if (import.meta.env.DEV) {
-  console.log(`🛠️ Conectado ao Banco de DESENVOLVIMENTO: ${api_url}`);
-} else {
-  console.log(`🚀 Conectado ao Banco de PRODUÇÃO: ${api_url}`);
+  console.log(`🛠️ Conectado ao Backend de DESENVOLVIMENTO: ${api_url}`);
 }
 
-// 2. INTERCEPTORES
+// 2. INTERCEPTORES (Configurados diretamente na instância)
 axiosInstance.interceptors.request.use((config) => {
+  // Use a chave exata que você usa no resto do sistema (ajustei para @App:token)
   const token = localStorage.getItem("@App:token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -37,8 +37,15 @@ axiosInstance.interceptors.response.use(
   },
 );
 
-// 3. OBJETO API
+// 3. OBJETO API (Aqui incluí o método .get para sua tela de Logs não quebrar)
 const api = {
+  // Atalho para chamadas diretas (ex: Auditoria)
+  get: (url, config) => axiosInstance.get(url, config),
+  post: (url, data, config) => axiosInstance.post(url, data, config),
+  put: (url, data, config) => axiosInstance.put(url, data, config),
+  patch: (url, data, config) => axiosInstance.patch(url, data, config),
+  delete: (url, config) => axiosInstance.delete(url, config),
+
   // === 🔐 AUTENTICAÇÃO ===
   login: async (email, password) => {
     const payload = { email: email.trim(), password: password.trim() };
@@ -55,11 +62,7 @@ const api = {
   },
 
   saveFrequencia: async (id, acao, motivo = "") => (await axiosInstance.patch(`/agenda/${id}/frequencia`, { acao, motivo })).data,
-
-  gerarAgenda: async (payload) => {
-    return (await axiosInstance.post("/agenda/gerar", payload)).data;
-  },
-
+  gerarAgenda: async (payload) => (await axiosInstance.post("/agenda/gerar", payload)).data,
   deleteAgenda: async (id) => (await axiosInstance.delete(`/agenda/${id}`)).data,
 
   // === 👤 USUÁRIOS ===

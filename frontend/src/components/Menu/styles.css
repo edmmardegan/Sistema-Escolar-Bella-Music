@@ -59,9 +59,25 @@
   gap: 10px;
   font-size: 0.85rem;
 }
+/* Localize e substitua/adicione estas classes */
 
-.menu-link-item:hover { background-color: #34495e; }
-.menu-link-item.active { background-color: #3498db; }
+.menu-link-item.active {
+  background-color: #007bff !important; /* Azul destaque */
+  color: #ffffff !important; /* Texto branco para leitura */
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+/* Opcional: Garante que o ícone também fique branco no ativo */
+.menu-link-item.active .menu-icon {
+  color: #ffffff !important;
+}
+
+/* Ajuste do hover para não confundir com o ativo */
+.menu-link-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
 
 .btn-logout {
   margin-top: 20px;
@@ -79,22 +95,52 @@
 }
 /* O container que segura a imagem e o texto */
 .logo {
-  display: flex;          /* Habilita o alinhamento flexível */
-  align-items: center;    /* Centraliza imagem e texto verticalmente entre si */
-  gap: 10px;              /* Espaço entre a imagem e o texto "- Home" */
+  display: flex; /* Habilita o alinhamento flexível */
+  align-items: center; /* Centraliza imagem e texto verticalmente entre si */
+  gap: 10px; /* Espaço entre a imagem e o texto "- Home" */
   cursor: pointer;
-  margin-top: 20px;       /* Mantém o espaço que você queria no topo */
+  margin-top: 20px; /* Mantém o espaço que você queria no topo */
   padding: 10px;
 }
 
 .logo-mini {
   width: 30px;
   height: auto;
-  display: block;         /* Remove espaços extras abaixo da imagem */
+  display: block; /* Remove espaços extras abaixo da imagem */
 }
 
 .logo span {
   font-weight: bold;
-  color: write;            /* Cor do seu texto "- Home" */
+  color: write; /* Cor do seu texto "- Home" */
   font-size: 1rem;
+}
+
+/* ... seus estilos anteriores do Menu permanecem ... */
+
+.badge-ambiente-dev {
+  font-size: 10px;
+  background: #ff9800; /* Laranja para Dev */
+  color: #000;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 4px;
+  margin-top: 5px;
+  padding: 2px 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Garante que o ícone de auditoria siga o padrão dos outros */
+.menu-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+}
+
+/* Se quiser um efeito visual quando o link de Auditoria for clicado */
+.menu-link-item.active {
+  background-color: #e9ecef;
+  font-weight: bold;
+  border-right: 4px solid #007bff;
 }

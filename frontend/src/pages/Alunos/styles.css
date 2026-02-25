@@ -1,6 +1,68 @@
-/* src/pages/Alunos/styles.css */
+/* --- CONTAINER DE FILTROS (MANTIDO) --- */
+.filtro-container-flex {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 15px;
+}
 
-/* Checkbox alinhado ao formulário */
+/* --- CONTAINER DA BUSCA (CORRIGIDO) --- */
+.busca-nome-container {
+  position: relative;
+  flex: 1;
+  max-width: 320px;
+  display: flex;
+  align-items: center;
+}
+
+/* Seletores separados por vírgula para aplicar o posicionamento centralizado em ambos */
+.busca-nome-container .icon-search,
+.busca-nome-container .icon-clear {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  z-index: 5; /* Garante que fique acima do input */
+}
+
+/* Lupa: Fixa à esquerda */
+.busca-nome-container .icon-search {
+  left: 12px;
+}
+
+/* Ícone de Limpar (X): Fixo à direita */
+.busca-nome-container .icon-clear {
+  right: 12px;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s ease;
+}
+
+.busca-nome-container .icon-clear:hover {
+  color: #fa5252; /* Fica vermelho ao passar o mouse */
+}
+
+/* --- INPUT FIELD (AJUSTADO) --- */
+.busca-nome-container .input-field {
+  width: 100%;
+  height: 38px;
+  /* Espaçamento: Top, Right (espaço p/ o X), Bottom, Left (espaço p/ a Lupa) */
+  padding: 8px 35px 8px 38px; 
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.busca-nome-container .input-field:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+/* --- OUTROS ELEMENTOS (MANTIDOS E ORGANIZADOS) --- */
+
 .checkbox-group {
   display: flex;
   align-items: center;
@@ -14,33 +76,6 @@
   cursor: pointer;
 }
 
-/* Cabeçalho de Filtros e Busca */
-.filtro-container-flex {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 15px;
-}
-
-.busca-nome-container {
-  position: relative;
-  flex: 1;
-  max-width: 320px;
-}
-
-.busca-nome-container .icon-search {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #aaa;
-}
-
-.busca-nome-container .input-field {
-  padding-left: 38px; /* Espaço para o ícone de lupa */
-}
-
-/* Status e Badges */
 .badge-status {
   padding: 4px 10px;
   border-radius: 4px;
@@ -49,19 +84,10 @@
   text-transform: uppercase;
 }
 
-.status-ativo {
-  background: #e6fcf5;
-  color: #0ca678;
-}
-.status-inativo {
-  background: #fff5f5;
-  color: #fa5252;
-}
+.status-ativo { background: #e6fcf5; color: #0ca678; }
+.status-inativo { background: #fff5f5; color: #fa5252; }
 
-/* Contadores e Abas */
-.contadores-flex {
-  margin-left: auto;
-}
+.contadores-flex { margin-left: auto; }
 
 .count-badge {
   background-color: #e9ecef;
@@ -71,10 +97,7 @@
   border: 1px solid #dee2e6;
 }
 
-.grupo-abas {
-  display: flex;
-  gap: 5px;
-}
+.grupo-abas { display: flex; gap: 5px; }
 
 .aba-item {
   padding: 8px 16px;
@@ -87,12 +110,11 @@
 }
 
 .aba-item.ativa {
-  background: var(--primary);
+  background: #007bff; /* Ajuste para sua variável primary */
   color: white;
-  border-color: var(--primary);
 }
 
-/* Ajustes para telas menores */
+/* --- RESPONSIVIDADE --- */
 @media (max-width: 768px) {
   .filtro-container-flex {
     flex-direction: column;
@@ -104,10 +126,11 @@
   .contadores-flex {
     margin-left: 0;
     text-align: center;
+    margin-top: 10px;
   }
 }
 
-/* Container que agrupa o input e o ícone */
+/* --- CPF CONTAINER (EVITANDO CONFLITOS) --- */
 .cpf-container {
   position: relative;
   display: flex;
@@ -116,24 +139,17 @@
 }
 
 .cpf-container .input-field {
-  padding-right: 40px; /* Espaço para o ícone não ficar em cima do número */
+  padding-right: 40px;
   width: 100%;
 }
 
 .btn-toggle-cpf {
-  position: absolute;
+  /*position: absolute; para ficar dentro imput*/
   right: 10px;
   background: none;
   border: none;
   cursor: pointer;
   color: #666;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  transition: color 0.2s;
+  z-index: 5;
 }
 
-.btn-toggle-cpf:hover {
-  color: #000;
-}

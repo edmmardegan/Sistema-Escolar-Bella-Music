@@ -1,107 +1,527 @@
-carne
+//local: /src/entities/auditLog.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 
-formato papel: a4
-largura utilizada: 18 cm.
-altura utilizada: 28 cm
+@Entity('audit_log')
+export class auditLog {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-dar espaco entre capa, matricula, mensalidade de 1 cm para poder cortar a folha
+  @Column({ nullable: true })
+  user_id: number; // ID do usuário que realizou a ação
 
---------------------------------------------------------
-capa: altura 5cm
-textos centralizado
-1 coluna 18 cm
+  @Column()
+  user_name: string; // Opcional: guardar o nome facilita a leitura rápida sem Joins
 
-Carnê de pagamento (letras grandes pode usar 3 linhas)
-    linha em branco
-Aluno: Nome Vencimento: dia (letras media pode usar 2 linhas)
-    linha em branco
-Após 5 dias do vencimento será cobrado multa de R$ 5.00
+  @Column()
+  action: string; // 'LOGIN', 'INSERT', 'UPDATE', 'DELETE'
 
--------------------------------------------
-Matricula: altura 5cm
-textos centralizado
-3 colunas (1 coluna 6 cm, 2 coluna 2cm, 3 coluna 6cm)
+  @Column()
+  table_name: string; // Ex: 'produtos', 'vendas'
 
-1 coluna com 8 linhas
-Recibo de Matricula
-    linha em branco
-    linha em branco
-Matricula (letras grande pode usar 2 linhas)
-    linha em branco
-    linha em branco
-Valor R$: 
+  @Column({ nullable: true })
+  record_id: string; // ID do registro que foi afetado
 
-2 coluna em branco
+  @Column({ type: 'jsonb', nullable: true })
+  old_values: any; // Estado do objeto antes da alteração
 
-3 coluna com 8 linhas
-Recibo de Matricula
-    nome do aluno
-    linha em branco
-Matricula (letras grande pode usar 2 linhas)
-    linha em branco
-    linha em branco
-Valor R$: 
+  @Column({ type: 'jsonb', nullable: true })
+  new_values: any; // Estado do objeto depois da alteração
 
-------------------------------------
-Mensalidade: altura 5cm
-textos centralizado
-3 colunas (1 coluna 6 cm, 2 coluna 2cm, 3 coluna 6cm)
+  @Column({ nullable: true })
+  ip_address: string;
 
-1 coluna com 8 linhas
-Recibo de Pagamento
-    linha em branco
-    linha em branco
-Mensalidade mês
-nome mes / ano
-    linha em branco
-Vencimento: dd/mm/aa     Data Pagto
-Valor R$: valor total    __ / __ / __
+  @CreateDateColumn()
+  created_at: Date;
+}
 
-2 coluna em branco
 
-1 coluna com 8 linhas
-Recibo de Pagamento
-    Nome do aluno
-    linha em branco
-Mensalidade mês
-nome mes / ano
-    linha em branco
-Vencimento: dd/mm/aa     Data Pagto
-Valor R$: valor total    __ / __ / __
+//local: /src/app.module.ts
 
--------------------------------------------------------
-padrao botoes
+import {
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+  RequestMethod,
+} from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm'; // Adicionado o import do DataSource
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
-<button onClick={() => handlePresenca(aula.id)} className="btn-icon btn-confirm" title="Presença"> <FaCheck /> </button>
-<button onClick={() => handleFalta(aula.id)} className="btn-icon btn-not-confirm" title="Falta"> <FaTimes /> </button>
+// --- ENTIDADES ---
+import { Aluno } from './entities/aluno.entity';
+import { User } from './entities/user.entity';
+import { Aula } from './entities/aula.entity';
+import { Curso } from './entities/curso.entity';
+import { Matricula } from './entities/matricula.entity';
+import { Financeiro } from './entities/financeiro.entity';
+import { MatriculaTermo } from './entities/matricula-termo.entity';
+import { auditLog } from './entities/auditLog';
 
-<button onClick={() => prepararEdicao(c)} className="btn-icon btn-edit" title="Editar"> <FaPen color="blue"/> </button>
-<button onClick={() => excluir(c.id)} className="btn-icon btn-excluir" title="Excluir"> <FaTrash color="red"/> </button>
+// --- MÓDULOS ---
+import { AgendaModule } from './agenda/agenda.module';
+import { AlunoModule } from './aluno/aluno.module';
+import { CursoModule } from './curso/curso.module';
+import { MatriculaModule } from './matricula/matricula.module';
+import { FinanceiroModule } from './financeiro/financeiro.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
-<button type="submit" className="btn btn-primary"><FaSave /> Salvar Ficha</button>
-<button type="button" className="btn btn-secondary" onClick={limparEFechar}> <FaTimes /> Cancelar </button>
-            
+// --- MIDDLEWARE E SUBSCRIBER ---
+import { auditMiddleware } from './middlewares/auditMiddleware';
+import { AuditSubscriber } from './subscribers/AuditSubscriber';
 
-<button onClick={() => prepararEdicao(m)} className="btn-icon btn-edit" Title="Editar"> <FaPen /> </button>
-<button onClick={() => setMatriculaSelecionada(m)} className="btn-icon btn-modal" Title="Boletim"> <FaFileInvoiceDollar /> </button>
-<button onClick={() => abrirFinanceiro(m)} className="btn-icon icon-FaMoneyBillWave" Title="Financeiro"> <FaMoneyBillWave /> </button>
-<button onClick={() => confirmarExclusão(m)} className="btn-icon btn-excluir" Title="Excluir"> <FaTrash /> </button>
+@Module({
+  imports: [
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST || '127.0.0.1',
+      port: Number(process.env.DB_PORT) || 5432,
+      username: process.env.DB_USERNAME || 'evandro',
+      password: String(process.env.DB_PASSWORD || '123456'),
+      database: process.env.DB_DATABASE || 'escolaron',
+      entities: [
+        User,
+        Aluno,
+        Aula,
+        Curso,
+        Financeiro,
+        Matricula,
+        MatriculaTermo,
+        auditLog,
+      ],
+      subscribers: [AuditSubscriber],
+      // Removi a linha 'subscribers' daqui para evitar conflitos,
+      // vamos registrar via Provider que é mais seguro no Nest.
+      synchronize: true,
+    }),
 
-Ação,Classe,Ícone
-Presença,btn-icon btn-confirm,<FaCheck />
-Falta,btn-icon btn-not-confirm,<FaTimes />
-Editar,btn-icon btn-edit,<FaPen />
-Excluir,btn-icon btn-excluir,<FaTrash />
-Boletim,btn-icon btn-modal,<FaFileInvoiceDollar />
-Financeiro,btn-icon icon-FaMoneyBillWave,<FaMoneyBillWave />
+    AgendaModule,
+    UsersModule,
+    AuthModule,
+    AlunoModule,
+    CursoModule,
+    MatriculaModule,
+    FinanceiroModule,
+  ],
+  controllers: [AppController],
+  providers: [
+    AppService,
+    AuditSubscriber, // Registrado como provider para o Nest gerenciar
+  ],
+})
+export class AppModule implements NestModule {
+  constructor(private dataSource: DataSource) {
+    // Esse log TEM que aparecer no PM2 logs
+    console.log(
+      '🔍OLÁ EVANDRO! O SISTEMA DE LOGS ESTÁ LIGADO AGORA! Tentando registrar o AuditSubscriber manualmente...',
+    );
 
-btn-icon btn-confirm verde
-btn-icon btn-edit verde
-btn-icon btn-pagar verde
-btn-icon btn-not-confirm vermelho
-btn-icon btn-excluir vermelho
-btn-icon btn-estornar laranjado
-btn-icon btn-print laranjado
-btn-icon btn-boletim roxo
-btn-icon btn-modal azul
-btn-icon btn-key amarelo
+    const subscriber = new AuditSubscriber();
+
+    // Verifica se já existe para não duplicar, senão adiciona
+    const isAlreadyRegistered = this.dataSource.subscribers.some(
+      (s) => s.constructor.name === 'AuditSubscriber',
+    );
+
+    if (!isAlreadyRegistered) {
+      this.dataSource.subscribers.push(subscriber);
+      console.log('✅ AuditSubscriber injetado com sucesso no DataSource!');
+    }
+  }
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(auditMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}
+
+
+//Local: /src/users/audit.controller.ts
+
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { auditLog } from '../entities/auditLog';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
+@Controller('audit')
+//@UseGuards(JwtAuthGuard) // Só quem está logado pode ver os logs
+export class AuditController {
+  constructor(
+    @InjectRepository(auditLog)
+    private readonly auditRepo: Repository<auditLog>,
+  ) {}
+
+  @Get()
+  async getLogs(@Query('page') page = 1, @Query('limit') limit = 20) {
+    const [result, total] = await this.auditRepo.findAndCount({
+      order: { created_at: 'DESC' }, // Mais recentes primeiro
+      take: limit,
+      skip: (page - 1) * limit,
+    });
+
+    return {
+      data: result,
+      count: total,
+      currentPage: +page,
+      lastPage: Math.ceil(total / limit),
+    };
+  }
+}
+
+
+//Local: src/subscribers/AuditSubscriber.ts
+
+import {
+  EntitySubscriberInterface,
+  EventSubscriber,
+  UpdateEvent,
+  InsertEvent,
+} from 'typeorm';
+import { auditLog } from '../entities/auditLog';
+import { AsyncLocalStorage } from 'async_hooks';
+import { Logger } from '@nestjs/common';
+
+export const auditContext = new AsyncLocalStorage<any>();
+
+@EventSubscriber()
+export class AuditSubscriber implements EntitySubscriberInterface {
+  private readonly logger = new Logger('AuditSubscriber');
+
+  constructor() {
+    this.logger.log('✅ AuditSubscriber carregado e pronto para monitorar!');
+  }
+
+  listenTo() {
+    return 'all';
+  }
+
+  async afterUpdate(event: UpdateEvent<any>) {
+    // 1. Evita loop infinito
+    if (event.metadata.tableName === 'audit_log') return;
+
+    this.logger.debug(
+      `📝 Alteração detectada na tabela: ${event.metadata.tableName}`,
+    );
+
+    const context = auditContext.getStore();
+    const repo = event.manager.getRepository(auditLog);
+
+    try {
+      // Captura o ID de forma mais segura
+      const id = event.entity?.id || event.databaseEntity?.id || '0';
+
+      const log = repo.create({
+        action: 'UPDATE',
+        table_name: event.metadata.tableName,
+        record_id: String(id),
+        new_values: event.entity || {},
+        old_values: event.databaseEntity || {},
+        user_name: context?.user?.nome || 'Admin Direto',
+        user_id: context?.user?.id || 1,
+      });
+
+      await repo.save(log);
+      this.logger.log(
+        `✅ Log de UPDATE salvo para a tabela ${event.metadata.tableName}`,
+      );
+    } catch (error) {
+      this.logger.error(`❌ Erro ao salvar log: ${error.message}`);
+    }
+  }
+
+  async afterInsert(event: InsertEvent<any>) {
+    if (event.metadata.tableName === 'audit_log') return;
+
+    this.logger.debug(
+      `🆕 Inserção detectada na tabela: ${event.metadata.tableName}`,
+    );
+
+    const context = auditContext.getStore();
+    const repo = event.manager.getRepository(auditLog);
+
+    try {
+      const log = repo.create({
+        action: 'CREATE',
+        table_name: event.metadata.tableName,
+        record_id: String(event.entity?.id || ''),
+        new_values: event.entity || {},
+        user_name: context?.user?.nome || 'Admin Direto',
+        user_id: context?.user?.id || 1,
+      });
+
+      await repo.save(log);
+      this.logger.log(
+        `✅ Log de CREATE salvo para a tabela ${event.metadata.tableName}`,
+      );
+    } catch (error) {
+      this.logger.error(`❌ Erro ao salvar log: ${error.message}`);
+    }
+  }
+}
+
+
+//LOCAL: src/middleware/auditMiddleware.ts
+
+import { Request, Response, NextFunction } from 'express';
+import { userContextStorage } from '../context/userContext';
+
+// Esta função PRECISA ter o nome exato que você importa no AppModule
+export function auditMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const user = (req as any).user;
+
+  const context = {
+    userId: user?.id || 0,
+    userName: user?.nome || 'Sistema',
+    ip: req.ip || req.connection.remoteAddress || '',
+  };
+
+  userContextStorage.run(context, () => {
+    next();
+  });
+}
+
+//Local: /src/services/api.js
+
+import axios from "axios";
+
+// 1. CONFIGURAÇÃO BASE
+const api_url = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const axiosInstance = axios.create({
+  baseURL: api_url,
+});
+
+if (import.meta.env.DEV) {
+  console.log(`🛠️ Conectado ao Backend de DESENVOLVIMENTO: ${api_url}`);
+}
+
+// 2. INTERCEPTORES (Configurados diretamente na instância)
+axiosInstance.interceptors.request.use((config) => {
+  // Use a chave exata que você usa no resto do sistema (ajustei para @App:token)
+  const token = localStorage.getItem("@App:token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      if (!window.location.pathname.includes("/login")) {
+        localStorage.removeItem("@App:token");
+        localStorage.removeItem("@App:user");
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
+// 3. OBJETO API (Aqui incluí o método .get para sua tela de Logs não quebrar)
+const api = {
+  // Atalho para chamadas diretas (ex: Auditoria)
+  get: (url, config) => axiosInstance.get(url, config),
+  post: (url, data, config) => axiosInstance.post(url, data, config),
+  put: (url, data, config) => axiosInstance.put(url, data, config),
+  patch: (url, data, config) => axiosInstance.patch(url, data, config),
+  delete: (url, config) => axiosInstance.delete(url, config),
+
+  // === 🔐 AUTENTICAÇÃO ===
+  login: async (email, password) => {
+    const payload = { email: email.trim(), password: password.trim() };
+    const response = await axiosInstance.post("/auth/login", payload);
+    return response.data;
+  },
+
+  // === 📅 AGENDA ===
+  getAgenda: async (tipo, filtros) => {
+    const resposta = await axiosInstance.get(`/agenda`, {
+      params: { tipo, ...filtros },
+    });
+    return resposta.data;
+  },
+
+  saveFrequencia: async (id, acao, motivo = "") => (await axiosInstance.patch(`/agenda/${id}/frequencia`, { acao, motivo })).data,
+  gerarAgenda: async (payload) => (await axiosInstance.post("/agenda/gerar", payload)).data,
+  deleteAgenda: async (id) => (await axiosInstance.delete(`/agenda/${id}`)).data,
+
+  // === 👤 USUÁRIOS ===
+  getUsuarios: async () => (await axiosInstance.get("/usuarios")).data,
+  saveUsuario: async (dados, id = null) => {
+    if (id) return (await axiosInstance.put(`/usuarios/${id}`, dados)).data;
+    return (await axiosInstance.post("/usuarios", dados)).data;
+  },
+  deleteUsuario: async (id) => (await axiosInstance.delete(`/usuarios/${id}`)).data,
+  resetPasswordAdmin: async (id, dados) => (await axiosInstance.patch(`/usuarios/${id}/reset-password-admin`, dados)).data,
+  updateOwnPassword: async (id, dados) => (await axiosInstance.patch(`/usuarios/${id}/update-own-password`, dados)).data,
+
+  // === 🎓 ALUNOS ===
+  getAlunos: async () => (await axiosInstance.get("/alunos")).data,
+  getAniversariantes: async () => (await axiosInstance.get("/alunos/aniversariantes")).data,
+  saveAluno: async (dados, id = null) => {
+    if (id) return (await axiosInstance.put(`/alunos/${id}`, dados)).data;
+    return (await axiosInstance.post("/alunos", dados)).data;
+  },
+  deleteAluno: async (id) => (await axiosInstance.delete(`/alunos/${id}`)).data,
+
+  // === 📚 CURSOS ===
+  getCursos: async () => (await axiosInstance.get("/cursos")).data,
+  saveCurso: async (dados, id = null) => {
+    if (id) return (await axiosInstance.put(`/cursos/${id}`, dados)).data;
+    return (await axiosInstance.post("/cursos", dados)).data;
+  },
+  deleteCurso: async (id) => (await axiosInstance.delete(`/cursos/${id}`)).data,
+
+  // === 📝 MATRÍCULAS ===
+  getMatriculas: async () => (await axiosInstance.get("/matriculas")).data,
+  saveMatricula: async (dados, id = null) => {
+    if (id) return (await axiosInstance.put(`/matriculas/${id}`, dados)).data;
+    return (await axiosInstance.post("/matriculas", dados)).data;
+  },
+  deleteMatricula: async (id) => (await axiosInstance.delete(`/matriculas/${id}`)).data,
+  getPorMatricula: async (id) => (await axiosInstance.get(`/financeiro/matricula/${id}`)).data,
+
+  // === 💰 FINANCEIRO ===
+  getAllFinanceiro: async () => (await axiosInstance.get("/financeiro")).data,
+  pagar: async (id) => (await axiosInstance.post(`/financeiro/${id}/pagar`)).data,
+  estornar: async (id) => (await axiosInstance.post(`/financeiro/${id}/estornar`)).data,
+  deleteParcela: async (id) => (await axiosInstance.delete(`/financeiro/${id}`)).data,
+  gerarParcelaGlobal: async (dados) => (await axiosInstance.post("/financeiro/gerar-lote-anual", dados)).data,
+  gerarParcelaIndividual: async (id, ano) => (await axiosInstance.post(`/matriculas/${id}/gerar-financeiro`, { ano })).data,
+  aplicarReajusteGlobal: async (dados) => (await axiosInstance.post("/financeiro/reajuste-global", dados)).data,
+
+  // === 📊 BOLETIM / TERMOS ===
+  getDetalhesBoletim: async (termoId) => (await axiosInstance.get(`/matriculas/termo/${termoId}`)).data,
+  updateBoletim: async (termoId, dados) => (await axiosInstance.patch(`/matriculas/termo/${termoId}`, dados)).data,
+};
+
+export default api;
+
+
+
+Frontend.. //Local: /src/pages/Logs/index.jsx
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import api from "../../services/api"; // Verifique o caminho do seu serviço de API
+import "./styles.css";
+
+const Logs = () => {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagina, setPagina] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+
+  useEffect(() => {
+    carregarLogs();
+  }, [pagina]);
+
+  const carregarLogs = async () => {
+    setLoading(true);
+    try {
+      // Tente usar a URL completa para garantir que funciona:
+      const token = localStorage.getItem("@app:token"); // pegando seu token
+      const response = await axios.get("http://localhost:5000/audit", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { page: pagina, limit: 20 },
+      });
+
+      setLogs(response.data.data);
+      setTotalPaginas(response.data.lastPage);
+    } catch (error) {
+      console.error("Erro ao carregar logs:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatarData = (dataStr) => {
+    return new Date(dataStr).toLocaleString("pt-BR");
+  };
+
+  const renderBadgeAcao = (acao) => {
+    const cores = {
+      CREATE: "badge-create",
+      UPDATE: "badge-update",
+      DELETE: "badge-delete",
+      LOGIN: "badge-login",
+    };
+    return <span className={`badge ${cores[acao] || ""}`}>{acao}</span>;
+  };
+
+  return (
+    <div className="logs-container">
+      <header className="logs-header">
+        <h2>Histórico de Atividades (Auditoria)</h2>
+        <button onClick={carregarLogs} className="btn-atualizar">
+          Atualizar
+        </button>
+      </header>
+
+      <div className="tabela-container">
+        <table className="logs-table">
+          <thead>
+            <tr>
+              <th>Data/Hora</th>
+              <th>Usuário</th>
+              <th>Ação</th>
+              <th>Tabela</th>
+              <th>ID Reg.</th>
+              <th>Alterações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="6">Carregando histórico...</td>
+              </tr>
+            ) : (
+              logs.map((log) => (
+                <tr key={log.id}>
+                  <td>{formatarData(log.created_at)}</td>
+                  <td>
+                    <strong>{log.user_name}</strong>
+                  </td>
+                  <td>{renderBadgeAcao(log.action)}</td>
+                  <td>{log.table_name}</td>
+                  <td>{log.record_id}</td>
+                  <td className="col-json">
+                    {log.action === "UPDATE" && <small>Alterou dados de {log.table_name}</small>}
+                    {log.action === "CREATE" && <small>Criou novo registro</small>}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="paginacao">
+        <button disabled={pagina === 1} onClick={() => setPagina((p) => p - 1)}>
+          Anterior
+        </button>
+        <span>
+          Página {pagina} de {totalPaginas}
+        </span>
+        <button disabled={pagina === totalPaginas} onClick={() => setPagina((p) => p + 1)}>
+          Próxima
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default Logs;

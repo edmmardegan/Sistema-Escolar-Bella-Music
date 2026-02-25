@@ -153,8 +153,12 @@ export default function Alunos() {
     });
 
     setEditandoId(aluno.id);
+    setExibirCpfReal(false);
     setExibindoForm(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    //    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => {
+      inputNomeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
   };
 
   const fecharFormulario = () => {
@@ -272,8 +276,9 @@ export default function Alunos() {
                   >
                     {exibirCpfReal ? "👁️" : "🙈"}
                   </button>
+                  {!exibirCpfReal && form.cpf && <small style={{ fontSize: "10px", color: "#999" }}>Clique no ícone para editar</small>}
                 </div>
-                {!exibirCpfReal && form.cpf && <small style={{ fontSize: "10px", color: "#999" }}>Clique no ícone para editar</small>}
+                
               </div>
 
               <div className="input-group campo-curto">
@@ -316,7 +321,7 @@ export default function Alunos() {
                 <label>Nome da Mãe:</label>
                 <input name="nomeMae" value={form.nomeMae || ""} onChange={handleChange} className="input-field" />
               </div>
-              
+
               {/* BOTOES DO FORMULARIO */}
               <div className="acoes-form">
                 <button id="btn-salvar-aluno" type="submit" className="btn btn-primary">
@@ -411,11 +416,7 @@ export default function Alunos() {
                         <span className={`badge-status ${a.ativo ? "status-ativo" : "status-inativo"}`}>{a.ativo ? "ATIVO" : "INATIVO"}</span>
                       </td>
                       <td className="acoes">
-                        <button
-                          onClick={() => alternarStatus(a)}
-                          className={`btn-icon status`}
-                          title={a.ativo ? "Inativar Aluno" : "Ativar Aluno"}
-                        >
+                        <button onClick={() => alternarStatus(a)} className={`btn-icon status`} title={a.ativo ? "Inativar Aluno" : "Ativar Aluno"}>
                           {a.ativo ? "🟢" : "🔴"}
                         </button>
                         <button onClick={() => prepararEdicao(a)} className="btn-icon btn-edit" title="Editar">

@@ -1,7 +1,17 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.js";
-import { FaUserGraduate, FaBook, FaTable, FaFileSignature, FaCalendarAlt, FaWallet, FaSignOutAlt, FaUserCog } from "react-icons/fa";
+import {
+  FaUserGraduate,
+  FaBook,
+  FaTable,
+  FaFileSignature,
+  FaCalendarAlt,
+  FaWallet,
+  FaSignOutAlt,
+  FaUserCog,
+  FaHistory, // Importado para Auditoria
+} from "react-icons/fa";
 import "./styles.css";
 import logo from "../../assets/logo2.jpg";
 
@@ -23,6 +33,7 @@ export default function Menu() {
     { to: "/matriculas", label: "Matrículas", icon: <FaFileSignature /> },
     { to: "/financeiro", label: "Financeiro", icon: <FaWallet />, adminOnly: true },
     { to: "/usuarios", label: "Usuários", icon: <FaUserCog />, adminOnly: true },
+   // { to: "/logs", label: "Auditoria", icon: <FaHistory />, adminOnly: true }, // NOVO ITEM
   ];
 
   const menuItems = allItems
@@ -32,28 +43,12 @@ export default function Menu() {
   return (
     <nav className="sidebar-menu">
       <div className="logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-        <img className="logo-mini" src={logo} alt="Logo"/>
+        <img className="logo-mini" src={logo} alt="Logo" />
         <span> - Home</span>
       </div>
-      {/* AVISO DE AMBIENTE DINÂMICO */}
-      {import.meta.env.VITE_STATUS === "development" ? (
-        <div
-          style={{
-            fontSize: "10px",
-            background: "#ff9800", // Laranja para Dev
-            color: "#000",
-            fontWeight: "bold",
-            textAlign: "center",
-            borderRadius: "4px",
-            marginTop: "5px",
-            padding: "2px 4px",
-            textTransform: "uppercase",
-            letterSpacing: "1px",
-          }}
-        >
-          Ambiente de Desenvolvimento
-        </div>
-      ) : null}
+
+      {/* AVISO DE AMBIENTE - Classe aplicada via CSS agora */}
+      {import.meta.env.VITE_STATUS === "development" && <div className="badge-ambiente-dev">Ambiente de Desenvolvimento</div>}
 
       <div className="user-info">
         <span>Logado como:</span>

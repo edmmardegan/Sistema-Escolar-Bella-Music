@@ -1,5 +1,3 @@
-// Local: src/aluno/aluno.service.ts
-
 import {
   Injectable,
   InternalServerErrorException,
@@ -8,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Aluno } from '../entities/aluno.entity';
+import { AuditLog } from '../entities/auditLog'; // Importe a entidade de Log
 import { CreateAlunoDto } from './dto/create-aluno.dto';
 
 @Injectable()
@@ -15,27 +14,53 @@ export class AlunoService {
   constructor(
     @InjectRepository(Aluno)
     private readonly repository: Repository<Aluno>,
+
+    @InjectRepository(AuditLog) // Injetando o repositório de log diretamente
+    private readonly auditRepo: Repository<AuditLog>,
   ) {}
 
-  // AJUSTADO: Agora traz as matrículas e os cursos vinculados
   async findAll() {
     return await this.repository.find({
-      relations: ['matriculas', 'matriculas.curso'], // Carrega os dados relacionados
+      relations: ['matriculas', 'matriculas.curso'],
       order: { nome: 'ASC' },
     });
   }
 
-  // PADRÃO: Criar ou Atualizar
-  // Usamos o DTO para garantir que os dados de entrada respeitem as regras do sistema
   async save(dados: CreateAlunoDto & { id?: number }) {
     try {
-      return await this.repository.save(dados);
-    } catch (error) {
-      // Caso ocorra erro de CPF duplicado, por exemplo, o banco lançará uma exceção aqui
-      if (error.code === '23505') {
-        throw new InternalServerErrorException(
-          'Este CPF já está cadastrado para outro aluno.',
+      let alunoAntigo = null;
+      let acao: 'INSERT' | 'UPDATE' = 'INSERT';
+
+      // Se tiver ID, busca o estado atual para o log
+      if (dados.id) {
+        alunoAntigo = await this.repository.findOneBy({ id: dados.id });
+        acao = 'UPDATE';
+      }
+
+      // Salva o aluno
+      const alunoSalvo = await this.repository.save(dados);
+
+      // --- GERAÇÃO MANUAL DO LOG DE AUDITORIA ---
+      try {
+        await this.auditRepo.save({
+          table_name: 'aluno',
+          action: acao,
+          old_values: alunoAntigo || {},
+          new_values: alunoSalvo,
+          user_name: 'SISTEMA_LOCAL', // Futuramente você pode pegar do Request
+        });
+        console.log(
+          `✅ Log de ${acao} gravado para o aluno: ${alunoSalvo.nome}`,
         );
+      } catch (logError) {
+        // Se o log falhar, não paramos a execução principal, apenas avisamos no console
+        console.error('⚠️ Erro ao gravar log de auditoria:', logError);
+      }
+
+      return alunoSalvo;
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new InternalServerErrorException('Este CPF já está cadastrado.');
       }
       throw new InternalServerErrorException(
         'Erro ao salvar os dados do aluno.',
@@ -43,14 +68,26 @@ export class AlunoService {
     }
   }
 
-  // PADRÃO: Remover
   async remove(id: number) {
     const registro = await this.repository.findOneBy({ id });
     if (!registro) throw new NotFoundException('Aluno não encontrado');
-    return await this.repository.delete(id);
+
+    const alunoRemovido = await this.repository.remove(registro);
+
+    // Log de remoção
+    await this.auditRepo
+      .save({
+        table_name: 'aluno',
+        action: 'DELETE',
+        old_values: registro,
+        new_values: {},
+        user_name: 'SISTEMA_LOCAL',
+      })
+      .catch((e) => console.error('Erro ao logar remoção:', e));
+
+    return alunoRemovido;
   }
 
-  // BUSCA: Aniversariantes do dia
   async buscarAniversariantes() {
     try {
       const hoje = new Date();
@@ -63,10 +100,7 @@ export class AlunoService {
         .andWhere('EXTRACT(DAY FROM aluno.dataNascimento) = :dia', { dia })
         .getMany();
     } catch (error) {
-      console.error('Erro na busca de aniversariantes:', error);
-      throw new InternalServerErrorException(
-        'Erro ao processar busca de aniversariantes',
-      );
+      throw new InternalServerErrorException('Erro ao buscar aniversariantes');
     }
   }
 }

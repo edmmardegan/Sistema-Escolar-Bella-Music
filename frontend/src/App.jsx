@@ -102,6 +102,7 @@ export default function App() {
                         <Route path="/agenda" element={<Agenda />} />
                         <Route path="/financeiro" element={<Financeiro />} />
                         <Route path="/usuarios" element={<Usuarios />} />
+                        {/*<Route path="/logs" element={<Logs />} />*/}
                         <Route path="/developer/template" element={<PaginaFantasma />} />
                         {/*<Route path="*" element={<Navigate to="/" replace />} />*/}
                       </Routes>
@@ -130,58 +131,44 @@ function AuthConsumerReset() {
   const handleReset = async (e) => {
     e.preventDefault();
     if (novaSenha !== confirmar) return alert("As senhas não coincidem!");
-
     setLoading(true);
     try {
       await api.updateOwnPassword(user.id, { novaSenha });
-      alert("Senha atualizada com sucesso! Faça login novamente.");
+      alert("Senha atualizada com sucesso!");
       logout();
     } catch (err) {
-      alert("Erro ao atualizar senha. Tente novamente.");
+      alert("Erro ao atualizar senha.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#f0f2f5" }}>
-      <div style={{ background: "#fff", padding: "40px", borderRadius: "12px", boxShadow: "0 10px 25px rgba(0,0,0,0.1)", width: "380px" }}>
-        <h2 style={{ textAlign: "center", color: "#333", marginBottom: "10px" }}>Nova Senha</h2>
-        <p style={{ textAlign: "center", color: "#666", marginBottom: "25px" }}>
-          Olá <strong>{user?.nome}</strong>, por segurança, altere sua senha inicial.
+    <div className="reset-password-container">
+      <div className="reset-password-card">
+        <h2 style={{ textAlign: "center", color: "#333" }}>Nova Senha</h2>
+        <p style={{ textAlign: "center", color: "#666" }}>
+          Olá <strong>{user?.nome}</strong>, altere sua senha inicial.
         </p>
 
-        <form onSubmit={handleReset} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+        <form onSubmit={handleReset} className="reset-password-form">
           <input
+            className="input-reset"
             type="password"
             placeholder="Nova senha"
             required
             value={novaSenha}
             onChange={(e) => setNovaSenha(e.target.value)}
-            style={{ padding: "12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "16px" }}
           />
           <input
+            className="input-reset"
             type="password"
             placeholder="Confirme a nova senha"
             required
             value={confirmar}
             onChange={(e) => setConfirmar(e.target.value)}
-            style={{ padding: "12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "16px" }}
           />
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              padding: "12px",
-              background: "#007bff",
-              color: "#fff",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "16px",
-            }}
-          >
+          <button type="submit" disabled={loading} className="btn-reset">
             {loading ? "Processando..." : "Salvar Nova Senha"}
           </button>
         </form>
