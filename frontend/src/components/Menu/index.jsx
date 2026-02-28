@@ -11,6 +11,7 @@ import {
   FaSignOutAlt,
   FaUserCog,
   FaHistory, // Importado para Auditoria
+  
 } from "react-icons/fa";
 import "./styles.css";
 import logo from "../../assets/logo2.jpg";
@@ -33,7 +34,7 @@ export default function Menu() {
     { to: "/matriculas", label: "Matrículas", icon: <FaFileSignature /> },
     { to: "/financeiro", label: "Financeiro", icon: <FaWallet />, adminOnly: true },
     { to: "/usuarios", label: "Usuários", icon: <FaUserCog />, adminOnly: true },
-   // { to: "/logs", label: "Auditoria", icon: <FaHistory />, adminOnly: true }, // NOVO ITEM
+    { to: "/logs", label: "Auditoria", icon: <FaHistory />, adminOnly: true }, // NOVO ITEM
   ];
 
   const menuItems = allItems

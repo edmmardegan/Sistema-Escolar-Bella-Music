@@ -1,3 +1,5 @@
+// Local: /src/aluno/aluno.controller.ts
+
 import {
   Controller,
   Get,
@@ -7,10 +9,12 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Req, // 👈 Adicione o Req
 } from '@nestjs/common';
 import { AlunoService } from './aluno.service';
 import { CreateAlunoDto } from './dto/create-aluno.dto';
 import { UpdateAlunoDto } from './dto/update-aluno.dto';
+
 @Controller('alunos')
 export class AlunoController {
   constructor(private readonly service: AlunoService) {}
@@ -26,20 +30,25 @@ export class AlunoController {
   }
 
   @Post()
-  create(@Body() dados: CreateAlunoDto) {
-    return this.service.save(dados);
+  create(@Body() dados: CreateAlunoDto, @Req() req: any) {
+    // Pegamos o username do JWT (req.user.email ou username conforme seu payload)
+    const userName = req.user?.email || req.user?.username || 'SISTEMA_LOCAL';
+    return this.service.save(dados, userName);
   }
 
   @Put(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() dados: UpdateAlunoDto) {
-    // Criamos uma constante com o tipo esperado pelo Service
-    // Isso une os dados do DTO com o ID numérico
-    const dadosCompletos: CreateAlunoDto & { id?: number } = {
-      ...dados,
-      id,
-    } as any;
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dados: UpdateAlunoDto,
+    @Req() req: any,
+  ) {
+    console.log('👤 Usuário logado na requisição:', req.user);
+    const userName = req.user?.email || req.user?.username || 'SISTEMA_LOCAL';
 
-    return this.service.save(dadosCompletos);
+    // Unimos o ID com os dados para o método save
+    const dadosCompletos = { ...dados, id };
+
+    return this.service.save(dadosCompletos as any, userName);
   }
 
   @Delete(':id')

@@ -1,3 +1,5 @@
+//Local: src/usuarios/dto/create-user.dto.ts
+
 import {
   IsString,
   IsEmail,
@@ -11,6 +13,7 @@ export enum UserRole {
   ADMIN = 'admin',
   SECRETARIA = 'secretaria',
   PROFESSOR = 'professor',
+  USER = 'user',
 }
 
 export class CreateUserDto {

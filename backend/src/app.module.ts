@@ -1,7 +1,13 @@
-import { Module } from '@nestjs/common';
+//Local: /src/app.module.ts
+
+import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AlsService } from './auth/als.service';
+import { AuditMiddleware } from './auth/audit.middleware';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
 // --- ENTIDADES ---
 import { Aluno } from './entities/aluno.entity';
@@ -21,9 +27,7 @@ import { MatriculaModule } from './matricula/matricula.module';
 import { FinanceiroModule } from './financeiro/financeiro.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-
-// --- SUBSCRIBER ---
-import { AuditSubscriber } from './subscribers/AuditSubscriber';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -48,8 +52,9 @@ import { AuditSubscriber } from './subscribers/AuditSubscriber';
       synchronize: true,
     }),
     // ✅ Importante para o repositório de Log ser injetável
-    TypeOrmModule.forFeature([AuditLog]),
+    //    TypeOrmModule.forFeature([AuditLog]),
     AgendaModule,
+    AuditModule,
     UsersModule,
     AuthModule,
     AlunoModule,
@@ -58,6 +63,21 @@ import { AuditSubscriber } from './subscribers/AuditSubscriber';
     FinanceiroModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuditSubscriber],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // Isso protege a API inteira!
+    },
+    AppService,
+    AlsService,
+  ],
+  //providers: [AppService, AuditSubscriber, AlsService],
 })
-export class AppModule {}
+export class AppModule {
+  // Configuração do Middleware para capturar o usuário em todas as rotas
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuditMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

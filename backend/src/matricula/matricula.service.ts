@@ -1,3 +1,5 @@
+//Local: /src/matricula/matricula.service.ts
+
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeepPartial, Like } from 'typeorm';
@@ -9,6 +11,7 @@ import { UpdateTermoDto } from './dto/update-termo.dto';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { FinanceiroCalculoUtil } from '../financeiro/utils/financeiro-calculo.util';
 import { Financeiro } from 'src/entities/financeiro.entity';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class MatriculaService {
@@ -21,6 +24,8 @@ export class MatriculaService {
 
     @InjectRepository(MatriculaTermo)
     private readonly termoRepo: Repository<MatriculaTermo>,
+
+    private readonly auditService: AuditService, // 👈 Injete o serviço de auditoria
   ) {}
 
   async findAll(): Promise<Matricula[]> {
@@ -29,38 +34,85 @@ export class MatriculaService {
       order: { aluno: { nome: 'ASC' } },
     });
   }
-  async save(data: CreateMatriculaDto & { id?: number }) {
-    const dataTerminoLimpa =
-      data.dataTermino && String(data.dataTermino).trim() !== ''
-        ? data.dataTermino
-        : null;
+
+  async save(
+    data: CreateMatriculaDto & { id?: number },
+    userName: string = 'SISTEMA',
+  ) {
+    const limparData = (valor: string | null | undefined): string | null =>
+      valor && String(valor).trim() !== '' ? valor : null;
+
+    const dataTerminoLimpa = limparData(data.dataTermino);
+    const dataTrancamentoLimpa = limparData(data.dataTrancamento);
+
+    // 🧹 Função auxiliar para limpar o log e não salvar o Aluno/Curso inteiro
+    // ✅ Tipagem segura: aceita um objeto (Record) e retorna um objeto limpo
+    // ✅ Tipagem que o Linter aceita: Record<string, any>
+    const simplificarParaLog = (
+      obj: Record<string, any> | null | undefined,
+    ) => {
+      if (!obj) return {};
+
+      // Criamos uma cópia para garantir a manipulação
+      const temp = { ...obj };
+
+      return {
+        ...temp,
+        aluno: temp.aluno?.nome || temp.aluno,
+        curso: temp.curso?.nome || temp.curso,
+        termos: undefined, // Remove lixo do log
+        financeiros: undefined,
+      };
+    };
 
     // --- MODO EDIÇÃO ---
+    // --- MODO EDIÇÃO (Dentro do save) ---
     if (data.id) {
       const id = data.id;
-      const dadosParaAtualizar = { ...data };
-      delete (dadosParaAtualizar as any).id;
 
-      await this.repository.update(id, {
-        ...dadosParaAtualizar,
-        dataTermino: dataTerminoLimpa,
-      } as QueryDeepPartialEntity<Matricula>);
-
-      return this.repository.findOne({
+      // 1. Busca como era ANTES
+      const matriculaAntes = await this.repository.findOne({
         where: { id },
         relations: ['aluno', 'curso'],
       });
+
+      const dadosParaAtualizar = { ...data };
+      delete (dadosParaAtualizar as any).id;
+
+      // 2. Executa a atualização
+      await this.repository.update(id, {
+        ...dadosParaAtualizar,
+        dataTermino: dataTerminoLimpa,
+        dataTrancamento: dataTrancamentoLimpa,
+      } as QueryDeepPartialEntity<Matricula>);
+
+      // 3. Busca como ficou DEPOIS (Para pegar os nomes do Aluno/Curso e não os IDs)
+      const matriculaDepois = await this.repository.findOne({
+        where: { id },
+        relations: ['aluno', 'curso'],
+      });
+
+      // 🛡️ AUDITORIA (UPDATE) - Agora comparando nomes com nomes
+      await this.auditService.createLog(
+        'matricula',
+        'UPDATE',
+        simplificarParaLog(matriculaAntes),
+        simplificarParaLog(matriculaDepois), // 👈 USAMOS O DEPOIS BUSCADO NO BANCO
+        userName,
+      );
+
+      return matriculaDepois;
     }
 
     // --- MODO CRIAÇÃO ---
     const nova = this.repository.create({
       ...data,
       dataTermino: dataTerminoLimpa,
+      dataTrancamento: dataTrancamentoLimpa,
     } as DeepPartial<Matricula>);
 
     const salvo = await this.repository.save(nova);
 
-    // 1. Busca completa para ter acesso ao curso e aluno
     const matCompleta = await this.repository.findOne({
       where: { id: salvo.id },
       relations: ['curso', 'aluno'],
@@ -68,12 +120,20 @@ export class MatriculaService {
 
     if (!matCompleta) return null;
 
-    // 2. Automação de Termos e Aulas (Extraído para método privado abaixo)
+    // 🛡️ AUDITORIA (INSERT) - Simplificada
+    await this.auditService.createLog(
+      'matricula',
+      'INSERT',
+      {},
+      simplificarParaLog(matCompleta),
+      userName,
+    );
+
+    // ... (Automações)
     if (matCompleta.curso?.qtdeTermos) {
       await this.gerarTermosEAulas(matCompleta);
     }
 
-    // 3. Automação Financeira (Gera parcelas para o ano de início)
     const anoInicio = new Date(matCompleta.dataInicio).getFullYear();
     await this.gerarParcelaIndividual(matCompleta.id, anoInicio);
 

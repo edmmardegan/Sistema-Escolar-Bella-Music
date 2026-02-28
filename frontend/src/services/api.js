@@ -113,6 +113,9 @@ const api = {
   // === 📊 BOLETIM / TERMOS ===
   getDetalhesBoletim: async (termoId) => (await axiosInstance.get(`/matriculas/termo/${termoId}`)).data,
   updateBoletim: async (termoId, dados) => (await axiosInstance.patch(`/matriculas/termo/${termoId}`, dados)).data,
+
+  // === 🕵️ AUDITORIA (ADICIONE ISSO AQUI) ===
+  getAudit: (filtros) => api.get("/audit", { params: filtros }).then((res) => res.data),
 };
 
 export default api;

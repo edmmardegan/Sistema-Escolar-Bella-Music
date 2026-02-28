@@ -1,4 +1,5 @@
 // src/matricula/matricula.controller.ts
+
 import {
   Controller,
   Get,
@@ -9,6 +10,7 @@ import {
   Delete,
   Patch,
   ParseIntPipe,
+  Req,
 } from '@nestjs/common';
 import { MatriculaService } from './matricula.service';
 import { CreateMatriculaDto } from './dto/create-matricula.dto';
@@ -31,8 +33,13 @@ export class MatriculaController {
   }
 
   @Put(':id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() dados: any) {
-    return await this.service.save({ ...dados, id });
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dados: UpdateMatriculaDto,
+    @Req() req: any, // Pega a requisição para extrair o user
+  ) {
+    const userName = req.user?.email || 'SISTEMA';
+    return await this.service.save({ ...dados, id }, userName);
   }
 
   @Patch('termo/:id')

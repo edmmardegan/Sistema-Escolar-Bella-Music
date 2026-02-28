@@ -21,6 +21,8 @@ import Financeiro from "./pages/Financeiro/index.jsx";
 import Usuarios from "./pages/Usuarios/index.jsx";
 import PaginaFantasma from "./pages/Template/index.jsx";
 import Boletim from "./pages/Boletim/index.jsx";
+import AuditLogs from "./pages/Logs/index.jsx";
+
 
 // 🎂 Componente de Notificação de Aniversariantes
 function NotificacaoAniversario() {
@@ -102,7 +104,7 @@ export default function App() {
                         <Route path="/agenda" element={<Agenda />} />
                         <Route path="/financeiro" element={<Financeiro />} />
                         <Route path="/usuarios" element={<Usuarios />} />
-                        {/*<Route path="/logs" element={<Logs />} />*/}
+                        {<Route path="/logs" element={<AuditLogs />} />}
                         <Route path="/developer/template" element={<PaginaFantasma />} />
                         {/*<Route path="*" element={<Navigate to="/" replace />} />*/}
                       </Routes>

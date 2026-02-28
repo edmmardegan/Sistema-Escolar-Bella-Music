@@ -1,0 +1,138 @@
+/* //Local: /src/pages/Logs/styles.css */
+
+/* Container Principal: O segredo para não entrar no menu */
+.audit-container {
+  padding: 0px;
+  margin-left: 100px; /* Alinhe com a largura da sua Sidebar */
+
+  background: #fff;
+  min-height: 100vh;
+}
+
+/* --- ÁREA DE FILTROS (Copiado do seu estilo de Alunos) --- */
+.filtro-container-flex {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.busca-nome-container {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+}
+
+.busca-nome-container .input-field {
+  width: 100%;
+  height: 38px;
+  padding: 8px 35px 8px 38px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.input-data {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.input-operacao {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+.input-limite {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+}
+
+/* --- TABELA --- */
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.audit-table th {
+  background: #f8f9fa;
+  padding: 12px;
+  text-align: left;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.audit-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+/* --- DIFERENÇAS (ANTES / DEPOIS) --- */
+.diff-container {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.box {
+  flex: 1;
+  padding: 8px;
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.box.old {
+  background: #fff5f5;
+  border: 1px solid #ffc1c1;
+  color: #a00;
+}
+.box.new {
+  background: #f0fff4;
+  border: 1px solid #c2f0c2;
+  color: #007b00;
+}
+
+/* Deixar o "➔" mais visível */
+.separator {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  color: #007bff;
+  padding: 0 5px;
+}
+
+.btn-limpar-filtros {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  color: #495057;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-limpar-filtros:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+  color: #212529;
+}
+
+.btn-limpar-filtros .icon-clear {
+  font-size: 16px;
+}

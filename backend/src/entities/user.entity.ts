@@ -1,3 +1,5 @@
+//Local: /src/entities/users.entity.ts
+
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'usuarios' })

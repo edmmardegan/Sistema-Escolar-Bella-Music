@@ -1,4 +1,5 @@
 // src/financeiro/financeiro.controller.ts
+
 import {
   Controller,
   Get,
