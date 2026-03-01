@@ -37,7 +37,7 @@ import { AuditModule } from './audit/audit.module';
       port: Number(process.env.DB_PORT) || 5432,
       username: process.env.DB_USERNAME || 'evandro',
       password: String(process.env.DB_PASSWORD || '123456'),
-      database: 'escolaron_dev',
+      database: process.env.DB_DATABASE || 'escolaron_dev',
       entities: [
         User,
         Aluno,
@@ -49,7 +49,7 @@ import { AuditModule } from './audit/audit.module';
         AuditLog,
       ],
       subscribers: [],
-      synchronize: true,
+      synchronize: true, //synchronize: true, mudar para false quando estiver em produção
     }),
     // ✅ Importante para o repositório de Log ser injetável
     //    TypeOrmModule.forFeature([AuditLog]),

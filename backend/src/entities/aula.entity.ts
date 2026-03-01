@@ -1,3 +1,5 @@
+//Local: /src/entities/aula.emtity.ts
+
 import {
   Entity,
   PrimaryGeneratedColumn,

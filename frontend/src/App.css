@@ -137,20 +137,34 @@ body {
   color: #ffffff !important;
 }
 
-.btn-primary {
-  background-color: var(--primary) !important;
-}
-.btn-secondary {
-  background-color: var(--danger) !important;
-}
-.btn-success {
-  background-color: var(--success) !important;
-}
-
 .btn:hover {
   filter: brightness(0.9);
   transform: translateY(-1px);
 }
+
+.btn-primary {
+  background-color: var(--primary) !important;
+}
+.btn-secondary {
+  background-color: var(--warning) !important;
+}
+.btn-success {
+  background-color: var(--success) !important;
+}
+.btn-edit {
+  background-color: var(--success) !important;
+}
+.btn-excluir {
+  background-color: var(--danger) !important;
+}
+.btn-financeiro {
+  background-color: var(--purple) !important;
+}
+.btn-matricula {
+  background-color: var(--dark) !important;
+}
+
+
 
 .btn-icon {
   all: unset;
@@ -166,12 +180,6 @@ body {
   color: #ffffff !important;
 }
 
-.btn-edit {
-  background-color: var(--success) !important;
-}
-.btn-excluir {
-  background-color: var(--danger) !important;
-}
 
 /* ================= TABELAS ================= */
 .tabela-container {

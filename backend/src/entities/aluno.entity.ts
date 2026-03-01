@@ -1,3 +1,5 @@
+//Local: /src/entities/aluno.emtity.ts
+
 import {
   Entity,
   PrimaryGeneratedColumn,

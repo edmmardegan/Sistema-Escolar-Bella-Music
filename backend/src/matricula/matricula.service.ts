@@ -45,61 +45,81 @@ export class MatriculaService {
     const dataTerminoLimpa = limparData(data.dataTermino);
     const dataTrancamentoLimpa = limparData(data.dataTrancamento);
 
-    // 🧹 Função auxiliar para limpar o log e não salvar o Aluno/Curso inteiro
-    // ✅ Tipagem segura: aceita um objeto (Record) e retorna um objeto limpo
-    // ✅ Tipagem que o Linter aceita: Record<string, any>
-    const simplificarParaLog = (
-      obj: Record<string, any> | null | undefined,
-    ) => {
-      if (!obj) return {};
+    // ✅ 1. FUNÇÃO DE DIFERENCIAL (DIFF) - Só loga o que mudou
+    const gerarDiffParaLog = (antes: any, depois: any) => {
+      const objAntes: any = {};
+      const objDepois: any = {};
 
-      // Criamos uma cópia para garantir a manipulação
-      const temp = { ...obj };
+      // Campos que não queremos comparar nem mostrar no log
+      const ignorar = ['atualizadoEm', 'criadoEm', 'termos', 'financeiros'];
 
-      return {
-        ...temp,
-        aluno: temp.aluno?.nome || temp.aluno,
-        curso: temp.curso?.nome || temp.curso,
-        termos: undefined, // Remove lixo do log
-        financeiros: undefined,
-      };
+      // Percorremos os campos do objeto novo (depois)
+      Object.keys(depois).forEach((key) => {
+        if (ignorar.includes(key)) return;
+
+        // Normaliza Aluno e Curso para comparar Nomes em vez de Objetos/IDs
+        let valorAntes = antes[key];
+        let valorDepois = depois[key];
+
+        if (key === 'aluno' || key === 'curso') {
+          valorAntes = antes[key]?.nome || antes[key];
+          valorDepois = depois[key]?.nome || depois[key];
+        }
+
+        // Compara se houve mudança real (usando stringify para arrays/objetos)
+        if (JSON.stringify(valorAntes) !== JSON.stringify(valorDepois)) {
+          objAntes[key] = valorAntes;
+          objDepois[key] = valorDepois;
+        }
+      });
+
+      return { antes: objAntes, depois: objDepois };
     };
 
     // --- MODO EDIÇÃO ---
-    // --- MODO EDIÇÃO (Dentro do save) ---
     if (data.id) {
       const id = data.id;
 
-      // 1. Busca como era ANTES
+      // A. Busca a foto do registro ANTES da alteração
       const matriculaAntes = await this.repository.findOne({
         where: { id },
         relations: ['aluno', 'curso'],
       });
 
+      if (!matriculaAntes)
+        throw new NotFoundException('Matrícula não encontrada');
+
       const dadosParaAtualizar = { ...data };
       delete (dadosParaAtualizar as any).id;
+      delete (dadosParaAtualizar as any).curso; // 🛡️ Bloqueia mudança de curso
+      delete (dadosParaAtualizar as any).aluno; // 🛡️ Bloqueia mudança de aluno
 
-      // 2. Executa a atualização
+      // B. Executa o Update no Banco
       await this.repository.update(id, {
         ...dadosParaAtualizar,
         dataTermino: dataTerminoLimpa,
         dataTrancamento: dataTrancamentoLimpa,
       } as QueryDeepPartialEntity<Matricula>);
 
-      // 3. Busca como ficou DEPOIS (Para pegar os nomes do Aluno/Curso e não os IDs)
+      // C. Busca a foto do registro DEPOIS da alteração
       const matriculaDepois = await this.repository.findOne({
         where: { id },
         relations: ['aluno', 'curso'],
       });
 
-      // 🛡️ AUDITORIA (UPDATE) - Agora comparando nomes com nomes
-      await this.auditService.createLog(
-        'matricula',
-        'UPDATE',
-        simplificarParaLog(matriculaAntes),
-        simplificarParaLog(matriculaDepois), // 👈 USAMOS O DEPOIS BUSCADO NO BANCO
-        userName,
-      );
+      // D. Gera o diferencial entre os dois estados
+      const diff = gerarDiffParaLog(matriculaAntes, matriculaDepois);
+
+      // E. Só gera o log se houver pelo menos uma mudança detectada
+      if (Object.keys(diff.depois).length > 0) {
+        await this.auditService.createLog(
+          'matricula',
+          'UPDATE',
+          diff.antes,
+          diff.depois,
+          userName,
+        );
+      }
 
       return matriculaDepois;
     }
@@ -120,16 +140,24 @@ export class MatriculaService {
 
     if (!matCompleta) return null;
 
-    // 🛡️ AUDITORIA (INSERT) - Simplificada
+    // No INSERT, usamos uma função simplificada para não salvar o objeto gigante
+    const simplificarParaInsert = (obj: any) => ({
+      aluno: obj.aluno?.nome || obj.aluno,
+      curso: obj.curso?.nome || obj.curso,
+      diaSemana: obj.diaSemana,
+      horario: obj.horario,
+      valorMensalidade: obj.valorMensalidade,
+    });
+
     await this.auditService.createLog(
       'matricula',
       'INSERT',
       {},
-      simplificarParaLog(matCompleta),
+      simplificarParaInsert(matCompleta),
       userName,
     );
 
-    // ... (Automações)
+    // Automações de curso e financeiro
     if (matCompleta.curso?.qtdeTermos) {
       await this.gerarTermosEAulas(matCompleta);
     }
@@ -141,9 +169,18 @@ export class MatriculaService {
   }
 
   /*** Método auxiliar para não poluir o save com loops de aulas */
+  /*** Método auxiliar corrigido para evitar erro de Fuso Horário (Timezone) */
   private async gerarTermosEAulas(matricula: Matricula) {
-    const dataAula = new Date(matricula.dataInicio);
-    dataAula.setHours(12, 0, 0, 0);
+    // 1. Extraímos apenas a data (YYYY-MM-DD) para evitar interferência de horas residuais
+    const dataBaseStr = new Date(matricula.dataInicio)
+      .toISOString()
+      .split('T')[0];
+
+    // 2. Montamos a data com o horário da matrícula manualmente
+    // Isso garante que 18:00 continue 18:00
+    const [horas, minutos] = matricula.horario.split(':');
+    const dataAula = new Date(`${dataBaseStr}T${horas}:${minutos}:00`);
+
     const intervalo = matricula.frequencia === 'Quinzenal' ? 14 : 7;
 
     for (let i = 1; i <= matricula.curso.qtdeTermos; i++) {
@@ -155,11 +192,16 @@ export class MatriculaService {
       });
 
       for (let semana = 0; semana < 4; semana++) {
+        // Criamos uma nova instância da data para cada aula
+        const dataParaSalvar = new Date(dataAula);
+
         await this.termoRepo.manager.save(Aula, {
           termo: termo,
-          data: new Date(dataAula),
+          data: dataParaSalvar,
           status: 'Pendente',
         });
+
+        // Adiciona 7 ou 14 dias para a próxima aula
         dataAula.setDate(dataAula.getDate() + intervalo);
       }
     }

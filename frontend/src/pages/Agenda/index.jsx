@@ -1,4 +1,5 @@
 /* src/pages/Agenda/index.jsx */
+
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../services/api";
 import {
@@ -237,7 +238,7 @@ export default function Agenda() {
 
                       <td className="txt-negrito">
                         <FaClock style={{ marginRight: "5px", color: "#888" }} />
-                        {dataLocal.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
+                        {dataLocal.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                       </td>
 
                       <td>

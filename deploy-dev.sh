@@ -12,8 +12,13 @@ pm2 delete api-escola-dev || true
 echo "📦 Configurando Backend (DEV)..."
 cd backend
 npm run build
+
 # Forçamos as variáveis do banco de teste
-DB_DATABASE=escolaron_dev PORT=5000 DB_PASSWORD=123456 NODE_ENV=development pm2 start dist/main.js --name api-escola-dev
+PORT=5000 \
+NODE_ENV=development \
+DB_DATABASE=escolaron_dev \
+DB_PASSWORD=123456 \
+pm2 start dist/main.js --name api-escola-dev --update-env --force
 
 # 3. Atualizando Frontend
 echo "🌐 Iniciando Frontend (DEV)..."

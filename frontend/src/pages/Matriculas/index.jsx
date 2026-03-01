@@ -20,6 +20,7 @@ import InputMoeda from "../../components/InputMoeda";
 import { executarImpressao } from "../../utils/geradorCarne";
 import { useNavigate } from "react-router-dom";
 import "./styles.css";
+import { executarImpressaoMatricula } from "../../utils/geradorMatricula";
 
 export default function Matriculas() {
   // 1. ESTADOS PADRONIZADOS
@@ -256,7 +257,13 @@ export default function Matriculas() {
         <section className="card-principal">
           <div className="header-card">
             <h2>
-              <FaChalkboardTeacher /> {editandoId ? "Editar Matrícula" : "Matrículas - Bella Music"}
+              <FaChalkboardTeacher /> {editandoId ? "Editar Matrícula" : "Matrículas"}
+              {/* Opcional: Aviso visual abaixo do curso quando editando */}
+              {editandoId && (
+                <small style={{ color: "#888", fontSize: "11px", display: "block", marginTop: "4px" }}>
+                  * Aluno e Curso não podem ser alterados na edição.
+                </small>
+              )}
             </h2>
             {!exibindoForm && (
               <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
@@ -270,7 +277,17 @@ export default function Matriculas() {
               {/* LINHA 1 */}
               <div className="input-group campo-grande">
                 <label>Aluno:</label>
-                <select ref={inputFocoRef} required name="aluno" value={form.aluno} onChange={handleChange} className="input-field">
+                <select
+                  ref={inputFocoRef}
+                  required
+                  name="aluno"
+                  value={form.aluno}
+                  onChange={handleChange}
+                  className="input-field"
+                  disabled={!!editandoId}
+                >
+                  {" "}
+                  // 🔒 Bloqueia se estiver editando
                   <option value="">Selecione o Aluno...</option>
                   {alunos
                     .filter((a) => a.ativo)
@@ -285,7 +302,9 @@ export default function Matriculas() {
               {/* LINHA 2 */}
               <div className="input-group campo-curto">
                 <label>Curso:</label>
-                <select required name="curso" value={form.curso} onChange={handleChange} className="input-field">
+                <select required name="curso" value={form.curso} onChange={handleChange} className="input-field" disabled={!!editandoId}>
+                  {" "}
+                  // 🔒 Bloqueia se estiver editando
                   <option value="">Selecione o Curso...</option>
                   {cursos.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -621,19 +640,22 @@ export default function Matriculas() {
 
                       <td className="acoes">
                         {/* ... botões de ações permanecem iguais ... */}
-                        <button onClick={() => prepararEdicao(m)} className="btn-icon btn-edit" title="Editar">
+                        <button onClick={() => prepararEdicao(m)} className="btn-icon btn-edit" title="Editar Registro">
                           <FaPen />
                         </button>
-                        <button onClick={() => setConfigCarne(m)} className="btn-icon btn-primary" title="Carnê">
+                        <button onClick={() => setConfigCarne(m)} className="btn-icon btn-primary" title="Gerar Carnê Mensalidade">
                           <FaPrint />
                         </button>
-                        <button onClick={() => navigate(`/boletim/${m.id}`)} className="btn-icon btn-secondary" title="Boletim">
+                        <button onClick={() => navigate(`/boletim/${m.id}`)} className="btn-icon btn-secondary" title="Boletim Escolar">
                           <FaGraduationCap />
                         </button>
-                        <button onClick={() => abrirFinanceiro(m)} className="btn-icon btn-edit" title="Financeiro">
+                        <button onClick={() => executarImpressaoMatricula(m)} className="btn-icon btn-primary" title="Imprimir Matrícula">
+                          <FaPrint />
+                        </button>
+                        <button onClick={() => abrirFinanceiro(m)} className="btn-icon btn-financeiro" title="Financeiro">
                           <FaMoneyBillWave />
                         </button>
-                        <button onClick={() => excluir(m.id)} className="btn-icon btn-excluir" title="Excluir">
+                        <button onClick={() => excluir(m.id)} className="btn-icon btn-excluir" title="Excluir Registro">
                           <FaTrash />
                         </button>
                       </td>

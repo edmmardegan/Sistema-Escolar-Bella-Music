@@ -1,3 +1,5 @@
+// Local: src/main.ts
+
 import 'reflect-metadata';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -7,7 +9,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Ativa a validação de dados automática nos DTOs
-  // Local: src/main.ts
 
   app.useGlobalPipes(
     new ValidationPipe({

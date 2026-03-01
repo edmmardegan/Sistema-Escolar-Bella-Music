@@ -121,7 +121,7 @@ export const AuditLogs = () => {
       {loading && <div style={{ fontSize: "12px", color: "#666" }}>Atualizando resultados...</div>}
 
       <div className="table-responsive">
-        <table className="audit-table">
+        <table className="tabela">
           <thead>
             <tr>
               <th>Data/Hora</th>

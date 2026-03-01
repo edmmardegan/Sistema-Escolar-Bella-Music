@@ -1,3 +1,5 @@
+// Local: /src/utils/geradorCarne.js
+
 import jsPDF from "jspdf";
 
 /**
