@@ -10,7 +10,7 @@ export class Financeiro {
   @Column()
   descricao: string;
 
-  @Column('float', { nullable: true }) // <--- ADICIONE O { nullable: true } AQUI
+  @Column('float', { nullable: true })
   valorTotal: number;
 
   @Column()

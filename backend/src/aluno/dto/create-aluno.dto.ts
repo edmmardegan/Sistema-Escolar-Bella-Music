@@ -1,3 +1,5 @@
+//Local: /src/aluno/dto/create-aluno.dto.ts
+
 import {
   IsString,
   IsOptional,
@@ -54,7 +56,10 @@ export class CreateAlunoDto {
   @IsOptional() @IsString() dataNascimento?: string;
   @IsOptional() @IsString() nomePai?: string;
   @IsOptional() @IsString() nomeMae?: string;
-  @IsOptional() @IsString() rua?: string;
+  @IsOptional() @IsString() cep?: string;
+  @IsOptional() @IsString() endereco?: string;
+  @IsOptional() @IsString() numero?: string;
+  @IsOptional() @IsString() complemento?: string;
   @IsOptional() @IsString() bairro?: string;
   @IsOptional() @IsString() cidade?: string;
 }

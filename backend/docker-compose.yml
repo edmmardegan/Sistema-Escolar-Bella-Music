@@ -1,0 +1,17 @@
+# Local: /src/docker-compose.yml
+
+services:
+  db_escola:
+    image: postgres:15
+    container_name: db_escola
+    environment:
+      POSTGRES_USER: evandro
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: escolaron
+    ports:
+      - "5434:5432" # Porta externa:Porta interna
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

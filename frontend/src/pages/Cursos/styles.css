@@ -88,7 +88,3 @@
 .contadores-flex {
   margin-left: auto;
 }
-
-/* Campos com travas de largura para não esticarem demais */
-.campo-curto { max-width: 250px; }
-.campo-medio { max-width: 500px; }

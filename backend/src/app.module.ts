@@ -8,6 +8,7 @@ import { AlsService } from './auth/als.service';
 import { AuditMiddleware } from './auth/audit.middleware';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { ConfigModule } from '@nestjs/config';
 
 // --- ENTIDADES ---
 import { Aluno } from './entities/aluno.entity';
@@ -31,13 +32,18 @@ import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env', // Força ele a ler o arquivo .env da pasta raiz do backend
+    }),
+
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST || '127.0.0.1',
-      port: Number(process.env.DB_PORT) || 5432,
+      port: Number(process.env.DB_PORT) || 5434,
       username: process.env.DB_USERNAME || 'evandro',
       password: String(process.env.DB_PASSWORD || '123456'),
-      database: process.env.DB_DATABASE || 'escolaron_dev',
+      database: process.env.DB_DATABASE || 'escolaron',
       entities: [
         User,
         Aluno,
@@ -49,7 +55,7 @@ import { AuditModule } from './audit/audit.module';
         AuditLog,
       ],
       subscribers: [],
-      synchronize: true, //synchronize: true, mudar para false quando estiver em produção
+      synchronize: false, //synchronize: true, mudar para false quando estiver em produção
     }),
     // ✅ Importante para o repositório de Log ser injetável
     //    TypeOrmModule.forFeature([AuditLog]),

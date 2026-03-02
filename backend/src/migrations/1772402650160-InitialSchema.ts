@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class InitialSchema1770988674299 implements MigrationInterface {
-  name = 'InitialSchema1770988674299';
+export class InitialSchema1772402650160 implements MigrationInterface {
+  name = 'InitialSchema1772402650160';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -17,13 +17,16 @@ export class InitialSchema1770988674299 implements MigrationInterface {
       `CREATE TABLE "matricula_termo" ("id" SERIAL NOT NULL, "numeroTermo" integer NOT NULL, "nota1" double precision, "dataProva1" date, "nota2" double precision, "dataProva2" date, "obs" text, "matriculaId" integer, CONSTRAINT "PK_6bcbe1da5c4ee00562433a7f916" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "matricula" ("id" SERIAL NOT NULL, "valorMatricula" numeric(10,2) NOT NULL, "valorMensalidade" numeric(10,2) NOT NULL, "valorCombustivel" numeric(10,2), "diaVencimento" integer NOT NULL, "situacao" character varying NOT NULL DEFAULT 'Em Andamento', "tipo" character varying NOT NULL DEFAULT 'Presencial', "termo_atual" integer NOT NULL DEFAULT '1', "dataInicio" TIMESTAMP NOT NULL DEFAULT now(), "dataTermino" date, "criadoEm" TIMESTAMP NOT NULL DEFAULT now(), "atualizadoEm" TIMESTAMP NOT NULL DEFAULT now(), "diaSemana" character varying, "horario" character varying, "frequencia" character varying NOT NULL DEFAULT 'Semanal', "professor" character varying, "aluno_id" integer, "curso_id" integer, CONSTRAINT "PK_0068575ec520ea5f11d79d8629d" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "matricula" ("id" SERIAL NOT NULL, "diaSemana" character varying, "horario" character varying, "frequencia" character varying NOT NULL DEFAULT 'Semanal', "professor" character varying, "tipo" character varying NOT NULL DEFAULT 'Presencial', "termo_atual" integer NOT NULL DEFAULT '1', "situacao" character varying NOT NULL DEFAULT 'Em Andamento', "valorMatricula" numeric(10,2) NOT NULL, "valorMensalidade" numeric(10,2) NOT NULL, "valorCombustivel" numeric(10,2), "diaVencimento" integer NOT NULL, "dataInicio" TIMESTAMP NOT NULL DEFAULT now(), "dataTrancamento" date, "dataTermino" date, "criadoEm" TIMESTAMP NOT NULL DEFAULT now(), "atualizadoEm" TIMESTAMP NOT NULL DEFAULT now(), "aluno_id" integer, "curso_id" integer, CONSTRAINT "PK_0068575ec520ea5f11d79d8629d" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "aluno" ("id" SERIAL NOT NULL, "nome" character varying NOT NULL, "dataNascimento" date, "telefone" character varying, "ativo" boolean NOT NULL DEFAULT true, "nomePai" character varying, "nomeMae" character varying, "rua" character varying, "bairro" character varying, "cidade" character varying, "cpf" character varying(11), "criadoEm" TIMESTAMP DEFAULT now(), "atualizadoEm" TIMESTAMP DEFAULT now(), CONSTRAINT "PK_9611d4cf7a77574063439cf46b2" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "aluno" ("id" SERIAL NOT NULL, "nome" character varying NOT NULL, "cpf" character varying(11), "dataNascimento" date, "nomePai" character varying, "nomeMae" character varying, "cep" character varying, "endereco" character varying, "numero" character varying, "complemento" character varying, "bairro" character varying, "cidade" character varying, "telefone" character varying, "ativo" boolean NOT NULL DEFAULT true, "criadoEm" TIMESTAMP DEFAULT now(), "atualizadoEm" TIMESTAMP DEFAULT now(), CONSTRAINT "PK_9611d4cf7a77574063439cf46b2" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "usuarios" ("id" SERIAL NOT NULL, "nome" character varying NOT NULL, "email" character varying NOT NULL, "senha" character varying NOT NULL, "role" character varying NOT NULL DEFAULT 'user', "primeiroAcesso" boolean NOT NULL DEFAULT true, CONSTRAINT "PK_d7281c63c176e152e4c531594a8" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "audit_logs" ("id" SERIAL NOT NULL, "table_name" character varying NOT NULL, "action" character varying NOT NULL, "old_values" jsonb, "new_values" jsonb, "user_name" character varying, "created_at" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_1bb179d048bbc581caa3b013439" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `ALTER TABLE "financeiro" ADD CONSTRAINT "FK_ddc70d940b44322fb264b0cef57" FOREIGN KEY ("alunoId") REFERENCES "aluno"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
@@ -64,6 +67,7 @@ export class InitialSchema1770988674299 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "financeiro" DROP CONSTRAINT "FK_ddc70d940b44322fb264b0cef57"`,
     );
+    await queryRunner.query(`DROP TABLE "audit_logs"`);
     await queryRunner.query(`DROP TABLE "usuarios"`);
     await queryRunner.query(`DROP TABLE "aluno"`);
     await queryRunner.query(`DROP TABLE "matricula"`);

@@ -1,3 +1,5 @@
+//Local: /src/data-source.ts
+
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
 import { Aluno } from './entities/aluno.entity';
@@ -7,6 +9,7 @@ import { Curso } from './entities/curso.entity';
 import { Aula } from './entities/aula.entity';
 import { Financeiro } from './entities/financeiro.entity';
 import { User } from './entities/user.entity';
+import { AuditLog } from './entities/auditLog';
 
 // Importe aqui as outras que você tiver, ex: Professor, Turma, etc.
 
@@ -19,7 +22,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'evandro',
   password: process.env.DB_PASSWORD || '123456',
   database: process.env.DB_DATABASE || 'escolaron',
-  synchronize: false,
+  synchronize: true,
   logging: true,
   entities: [
     Aluno,
@@ -29,6 +32,7 @@ export const AppDataSource = new DataSource({
     Financeiro,
     User,
     MatriculaTermo,
+    AuditLog,
     // Adicione as outras classes aqui também
   ],
   migrations: ['./src/migrations/*.ts'],

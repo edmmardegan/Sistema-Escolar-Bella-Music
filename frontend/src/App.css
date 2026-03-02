@@ -51,6 +51,7 @@ body {
   padding: 15px; /* Card mais compacto */
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+ 
 }
 
 .header-card {
@@ -441,6 +442,11 @@ body {
   font-weight: bold;
   font-size: 16px;
 }
+
+/* Campos com travas de largura para não esticarem demais */
+.campo-pequeno { max-width: 150px; }
+.campo-curto { max-width: 250px; }
+.campo-medio { max-width: 500px; }
 
 @keyframes pulse {
   0% { transform: scale(1); }

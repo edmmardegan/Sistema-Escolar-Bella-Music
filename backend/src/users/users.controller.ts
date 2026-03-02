@@ -55,4 +55,14 @@ export class UsersController {
 
     return this.service.updatePassword(+id, senhaFinal, false, userName);
   }
+
+  @Patch(':id/update-own-password')
+  updateOwn(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+    const userName = req.user?.email || 'USUÁRIO';
+    // Pega 'novaSenha' que vem do seu ResetPassword/index.jsx
+    const senhaFinal = body.novaSenha;
+
+    // 'false' no terceiro parâmetro para dizer que o primeiro acesso ACABOU
+    return this.service.updatePassword(+id, senhaFinal, false, userName);
+  }
 }

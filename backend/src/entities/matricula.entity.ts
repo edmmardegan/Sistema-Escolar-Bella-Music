@@ -29,7 +29,27 @@ export class Matricula {
   @JoinColumn({ name: 'curso_id' })
   curso: Curso;
 
-  // --- FINANCEIRO DA MATRÍCULA ---
+  @Column({ nullable: true })
+  diaSemana: string; // Ex: "Segunda", "Terca", "Quarta"...
+
+  @Column({ nullable: true })
+  horario: string; // Ex: "14:00", "09:30"
+
+  @Column({ default: 'Semanal' })
+  frequencia: string; // Vai receber 'Semanal' ou 'Quinzenal'
+
+  @Column({ nullable: true })
+  professor: string;
+
+  @Column({ default: 'Presencial' })
+  tipo: string; // Presencial ou Residencial
+
+  @Column({ name: 'termo_atual', type: 'int', default: 1 })
+  termo_atual: number;
+
+  @Column({ default: 'Em Andamento' })
+  situacao: string; // Em Andamento, Trancado, Finalizado
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   valorMatricula: number; // <--- SEU NOVO CAMPO AQUI
 
@@ -41,16 +61,6 @@ export class Matricula {
 
   @Column()
   diaVencimento: number; // 5, 10, 15...
-
-  // --- DADOS DO CONTRATO ---
-  @Column({ default: 'Em Andamento' })
-  situacao: string; // Em Andamento, Trancado, Finalizado
-
-  @Column({ default: 'Presencial' })
-  tipo: string; // Presencial ou Residencial
-
-  @Column({ name: 'termo_atual', type: 'int', default: 1 })
-  termo_atual: number;
 
   @CreateDateColumn()
   dataInicio: Date;
@@ -74,16 +84,4 @@ export class Matricula {
 
   @UpdateDateColumn()
   atualizadoEm: Date; // Atualiza sozinho sempre que você editar o aluno
-
-  @Column({ nullable: true })
-  diaSemana: string; // Ex: "Segunda", "Terca", "Quarta"...
-
-  @Column({ nullable: true })
-  horario: string; // Ex: "14:00", "09:30"
-
-  @Column({ default: 'Semanal' })
-  frequencia: string; // Vai receber 'Semanal' ou 'Quinzenal'
-
-  @Column({ nullable: true })
-  professor: string;
 }

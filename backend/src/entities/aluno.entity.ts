@@ -20,30 +20,6 @@ export class Aluno {
   @Column()
   nome: string;
 
-  @Column({ type: 'date', nullable: true })
-  dataNascimento: Date;
-
-  @Column({ nullable: true })
-  telefone: string;
-
-  @Column({ default: true })
-  ativo: boolean;
-
-  @Column({ nullable: true })
-  nomePai: string;
-
-  @Column({ nullable: true })
-  nomeMae: string;
-
-  @Column({ nullable: true })
-  rua: string;
-
-  @Column({ nullable: true })
-  bairro: string;
-
-  @Column({ nullable: true })
-  cidade: string;
-
   @Column({ type: 'varchar', length: 11, nullable: true })
   cpf: string;
 
@@ -55,6 +31,39 @@ export class Aluno {
       this.cpf = this.cpf.replace(/\D/g, ''); // Remove tudo que não for número
     }
   }
+
+  @Column({ type: 'date', nullable: true })
+  dataNascimento: Date;
+
+  @Column({ nullable: true })
+  nomePai: string;
+
+  @Column({ nullable: true })
+  nomeMae: string;
+
+  @Column({ nullable: true })
+  cep: string;
+
+  @Column({ nullable: true })
+  endereco: string;
+
+  @Column({ nullable: true })
+  numero: string;
+
+  @Column({ nullable: true })
+  complemento: string;
+
+  @Column({ nullable: true })
+  bairro: string;
+
+  @Column({ nullable: true })
+  cidade: string;
+
+  @Column({ nullable: true })
+  telefone: string;
+
+  @Column({ default: true })
+  ativo: boolean;
 
   // --- DATAS DE AUDITORIA ---
   @CreateDateColumn({ type: 'timestamp', nullable: true })

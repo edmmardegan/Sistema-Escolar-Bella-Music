@@ -31,7 +31,10 @@ export default function Alunos() {
     ativo: true,
     nomePai: "",
     nomeMae: "",
-    rua: "",
+    cep: "",
+    endereco: "",
+    numero: "",
+    complemento:"",
     bairro: "",
     cidade: "",
   };
@@ -237,7 +240,7 @@ export default function Alunos() {
         <div className="card-principal">
           <div className="header-card">
             <h2>
-              <FaUserGraduate /> {editandoId ? "Editar Aluno" : exibindoForm ? "Novo Aluno" : "Gerenciar Alunos"}
+              <FaUserGraduate /> {editandoId ? "Editar Aluno" : exibindoForm ? "Novo Aluno" : "Gerenciar Alunos Gerenciar Alunos"}
             </h2>
             {!exibindoForm && (
               <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
@@ -281,7 +284,7 @@ export default function Alunos() {
                 
               </div>
 
-              <div className="input-group campo-curto">
+              <div className="input-group campo-pequeno">
                 <InputMask
                   label="Telefone:"
                   mask="(99) 99999-9999"
@@ -292,19 +295,34 @@ export default function Alunos() {
                 />
               </div>
 
-              <div className="input-group campo-curto">
+              <div className="input-group campo-pequeno">
                 <label>Data Nasc:</label>
                 <input type="date" name="dataNascimento" value={form.dataNascimento || ""} onChange={handleChange} className="input-field" />
               </div>
 
               <div className="input-group campo-medio">
-                <label>Rua:</label>
-                <input name="rua" value={form.rua || ""} onChange={handleChange} className="input-field" />
+                <label>Endereço:</label>
+                <input name="endereco" value={form.endereco || ""} onChange={handleChange} className="input-field" />
+              </div>
+
+              <div className="input-group campo-pequeno">
+                <label>Número:</label>
+                <input name="numero" value={form.numero || ""} onChange={handleChange} className="input-field" />
+              </div>
+
+              <div className="input-group campo-curto">
+                <label>Complemento:</label>
+                <input name="complemento" value={form.complemento || ""} onChange={handleChange} className="input-field" />
               </div>
 
               <div className="input-group campo-curto">
                 <label>Bairro:</label>
                 <input name="bairro" value={form.bairro || ""} onChange={handleChange} className="input-field" />
+              </div>
+
+              <div className="input-group campo-pequeno">
+                <label>Cep:</label>
+                <input name="cep" value={form.cep || ""} onChange={handleChange} className="input-field" />
               </div>
 
               <div className="input-group campo-curto">
@@ -397,7 +415,8 @@ export default function Alunos() {
                         )}*/}
 
                         <br />
-                        <small className="txt-registros txt-complemento">{a.rua ? `End.: ${a.rua} - ${a.bairro}` : "Sem endereço cadastrado"}</small>
+                        <small className="txt-registros txt-complemento">{"teste"}</small>
+                       { /*<small className="txt-registros txt-complemento">{a.endereco ? `End.: ${a.endereco}, ${a.numero} - ${a.bairro}` : "Sem endereço cadastrado"}</small>*/}
                       </td>
                       <td>
                         <a
