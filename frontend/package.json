@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "deploy": "pm2 restart web-escola",
+    "producao": "tsc && vite build",
+    
     "build": "vite build",
+    "deploy": "pm2 restart web-escola",
     "build:prod": "vite build --mode production",
     "lint": "eslint .",
     "preview": "vite preview",

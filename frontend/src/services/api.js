@@ -2,16 +2,19 @@
 
 import axios from "axios";
 
-// 1. CONFIGURAÇÃO BASE
-//const api_url = import.meta.env.VITE_API_URL || "http://localhost:5000";
-const api_url = "http://localhost:5000";
+// ✅ AGORA ELE PEGA A PORTA DO .ENV (4000 na produção, 5000 no dev)
+// Se o .env falhar, ele usa 4000 como segurança.
+const api_url = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 const axiosInstance = axios.create({
   baseURL: api_url,
 });
 
+// Log para te ajudar a debugar no console do navegador
+console.log(`🚀 API configurada para: ${api_url}`);
+
 if (import.meta.env.DEV) {
-  console.log(`🛠️ Conectado ao Backend de DESENVOLVIMENTO: ${api_url}`);
+  console.log(`🛠️ Modo: DESENVOLVIMENTO`);
 }
 
 // 2. INTERCEPTORES (Configurados diretamente na instância)
@@ -94,7 +97,12 @@ const api = {
   deleteCurso: async (id) => (await axiosInstance.delete(`/cursos/${id}`)).data,
 
   // === 📝 MATRÍCULAS ===
-  getMatriculas: async () => (await axiosInstance.get("/matriculas")).data,
+  getMatriculas: async (nome = "") => {
+    const resposta = await axiosInstance.get("/matriculas", {
+      params: { nome },
+    });
+    return resposta.data;
+  },
   saveMatricula: async (dados, id = null) => {
     if (id) return (await axiosInstance.put(`/matriculas/${id}`, dados)).data;
     return (await axiosInstance.post("/matriculas", dados)).data;

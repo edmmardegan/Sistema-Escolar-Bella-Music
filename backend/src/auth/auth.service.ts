@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { User } from '../entities/user.entity';
 
@@ -15,26 +15,39 @@ export class AuthService {
     loginInformado: string,
     senhaDigitada: string,
   ): Promise<Partial<User> | null> {
+    // 1. Primeiro buscamos o usuário
     const user = await this.usersService.findOne(loginInformado);
+    const hashManual =
+      '$2b$10$Xo8v314W8.Rtm1X35f1uS.7yWpC6iR/eN.X2Ea0N9R5H9o3r3I.G.';
+    const testeIsolado = await bcrypt.compare('admin123', hashManual);
+    console.log('--- TESTE DE LABORATÓRIO ---');
+    console.log('O BcryptJS funciona com admin123?', testeIsolado);
 
     if (!user) {
       console.log('LOG: Usuário não encontrado:', loginInformado);
       return null;
     }
 
-    const isMatch = await bcrypt.compare(senhaDigitada, user.senha);
+    // 2. Agora que temos o 'user', limpamos e testamos
+    const senhaLimpa = senhaDigitada.trim();
+    const hashLimpo = user.senha.trim();
+
+    console.log('--- DEBUG DE PRODUÇÃO ---');
+    console.log('Login informado:', loginInformado);
+    console.log('Senha (original):', `|${senhaDigitada}|`);
+    console.log('Senha (limpa):', `|${senhaLimpa}|`);
+    console.log('Hash do banco:', `|${hashLimpo}|`);
+    console.log('Tamanho da Senha:', senhaLimpa.length);
+    console.log('Tamanho do Hash:', hashLimpo.length);
+
+    // 3. Comparamos usando os valores limpos
+    const isMatch = await bcrypt.compare(senhaLimpa, hashLimpo);
+
+    console.log('✅ Usuário achado! Senha bateu?', isMatch);
 
     if (isMatch) {
-      // 1. Criamos a cópia
       const userSeguro = { ...user };
-
-      // 2. Extraímos a senha.
-      // Não tipamos o 'result' na declaração para evitar o conflito.
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { senha: _, ...result } = userSeguro;
-
-      // 3. Retornamos fazendo o cast para o tipo que a função espera.
-      // Isso diz ao TS: "Pode confiar, esse objeto agora é um Usuário Parcial"
       return result as Partial<User>;
     }
 

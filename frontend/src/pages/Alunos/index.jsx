@@ -34,9 +34,9 @@ export default function Alunos() {
     cep: "",
     endereco: "",
     numero: "",
-    complemento:"",
+    complemento: "",
     bairro: "",
-    cidade: "",
+    cidade: "Araraquara",
   };
 
   const [form, setForm] = useState(estadoInicial);
@@ -240,7 +240,7 @@ export default function Alunos() {
         <div className="card-principal">
           <div className="header-card">
             <h2>
-              <FaUserGraduate /> {editandoId ? "Editar Aluno" : exibindoForm ? "Novo Aluno" : "Gerenciar Alunos Gerenciar Alunos"}
+              <FaUserGraduate /> {editandoId ? "Editar Aluno" : exibindoForm ? "Novo Aluno" : "Gerenciar Alunos"}
             </h2>
             {!exibindoForm && (
               <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
@@ -281,7 +281,6 @@ export default function Alunos() {
                   </button>
                   {!exibirCpfReal && form.cpf && <small style={{ fontSize: "10px", color: "#999" }}>Clique no ícone para editar</small>}
                 </div>
-                
               </div>
 
               <div className="input-group campo-pequeno">
@@ -415,8 +414,9 @@ export default function Alunos() {
                         )}*/}
 
                         <br />
-                        <small className="txt-registros txt-complemento">{"teste"}</small>
-                       { /*<small className="txt-registros txt-complemento">{a.endereco ? `End.: ${a.endereco}, ${a.numero} - ${a.bairro}` : "Sem endereço cadastrado"}</small>*/}
+                        <small className="txt-registros txt-complemento">
+                          {a.endereco ? `End.: ${a.endereco}, ${a.numero} - ${a.bairro}` : "Sem endereço cadastrado"}
+                        </small>
                       </td>
                       <td>
                         <a

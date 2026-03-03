@@ -39,6 +39,7 @@ export default function Matriculas() {
   const [configCarne, setConfigCarne] = useState(null);
   const [anoGeracao, setAnoGeracao] = useState(new Date().getFullYear());
 
+  const [buscaNome, setBuscaNome] = useState("");
   const inputFocoRef = useRef(null);
   const navigate = useNavigate();
 
@@ -77,7 +78,12 @@ export default function Matriculas() {
   const carregar = useCallback(async () => {
     try {
       setLoading(true);
-      const [resMat, resAlu, resCur] = await Promise.all([api.getMatriculas(), api.getAlunos(), api.getCursos()]);
+      // Passamos o buscaNome para o service
+      const [resMat, resAlu, resCur] = await Promise.all([
+        api.getMatriculas(buscaNome), // 👈 Ajustado aqui
+        api.getAlunos(),
+        api.getCursos(),
+      ]);
       setRegistros(Array.isArray(resMat) ? resMat : []);
       setAlunos(Array.isArray(resAlu) ? resAlu : []);
       setCursos(Array.isArray(resCur) ? resCur : []);
@@ -86,7 +92,7 @@ export default function Matriculas() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [buscaNome]); // 👈 Adicione buscaNome como dependência
 
   useEffect(() => {
     carregar();
@@ -450,6 +456,15 @@ export default function Matriculas() {
                   {s}
                 </button>
               ))}
+            </div>
+            <div className="busca-container">
+              <input
+                type="text"
+                placeholder="Pesquisar por nome..."
+                value={buscaNome}
+                onChange={(e) => setBuscaNome(e.target.value)}
+                className="input-field input-busca"
+              />
             </div>
 
             <div className="input-group-filtro">

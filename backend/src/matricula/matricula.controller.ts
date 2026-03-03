@@ -11,6 +11,7 @@ import {
   Patch,
   ParseIntPipe,
   Req,
+  Query,
 } from '@nestjs/common';
 import { MatriculaService } from './matricula.service';
 import { CreateMatriculaDto } from './dto/create-matricula.dto';
@@ -23,8 +24,8 @@ export class MatriculaController {
   constructor(private readonly service: MatriculaService) {}
 
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query('nome') nome?: string) {
+    return this.service.findAll(nome);
   }
 
   @Post()

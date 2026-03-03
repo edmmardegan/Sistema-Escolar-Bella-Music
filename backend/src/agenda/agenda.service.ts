@@ -165,10 +165,7 @@ export class AgendaService {
     ano: number,
     userName: string,
   ): Promise<{ message: string }> {
-    console.log(
-      `--- INICIANDO GERAÇÃO: Mês ${mes + 1} Ano ${ano} por ${userName} ---`,
-    );
-
+    // 1. Busca matrículas ativas
     const matriculas = await this.matriculaRepo.find({
       where: { situacao: ILike('Em andamento') },
       relations: ['aluno', 'curso'],
@@ -187,55 +184,84 @@ export class AgendaService {
 
     for (const mat of matriculas) {
       const diaSemanaDesejado = diasSemanaMap[mat.diaSemana];
-      const termo = await this.termoRepo.findOne({
+      if (diaSemanaDesejado === undefined) continue;
+
+      // --- 🛡️ LOGICA DE RECUPERAÇÃO/CRIAÇÃO DO TERMO ---
+      let termo = await this.termoRepo.findOne({
         where: {
           matricula: { id: mat.id },
           numeroTermo: mat.termo_atual,
         },
       });
 
-      if (!termo || diaSemanaDesejado === undefined) continue;
+      // Se o termo não existe (comum após importação), criamos ele agora!
+      if (!termo) {
+        termo = await this.termoRepo.save({
+          matricula: mat,
+          numeroTermo: mat.termo_atual,
+          status: 'Em andamento',
+          // adicione outros campos obrigatórios do seu MatriculaTermo aqui se houver
+        });
+      }
 
-      const mesBase = mes;
-      const dataCursor = new Date(ano, mesBase, 1, 12, 0, 0);
+      // Cursor de datas (Meio-dia para evitar bugs de fuso horário)
+      const dataCursor = new Date(ano, mes, 1, 12, 0, 0);
+      let contadorSemanasNoMes = 0;
 
-      while (dataCursor.getMonth() === mesBase) {
+      while (dataCursor.getMonth() === mes) {
         if (dataCursor.getDay() === diaSemanaDesejado) {
-          const dataIso = dataCursor.toISOString().split('T')[0];
+          contadorSemanasNoMes++;
 
-          const existe = await this.repository.findOne({
-            where: {
-              termo: { id: termo.id },
-              data: Raw((alias) => `CAST(${alias} AS DATE) = :data`, {
-                data: dataIso,
-              }),
-            },
-          });
+          // Respeita a Frequência (Semanal vs Quinzenal)
+          const ehSemanaValida =
+            mat.frequencia === 'Quinzenal'
+              ? contadorSemanasNoMes === 1 || contadorSemanasNoMes === 3
+              : true;
 
-          if (!existe) {
-            const [hora, minuto] = mat.horario.split(':');
-            const dataFinal = new Date(dataCursor);
-            dataFinal.setHours(parseInt(hora), parseInt(minuto), 0, 0);
+          if (ehSemanaValida) {
+            const dataIso = dataCursor.toISOString().split('T')[0];
 
-            await this.repository.save({
-              termo: termo,
-              data: dataFinal,
-              status: 'Pendente',
+            // Verifica se a aula já existe para evitar duplicidade
+            const existe = await this.repository.findOne({
+              where: {
+                termo: { id: termo.id },
+                data: Raw((alias) => `CAST(${alias} AS DATE) = :data`, {
+                  data: dataIso,
+                }),
+              },
             });
-            totalCriado++;
+
+            if (!existe) {
+              const [hora, minuto] = mat.horario.split(':');
+              const dataFinal = new Date(
+                ano,
+                mes,
+                dataCursor.getDate(),
+                parseInt(hora),
+                parseInt(minuto),
+                0,
+              );
+
+              await this.repository.save({
+                termo: termo,
+                data: dataFinal,
+                status: 'Pendente',
+              });
+              totalCriado++;
+            }
           }
         }
         dataCursor.setDate(dataCursor.getDate() + 1);
       }
     }
 
-    // 🛡️ ADICIONE O LOG DE AUDITORIA AQUI ANTES DO RETURN
+    // Auditoria
     await this.auditService.createLog(
       'agenda',
       'INSERT',
       {},
       {
-        operacao: 'Geração Mensal de Aulas',
+        operacao: 'Geração Mensal',
         mes: mes + 1,
         ano,
         totalAulas: totalCriado,

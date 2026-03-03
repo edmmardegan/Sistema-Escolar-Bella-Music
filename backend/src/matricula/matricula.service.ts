@@ -12,6 +12,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { FinanceiroCalculoUtil } from '../financeiro/utils/financeiro-calculo.util';
 import { Financeiro } from 'src/entities/financeiro.entity';
 import { AuditService } from '../audit/audit.service';
+import { ILike } from 'typeorm';
 
 @Injectable()
 export class MatriculaService {
@@ -28,11 +29,21 @@ export class MatriculaService {
     private readonly auditService: AuditService, // 👈 Injete o serviço de auditoria
   ) {}
 
-  async findAll(): Promise<Matricula[]> {
-    return await this.repository.find({
-      relations: ['aluno', 'curso', 'termos'],
-      order: { aluno: { nome: 'ASC' } },
-    });
+  async findAll(nome?: string): Promise<Matricula[]> {
+    const query = this.repository
+      .createQueryBuilder('matricula')
+      .leftJoinAndSelect('matricula.aluno', 'aluno')
+      .leftJoinAndSelect('matricula.curso', 'curso')
+      .leftJoinAndSelect('matricula.termos', 'termos');
+
+    if (nome && nome.trim() !== '') {
+      // Busca pelo nome do aluno vinculado à matrícula
+      query.andWhere('aluno.nome ILIKE :nome', { nome: `%${nome}%` });
+    }
+
+    query.orderBy('aluno.nome', 'ASC');
+
+    return await query.getMany();
   }
 
   async save(

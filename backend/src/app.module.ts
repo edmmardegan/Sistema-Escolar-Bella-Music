@@ -1,4 +1,4 @@
-//Local: /src/app.module.ts
+// Local: /src/app.module.ts
 
 import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,7 +8,7 @@ import { AlsService } from './auth/als.service';
 import { AuditMiddleware } from './auth/audit.middleware';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 // --- ENTIDADES ---
 import { Aluno } from './entities/aluno.entity';
@@ -30,35 +30,60 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AuditModule } from './audit/audit.module';
 
+// --- DEFINIÇÃO DO ENV ---
+const nodeEnv = process.env.NODE_ENV || 'development';
+const envFile =
+  nodeEnv === 'production' ? '.env.production' : '.env.development';
+
+console.log('====================================');
+console.log('🚀 Ambiente:', nodeEnv);
+console.log('📄 Arquivo .env carregado:', envFile);
+console.log('====================================');
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env', // Força ele a ler o arquivo .env da pasta raiz do backend
+      envFilePath: envFile,
     }),
 
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || '127.0.0.1',
-      port: Number(process.env.DB_PORT) || 5434,
-      username: process.env.DB_USERNAME || 'evandro',
-      password: String(process.env.DB_PASSWORD || '123456'),
-      database: process.env.DB_DATABASE || 'escolaron',
-      entities: [
-        User,
-        Aluno,
-        Aula,
-        Curso,
-        Financeiro,
-        Matricula,
-        MatriculaTermo,
-        AuditLog,
-      ],
-      subscribers: [],
-      synchronize: false, //synchronize: true, mudar para false quando estiver em produção
+    // ✅ CONFIGURAÇÃO CORRETA DO TYPEORM
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const host = config.get<string>('DB_HOST');
+        const port = config.get<number>('DB_PORT');
+        const database = config.get<string>('DB_DATABASE');
+        const username = config.get<string>('DB_USERNAME');
+        const password = config.get<string>('DB_PASSWORD');
+
+        console.log('🔎 DB_HOST:', host);
+        console.log('🔎 DB_PORT:', port);
+        console.log('🔎 DB_DATABASE:', database);
+        console.log('🔎 DB_USERNAME:', username);
+
+        return {
+          type: 'postgres',
+          host,
+          port,
+          username,
+          password,
+          database,
+          entities: [
+            User,
+            Aluno,
+            Aula,
+            Curso,
+            Financeiro,
+            Matricula,
+            MatriculaTermo,
+            AuditLog,
+          ],
+          synchronize: false,
+        };
+      },
     }),
-    // ✅ Importante para o repositório de Log ser injetável
-    //    TypeOrmModule.forFeature([AuditLog]),
+
     AgendaModule,
     AuditModule,
     UsersModule,
@@ -72,15 +97,13 @@ import { AuditModule } from './audit/audit.module';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard, // Isso protege a API inteira!
+      useClass: JwtAuthGuard,
     },
     AppService,
     AlsService,
   ],
-  //providers: [AppService, AuditSubscriber, AlsService],
 })
 export class AppModule {
-  // Configuração do Middleware para capturar o usuário em todas as rotas
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuditMiddleware)

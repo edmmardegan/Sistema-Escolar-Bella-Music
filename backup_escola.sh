@@ -17,7 +17,7 @@ echo " Iniciando backup do Sistema Bella Music (DOCKER)"
 echo "--------------------------------------------"
 
 # Executa o pg_dump DENTRO do container e salva o resultado fora
-docker exec db_escola pg_dump -U evandro -d escolaron > "$ARQUIVO"
+docker exec db_escola pg_dump -U evandro -d escolaron_dev > "$ARQUIVO"
 
 # Verifica se o arquivo foi criado e se não está vazio
 if [ -s "$ARQUIVO" ]; then

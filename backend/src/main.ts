@@ -1,30 +1,28 @@
-// Local: src/main.ts
-
 import 'reflect-metadata';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config'; // 👈 Importação necessária
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Ativa a validação de dados automática nos DTOs
+  // 🚀 Pega o serviço de configuração para ler os arquivos .env corretamente
+  const configService = app.get(ConfigService);
 
+  // Ativa a validação de dados automática nos DTOs
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: false,
       transform: true,
-
       exceptionFactory: (errors) => {
-        // 🚀 ESSE LOG VAI APARECER NO SEU PM2 LOGS
         console.log('--- ERRO DE VALIDAÇÃO DETECTADO ---');
         errors.forEach((err) => {
           console.log(`Campo: ${err.property}`);
           console.log(
             `Erros: ${Object.values(err.constraints || {}).join(', ')}`,
           );
-          // Se quiser ver o valor que chegou:
           console.log(`Valor recebido:`, err.value);
         });
         return new BadRequestException(errors);
@@ -38,7 +36,10 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
-  const port = process.env.PORT || 5000;
+
+  // 🧐 Agora ele busca 'PORT' do ConfigService (prioridade .env.production)
+  // Se não encontrar em lugar nenhum, ele usa 5000 como última opção.
+  const port = configService.get<number>('PORT') || 5000;
 
   await app.listen(port, '0.0.0.0');
 
