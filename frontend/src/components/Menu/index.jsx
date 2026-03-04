@@ -1,3 +1,5 @@
+//Local: /src/components/Menu/index.jsx
+
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.js";
@@ -11,7 +13,6 @@ import {
   FaSignOutAlt,
   FaUserCog,
   FaHistory, // Importado para Auditoria
-  
 } from "react-icons/fa";
 import "./styles.css";
 import logo from "../../assets/logo2.jpg";
@@ -22,6 +23,7 @@ export default function Menu() {
   const location = useLocation();
 
   const handleLogout = () => {
+    sessionStorage.removeItem("@App:exibiuAniversario"); // Limpa o aviso de aniversário
     logout();
     navigate("/login");
   };

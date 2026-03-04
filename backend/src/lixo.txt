@@ -1,3 +1,587 @@
+//Local: /src/matricula/matricula.service.ts
+
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DeepPartial, Like } from 'typeorm';
+import { Matricula } from '../entities/matricula.entity';
+import { MatriculaTermo } from '../entities/matricula-termo.entity';
+import { Aula } from '../entities/aula.entity';
+import { CreateMatriculaDto } from './dto/create-matricula.dto';
+import { UpdateTermoDto } from './dto/update-termo.dto';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { FinanceiroCalculoUtil } from '../financeiro/utils/financeiro-calculo.util';
+import { Financeiro } from 'src/entities/financeiro.entity';
+import { AuditService } from '../audit/audit.service';
+import { ILike } from 'typeorm';
+
+@Injectable()
+export class MatriculaService {
+  constructor(
+    @InjectRepository(Matricula)
+    private readonly repository: Repository<Matricula>,
+
+    @InjectRepository(Financeiro)
+    private readonly repositoryFinanceiro: Repository<Financeiro>,
+
+    @InjectRepository(MatriculaTermo)
+    private readonly termoRepo: Repository<MatriculaTermo>,
+
+    private readonly auditService: AuditService, // 👈 Injete o serviço de auditoria
+  ) {}
+
+  async findAll(nome?: string): Promise<Matricula[]> {
+    const query = this.repository
+      .createQueryBuilder('matricula')
+      .leftJoinAndSelect('matricula.aluno', 'aluno')
+      .leftJoinAndSelect('matricula.curso', 'curso')
+      .leftJoinAndSelect('matricula.termos', 'termos');
+
+    if (nome && nome.trim() !== '') {
+      // Busca pelo nome do aluno vinculado à matrícula
+      query.andWhere('aluno.nome ILIKE :nome', { nome: `%${nome}%` });
+    }
+
+    query.orderBy('aluno.nome', 'ASC');
+
+    return await query.getMany();
+  }
+
+  async save(
+    data: CreateMatriculaDto & { id?: number },
+    userName: string = 'SISTEMA',
+  ) {
+    const limparData = (valor: string | null | undefined): string | null =>
+      valor && String(valor).trim() !== '' ? valor : null;
+
+    const dataTerminoLimpa = limparData(data.dataTermino);
+    const dataTrancamentoLimpa = limparData(data.dataTrancamento);
+
+    // ✅ 1. FUNÇÃO DE DIFERENCIAL (DIFF) - Só loga o que mudou
+    const gerarDiffParaLog = (antes: any, depois: any) => {
+      const objAntes: any = {};
+      const objDepois: any = {};
+
+      // Campos que não queremos comparar nem mostrar no log
+      const ignorar = ['atualizadoEm', 'criadoEm', 'termos', 'financeiros'];
+
+      // Percorremos os campos do objeto novo (depois)
+      Object.keys(depois).forEach((key) => {
+        if (ignorar.includes(key)) return;
+
+        // Normaliza Aluno e Curso para comparar Nomes em vez de Objetos/IDs
+        let valorAntes = antes[key];
+        let valorDepois = depois[key];
+
+        if (key === 'aluno' || key === 'curso') {
+          valorAntes = antes[key]?.nome || antes[key];
+          valorDepois = depois[key]?.nome || depois[key];
+        }
+
+        // Compara se houve mudança real (usando stringify para arrays/objetos)
+        if (JSON.stringify(valorAntes) !== JSON.stringify(valorDepois)) {
+          objAntes[key] = valorAntes;
+          objDepois[key] = valorDepois;
+        }
+      });
+
+      return { antes: objAntes, depois: objDepois };
+    };
+
+    // --- MODO EDIÇÃO ---
+    if (data.id) {
+      const id = data.id;
+
+      // A. Busca a foto do registro ANTES da alteração
+      const matriculaAntes = await this.repository.findOne({
+        where: { id },
+        relations: ['aluno', 'curso'],
+      });
+
+      if (!matriculaAntes)
+        throw new NotFoundException('Matrícula não encontrada');
+
+      const dadosParaAtualizar = { ...data };
+      delete (dadosParaAtualizar as any).id;
+      delete (dadosParaAtualizar as any).curso; // 🛡️ Bloqueia mudança de curso
+      delete (dadosParaAtualizar as any).aluno; // 🛡️ Bloqueia mudança de aluno
+
+      // B. Executa o Update no Banco
+      await this.repository.update(id, {
+        ...dadosParaAtualizar,
+        dataTermino: dataTerminoLimpa,
+        dataTrancamento: dataTrancamentoLimpa,
+      } as QueryDeepPartialEntity<Matricula>);
+
+      // C. Busca a foto do registro DEPOIS da alteração
+      const matriculaDepois = await this.repository.findOne({
+        where: { id },
+        relations: ['aluno', 'curso'],
+      });
+
+      // D. Gera o diferencial entre os dois estados
+      const diff = gerarDiffParaLog(matriculaAntes, matriculaDepois);
+
+      // E. Só gera o log se houver pelo menos uma mudança detectada
+      if (Object.keys(diff.depois).length > 0) {
+        await this.auditService.createLog(
+          'matricula',
+          'UPDATE',
+          diff.antes,
+          diff.depois,
+          userName,
+        );
+      }
+
+      return matriculaDepois;
+    }
+
+    // --- MODO CRIAÇÃO ---
+    const nova = this.repository.create({
+      ...data,
+      dataTermino: dataTerminoLimpa,
+      dataTrancamento: dataTrancamentoLimpa,
+    } as DeepPartial<Matricula>);
+
+    const salvo = await this.repository.save(nova);
+
+    const matCompleta = await this.repository.findOne({
+      where: { id: salvo.id },
+      relations: ['curso', 'aluno'],
+    });
+
+    if (!matCompleta) return null;
+
+    // No INSERT, usamos uma função simplificada para não salvar o objeto gigante
+    const simplificarParaInsert = (obj: any) => ({
+      aluno: obj.aluno?.nome || obj.aluno,
+      curso: obj.curso?.nome || obj.curso,
+      diaSemana: obj.diaSemana,
+      horario: obj.horario,
+      valorMensalidade: obj.valorMensalidade,
+    });
+
+    await this.auditService.createLog(
+      'matricula',
+      'INSERT',
+      {},
+      simplificarParaInsert(matCompleta),
+      userName,
+    );
+
+    // Automações de curso e financeiro
+    if (matCompleta.curso?.qtdeTermos) {
+      await this.gerarTermosEAulas(matCompleta);
+    }
+
+    const anoInicio = new Date(matCompleta.dataInicio).getFullYear();
+    await this.gerarParcelaIndividual(matCompleta.id, anoInicio);
+
+    return matCompleta;
+  }
+
+  /*** Método auxiliar para não poluir o save com loops de aulas */
+  /*** Método auxiliar corrigido para evitar erro de Fuso Horário (Timezone) */
+  private async gerarTermosEAulas(matricula: Matricula) {
+    // 1. Extraímos apenas a data (YYYY-MM-DD) para evitar interferência de horas residuais
+    const dataBaseStr = new Date(matricula.dataInicio)
+      .toISOString()
+      .split('T')[0];
+
+    // 2. Montamos a data com o horário da matrícula manualmente
+    // Isso garante que 18:00 continue 18:00
+    const [horas, minutos] = matricula.horario.split(':');
+    const dataAula = new Date(`${dataBaseStr}T${horas}:${minutos}:00`);
+
+    const intervalo = matricula.frequencia === 'Quinzenal' ? 14 : 7;
+
+    for (let i = 1; i <= matricula.curso.qtdeTermos; i++) {
+      const termo = await this.termoRepo.save({
+        numeroTermo: i,
+        matricula: matricula,
+        nota1: 0,
+        nota2: 0,
+      });
+
+      for (let semana = 0; semana < 4; semana++) {
+        // Criamos uma nova instância da data para cada aula
+        const dataParaSalvar = new Date(dataAula);
+
+        await this.termoRepo.manager.save(Aula, {
+          termo: termo,
+          data: dataParaSalvar,
+          status: 'Pendente',
+        });
+
+        // Adiciona 7 ou 14 dias para a próxima aula
+        dataAula.setDate(dataAula.getDate() + intervalo);
+      }
+    }
+  }
+
+  async updateTermo(id: number, data: UpdateTermoDto) {
+    await this.termoRepo.update(id, {
+      nota1: data.nota1,
+      nota2: data.nota2,
+      dataProva1: data.dataProva1,
+      dataProva2: data.dataProva2,
+      obs: data.obs,
+    } as QueryDeepPartialEntity<MatriculaTermo>);
+
+    return await this.termoRepo.findOne({
+      where: { id },
+      relations: ['matricula.aluno'],
+    });
+  }
+
+  async remove(id: number) {
+    return await this.repository.delete(id);
+  }
+
+  async getDetalhesBoletim(termoId: number) {
+    const termo = await this.termoRepo.findOne({
+      where: { id: termoId },
+      relations: ['matricula'],
+    });
+    if (!termo) throw new NotFoundException('Termo não encontrado');
+
+    const fullMat = await this.repository.findOne({
+      where: { id: termo.matricula.id },
+      relations: ['aluno', 'curso', 'termos.aulas'],
+      order: { termos: { numeroTermo: 'ASC' } },
+    });
+
+    if (!fullMat) {
+      throw new NotFoundException('Matrícula não encontrada para este termo');
+    }
+
+    return {
+      alunoNome: fullMat.aluno.nome,
+      cursoNome: fullMat.curso?.nome || 'Curso',
+      todosOsTermos: fullMat.termos.map((t) => ({
+        ...t,
+        aulasRealizadas:
+          t.aulas?.filter((a) => a.status === 'Presente').length || 0,
+      })),
+    };
+  }
+
+  // --- 1. ROTINA INDIVIDUAL (CORRIGIDA E BLINDADA) ---
+  // --- 1. ROTINA INDIVIDUAL (TIPADA E BLINDADA) ---
+  async gerarParcelaIndividual(
+    matriculaId: number,
+    ano: number,
+  ): Promise<Financeiro[] | { message: string }> {
+    // 🔍 Busca no repositório de Matricula (this.repository)
+    const matricula = await this.repository.findOne({
+      where: { id: matriculaId },
+      relations: ['aluno'],
+    });
+
+    if (!matricula) {
+      throw new NotFoundException('Matrícula não encontrada.');
+    }
+    // 1. Verifique se já existe QUALQUER taxa de matrícula para este ID
+    const jaTemTaxa = await this.repositoryFinanceiro.findOne({
+      where: {
+        matricula: { id: matriculaId },
+        descricao: Like('%Taxa de Matrícula%'),
+      },
+    });
+    // 🛡️ Verifica duplicidade no Financeiro (this.repositoryFinanceiro)
+    const jaTem = await this.repositoryFinanceiro.count({
+      where: {
+        matricula: { id: matriculaId },
+        dataVencimento: Like(`${ano}%`),
+      },
+    });
+
+    if (jaTem > 0) {
+      return { message: 'Este aluno já possui parcelas para este ano.' };
+    }
+
+    // Definimos como Partial<Financeiro> para garantir segurança de tipos ao popular
+    const novasParcelas: Partial<Financeiro>[] = [];
+
+    // A. Taxa de Matrícula (Vence no dia da geração)
+    if (Number(matricula.valorMatricula) > 0 && !jaTemTaxa) {
+      // <-- Só entra se não existir
+      novasParcelas.push({
+        aluno: matricula.aluno,
+        matricula: matricula,
+        descricao: `Taxa de Matrícula - ${ano}`,
+        dataVencimento: new Date().toISOString().split('T')[0],
+        valorTotal: Number(matricula.valorMatricula),
+        status: 'Aberta',
+        tipo: 'Receita',
+      });
+    }
+
+    // B. Mensalidades
+    const dataRef = matricula.dataInicio
+      ? new Date(matricula.dataInicio)
+      : new Date();
+
+    // Lógica: Se a matrícula é de anos anteriores, começa em Janeiro (1).
+    // Se é do ano atual, começa a partir do mês de início.
+    const mesInicio = dataRef.getFullYear() < ano ? 1 : dataRef.getMonth() + 1;
+
+    for (let mes = mesInicio; mes <= 12; mes++) {
+      const diaVencimentoBase = Number(matricula.diaVencimento || 10);
+
+      novasParcelas.push({
+        aluno: matricula.aluno,
+        matricula: matricula,
+        descricao: `Mensalidade ${String(mes).padStart(2, '0')}/${ano}`,
+        // ✅ Utilizando o utilitário estático centralizado
+        dataVencimento: FinanceiroCalculoUtil.ajustarDataVencimento(
+          ano,
+          mes,
+          diaVencimentoBase,
+        ),
+        valorTotal:
+          Number(matricula.valorMensalidade || 0) +
+          Number(matricula.valorCombustivel || 0),
+        status: 'Aberta',
+        tipo: 'Receita',
+      });
+    }
+
+    // O TypeORM reconhece o retorno como um array de Financeiro
+    return await this.repositoryFinanceiro.save(novasParcelas);
+  }
+}
+
+
+// Local: /src/matricula/matricula.module.ts
+
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { MatriculaService } from './matricula.service';
+import { MatriculaController } from './matricula.controller';
+import { Matricula } from '../entities/matricula.entity';
+import { MatriculaTermo } from '../entities/matricula-termo.entity';
+import { Financeiro } from '../entities/financeiro.entity';
+import { Aula } from '../entities/aula.entity';
+import { AuditModule } from '../audit/audit.module'; // 👈 1. IMPORTA O MÓDULO
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([Matricula, MatriculaTermo, Financeiro, Aula]),
+    AuditModule,
+  ],
+  controllers: [MatriculaController],
+  providers: [MatriculaService],
+  exports: [MatriculaService],
+})
+export class MatriculaModule {}
+
+
+// src/matricula/matricula.controller.ts
+
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
+  Patch,
+  ParseIntPipe,
+  Req,
+  Query,
+} from '@nestjs/common';
+import { MatriculaService } from './matricula.service';
+import { CreateMatriculaDto } from './dto/create-matricula.dto';
+import { UpdateMatriculaDto } from './dto/update-matricula.dto';
+import { UpdateTermoDto } from './dto/update-termo.dto';
+
+@Controller('matriculas')
+export class MatriculaController {
+  // Usei 'private readonly service' para manter o padrão que você iniciou
+  constructor(private readonly service: MatriculaService) {}
+
+  @Get()
+  findAll(@Query('nome') nome?: string) {
+    return this.service.findAll(nome);
+  }
+
+  @Post()
+  create(@Body() body: CreateMatriculaDto) {
+    return this.service.save(body);
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dados: UpdateMatriculaDto,
+    @Req() req: any, // Pega a requisição para extrair o user
+  ) {
+    const userName = req.user?.email || 'SISTEMA';
+    return await this.service.save({ ...dados, id }, userName);
+  }
+
+  @Patch('termo/:id')
+  updateTermo(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateTermoDto,
+  ) {
+    return this.service.updateTermo(id, body);
+  }
+
+  @Get('termo/:id')
+  getBoletim(@Param('id', ParseIntPipe) id: number) {
+    return this.service.getDetalhesBoletim(id);
+  }
+
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.service.remove(id);
+  }
+
+  @Post(':id/gerar-financeiro')
+  async gerarFin(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() corpo: { ano: number },
+  ): Promise<Record<string, any>> {
+    // <--- Definimos que o retorno é um objeto (Record)
+    const resultado = await this.service.gerarParcelaIndividual(id, corpo.ano);
+    return resultado as Record<string, any>; // <--- Fazemos o cast explícito para satisfazer o linter
+  }
+}
+
+//Local: /src/services/api.js
+
+import axios from "axios";
+
+// ✅ AGORA ELE PEGA A PORTA DO .ENV (4000 na produção, 5000 no dev)
+// Se o .env falhar, ele usa 4000 como segurança.
+const api_url = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+const axiosInstance = axios.create({
+  baseURL: api_url,
+});
+
+// Log para te ajudar a debugar no console do navegador
+console.log(`🚀 API configurada para: ${api_url}`);
+
+if (import.meta.env.DEV) {
+  console.log(`🛠️ Modo: DESENVOLVIMENTO`);
+}
+
+// 2. INTERCEPTORES (Configurados diretamente na instância)
+axiosInstance.interceptors.request.use((config) => {
+  // Use a chave exata que você usa no resto do sistema (ajustei para @App:token)
+  const token = localStorage.getItem("@App:token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      if (!window.location.pathname.includes("/login")) {
+        localStorage.removeItem("@App:token");
+        localStorage.removeItem("@App:user");
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
+// 3. OBJETO API (Aqui incluí o método .get para sua tela de Logs não quebrar)
+const api = {
+  // Atalho para chamadas diretas (ex: Auditoria)
+  get: (url, config) => axiosInstance.get(url, config),
+  post: (url, data, config) => axiosInstance.post(url, data, config),
+  put: (url, data, config) => axiosInstance.put(url, data, config),
+  patch: (url, data, config) => axiosInstance.patch(url, data, config),
+  delete: (url, config) => axiosInstance.delete(url, config),
+
+  // === 🔐 AUTENTICAÇÃO ===
+  login: async (email, password) => {
+    const payload = { email: email.trim(), password: password.trim() };
+    const response = await axiosInstance.post("/auth/login", payload);
+    return response.data;
+  },
+
+  // === 📅 AGENDA ===
+  getAgenda: async (tipo, filtros) => {
+    const resposta = await axiosInstance.get(`/agenda`, {
+      params: { tipo, ...filtros },
+    });
+    return resposta.data;
+  },
+
+  saveFrequencia: async (id, acao, motivo = "") => (await axiosInstance.patch(`/agenda/${id}/frequencia`, { acao, motivo })).data,
+  gerarAgenda: async (payload) => (await axiosInstance.post("/agenda/gerar", payload)).data,
+  deleteAgenda: async (id) => (await axiosInstance.delete(`/agenda/${id}`)).data,
+
+  // === 👤 USUÁRIOS ===
+  getUsuarios: async () => (await axiosInstance.get("/usuarios")).data,
+  saveUsuario: async (dados, id = null) => {
+    if (id) return (await axiosInstance.put(`/usuarios/${id}`, dados)).data;
+    return (await axiosInstance.post("/usuarios", dados)).data;
+  },
+  deleteUsuario: async (id) => (await axiosInstance.delete(`/usuarios/${id}`)).data,
+  resetPasswordAdmin: async (id, dados) => (await axiosInstance.patch(`/usuarios/${id}/reset-password-admin`, dados)).data,
+  updateOwnPassword: async (id, dados) => (await axiosInstance.patch(`/usuarios/${id}/update-own-password`, dados)).data,
+
+  // === 🎓 ALUNOS ===
+  getAlunos: async () => (await axiosInstance.get("/alunos")).data,
+  getAniversariantes: async () => (await axiosInstance.get("/alunos/aniversariantes")).data,
+  saveAluno: async (dados, id = null) => {
+    if (id) return (await axiosInstance.put(`/alunos/${id}`, dados)).data;
+    return (await axiosInstance.post("/alunos", dados)).data;
+  },
+  deleteAluno: async (id) => (await axiosInstance.delete(`/alunos/${id}`)).data,
+
+  // === 📚 CURSOS ===
+  getCursos: async () => (await axiosInstance.get("/cursos")).data,
+  saveCurso: async (dados, id = null) => {
+    if (id) return (await axiosInstance.put(`/cursos/${id}`, dados)).data;
+    return (await axiosInstance.post("/cursos", dados)).data;
+  },
+  deleteCurso: async (id) => (await axiosInstance.delete(`/cursos/${id}`)).data,
+
+  // === 📝 MATRÍCULAS ===
+  getMatriculas: async (nome = "") => {
+    const resposta = await axiosInstance.get("/matriculas", {
+      params: { nome },
+    });
+    return resposta.data;
+  },
+  saveMatricula: async (dados, id = null) => {
+    if (id) return (await axiosInstance.put(`/matriculas/${id}`, dados)).data;
+    return (await axiosInstance.post("/matriculas", dados)).data;
+  },
+  deleteMatricula: async (id) => (await axiosInstance.delete(`/matriculas/${id}`)).data,
+  getPorMatricula: async (id) => (await axiosInstance.get(`/financeiro/matricula/${id}`)).data,
+
+  // === 💰 FINANCEIRO ===
+  getAllFinanceiro: async () => (await axiosInstance.get("/financeiro")).data,
+  pagar: async (id) => (await axiosInstance.post(`/financeiro/${id}/pagar`)).data,
+  estornar: async (id) => (await axiosInstance.post(`/financeiro/${id}/estornar`)).data,
+  deleteParcela: async (id) => (await axiosInstance.delete(`/financeiro/${id}`)).data,
+  gerarParcelaGlobal: async (dados) => (await axiosInstance.post("/financeiro/gerar-lote-anual", dados)).data,
+  gerarParcelaIndividual: async (id, ano) => (await axiosInstance.post(`/matriculas/${id}/gerar-financeiro`, { ano })).data,
+  aplicarReajusteGlobal: async (dados) => (await axiosInstance.post("/financeiro/reajuste-global", dados)).data,
+
+  // === 📊 BOLETIM / TERMOS ===
+  getDetalhesBoletim: async (termoId) => (await axiosInstance.get(`/matriculas/termo/${termoId}`)).data,
+  updateBoletim: async (termoId, dados) => (await axiosInstance.patch(`/matriculas/termo/${termoId}`, dados)).data,
+
+  // === 🕵️ AUDITORIA (ADICIONE ISSO AQUI) ===
+  getAudit: (filtros) => api.get("/audit", { params: filtros }).then((res) => res.data),
+};
+
+export default api;
+
+
 /* src/pages/Matriculas/index.jsx */
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
@@ -254,25 +838,6 @@ export default function Matriculas() {
       setListaParcelas(Array.isArray(parcelas) ? parcelas : []);
     } catch (e) {
       console.error(e);
-    }
-  };
-
-  const handleAcaoFinanceiro = async (id, tipo) => {
-    try {
-      // Chama a mesma API que o Financeiro Global usa
-      if (tipo === "pagar") {
-        await api.pagar(id);
-      } else {
-        await api.estornar(id);
-      }
-
-      // ✅ RECARREGA as parcelas no modal após a ação
-      // Usamos o id da matrícula que já está guardado no finSelecionado
-      const parcelasAtualizadas = await api.getPorMatricula(finSelecionado.id);
-      setListaParcelas(Array.isArray(parcelasAtualizadas) ? parcelasAtualizadas : []);
-    } catch (e) {
-      console.error("Erro na operação financeira:", e);
-      alert("Erro ao processar o pagamento/estorno.");
     }
   };
 
@@ -760,7 +1325,7 @@ export default function Matriculas() {
                         <span className={`badge-status ${p.status === "Paga" ? "status-pago" : "status-aberto"}`}>{p.status}</span>
                       </td>
                       <td className="acoes">
-                        <button onClick={() => handleAcaoFinanceiro(p.id, p.status === "Aberta" ? "pagar" : "estornar")} className="btn-icon">
+                        <button onClick={() => handleAcaoFin(p.id, p.status === "Aberta" ? "pagar" : "estornar")} className="btn-icon">
                           {p.status === "Aberta" ? <FaCheck color="green" /> : <FaUndo color="orange" />}
                         </button>
                       </td>
@@ -772,6 +1337,215 @@ export default function Matriculas() {
           </div>
         </div>
       )}
+    </main>
+  );
+}
+
+/* src/pages/Boletim/index.jsx */
+
+import React, { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import { FaSave, FaArrowLeft, FaGraduationCap, FaCalendarCheck } from "react-icons/fa";
+import "./styles.css";
+
+export default function Boletim() {
+  const { termoId } = useParams();
+  const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(true);
+  const [alunoInfo, setAlunoInfo] = useState({ nome: "", curso: "" });
+  const [termos, setTermos] = useState([]);
+  const [termoAtivo, setTermoAtivo] = useState(null);
+
+  const carregarDados = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await api.getDetalhesBoletim(termoId);
+      setAlunoInfo({
+        nome: res.alunoNome || "Estudante",
+        curso: res.cursoNome || "Curso",
+      });
+      setTermos(res.todosOsTermos || []);
+
+      if (!termoAtivo) {
+        const ativo = res.todosOsTermos?.find((t) => t.id === parseInt(termoId));
+        if (ativo) setTermoAtivo(ativo);
+      } else {
+        const atualizado = res.todosOsTermos?.find((t) => t.id === termoAtivo.id);
+        if (atualizado) setTermoAtivo(atualizado);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar boletim:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [termoId, termoAtivo]);
+
+  useEffect(() => { carregarDados(); }, [termoId]);
+
+  const handleSalvar = async () => {
+  if (!termoAtivo) return;
+
+  // 1. Tratamento das Notas (converte string vazia para 0 e garante que seja número)
+  const n1 = termoAtivo.nota1 === "" || termoAtivo.nota1 === null ? 0 : parseFloat(termoAtivo.nota1);
+  const n2 = termoAtivo.nota2 === "" || termoAtivo.nota2 === null ? 0 : parseFloat(termoAtivo.nota2);
+
+  // 2. Validação de Regra de Negócio: Se tem nota, tem que ter data
+  if (n1 > 0 && (!termoAtivo.dataProva1 || String(termoAtivo.dataProva1).trim() === "")) {
+    alert("Nota 1 lançada, informe a data da prova.");
+    return; // Para a execução aqui
+  }
+
+  if (n2 > 0 && (!termoAtivo.dataProva2 || String(termoAtivo.dataProva2).trim() === "")) {
+    alert("Nota 2 lançada, informe a data da prova.");
+    return; // Para a execução aqui
+  }
+
+  try {
+    setLoading(true);
+    
+    // 3. Montagem do objeto de envio
+    const dadosParaSalvar = {
+      ...termoAtivo,
+      nota1: isNaN(n1) ? 0 : n1,
+      nota2: isNaN(n2) ? 0 : n2,
+      // Garante que datas vazias vão como null para o banco
+      dataProva1: termoAtivo.dataProva1 || null,
+      dataProva2: termoAtivo.dataProva2 || null,
+    };
+
+    await api.updateBoletim(termoAtivo.id, dadosParaSalvar);
+    
+    alert(`Dados do ${termoAtivo.numeroTermo}º Termo salvos!`);
+    await carregarDados();
+    
+  } catch (error) {
+    console.error("Erro ao salvar:", error);
+    alert(error.response?.data?.message || "Erro ao salvar notas.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const calcularMedia = (n1, n2) => ((parseFloat(n1 || 0) + parseFloat(n2 || 0)) / 2).toFixed(1);
+
+  return (
+    <main className="conteudo-principal">
+      <div className="container-principal">
+        
+        <header className="header-card">
+          <div style={{display: 'flex', alignItems: 'center', gap: '15px'}}>
+            <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+              <FaArrowLeft /> Voltar
+            </button>
+            <h2 style={{margin: 0}}><FaGraduationCap /> Boletim: {alunoInfo.nome}</h2>
+          </div>
+          <span className="count-badge">{alunoInfo.curso}</span>
+        </header>
+
+        <div className="layout-boletim-flex">
+          {/* SIDEBAR */}
+          <aside className="sidebar-modulos">
+            <h3>Módulos</h3>
+            <div className="lista-termos-scroll">
+              {termos.map((t) => (
+                <div 
+                  key={t.id} 
+                  className={`item-termo-card ${termoAtivo?.id === t.id ? "ativo" : ""}`} 
+                  onClick={() => setTermoAtivo(t)}
+                >
+                  <div className="termo-topo">
+                    <strong>{t.numeroTermo}º Termo</strong>
+                    <span className="badge-aulas">{t.aulasRealizadas} aulas</span>
+                  </div>
+                  <div className="termo-media-info">Média: {calcularMedia(t.nota1, t.nota2)}</div>
+                </div>
+              ))}
+            </div>
+          </aside>
+
+          {/* PAINEL DE EDIÇÃO COM CLASSES PADRONIZADAS */}
+          <section className="painel-notas-central">
+            {termoAtivo ? (
+              <div className="card-principal">
+                <div className="alerta-modulo">
+                  Lançamento de Notas: <strong>{termoAtivo.numeroTermo}º Termo</strong>
+                </div>
+
+                <div className="grid-notas-form">
+                  {/* SEÇÃO PRÁTICA */}
+                  <div className="bloco-prova">
+                    <h4>Avaliação Prática</h4>
+                    <div className="form-row-compact">
+                      <div className="input-group campo-curto">
+                        <label>Nota</label>
+                        <input type="number" min="0" max="10" step="0.1" className="input-field"
+                          value={termoAtivo.nota1 || ""}
+                          onChange={(e) => setTermoAtivo({ ...termoAtivo, nota1: e.target.value })}
+                        />
+                      </div>
+                      <div className="input-group campo-curto">
+                        <label>Data</label>
+                        <input type="date" className="input-data"
+                          value={termoAtivo.dataProva1 ? termoAtivo.dataProva1.split("T")[0] : ""}
+                          onChange={(e) => setTermoAtivo({ ...termoAtivo, dataProva1: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SEÇÃO TEÓRICA */}
+                  <div className="bloco-prova">
+                    <h4>Avaliação Teórica</h4>
+                    <div className="form-row-compact">
+                      <div className="input-group campo-curto">
+                        <label>Nota</label>
+                        <input type="number" min="0" max="10" step="0.1" className="input-field"
+                          value={termoAtivo.nota2 || ""}
+                          onChange={(e) => setTermoAtivo({ ...termoAtivo, nota2: e.target.value })}
+                        />
+                      </div>
+                      <div className="input-group campo-curto">
+                        <label>Data</label>
+                        <input type="date" className="input-data"
+                          value={termoAtivo.dataProva2 ? termoAtivo.dataProva2.split("T")[0] : ""}
+                          onChange={(e) => setTermoAtivo({ ...termoAtivo, dataProva2: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* RESULTADO FINAL */}
+                  <div className="bloco-resultado">
+                    <h4>Média</h4>
+                    <div className={`circulo-media ${calcularMedia(termoAtivo.nota1, termoAtivo.nota2) >= 8 ? "aprovado" : "reprovado"}`}>
+                      {calcularMedia(termoAtivo.nota1, termoAtivo.nota2)}
+                    </div>
+                    <div className="txt-aulas-info"><FaCalendarCheck /> {termoAtivo.aulasRealizadas} aulas</div>
+                  </div>
+                </div>
+
+                <div className="input-group" style={{marginTop: '15px'}}>
+                  <label>Observações Pedagógicas</label>
+                  <textarea rows="2" className="input-field"
+                    value={termoAtivo.obs || ""}
+                    onChange={(e) => setTermoAtivo({ ...termoAtivo, obs: e.target.value })}
+                  />
+                </div>
+
+                <div className="acoes-form">
+                  <button className="btn btn-primary" style={{width: '100%'}} onClick={handleSalvar} disabled={loading}>
+                    <FaSave /> Salvar {termoAtivo.numeroTermo}º Termo
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="aviso-vazio">Selecione um termo para editar.</div>
+            )}
+          </section>
+        </div>
+      </div>
     </main>
   );
 }

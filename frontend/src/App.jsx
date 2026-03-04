@@ -1,9 +1,11 @@
-import "./App.css";
-import React, { useState, useEffect } from "react"; // Adicionado useEffect
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { FaBirthdayCake, FaTimes } from "react-icons/fa"; // Ícones que você já usa
+//Local: /src/App.jsx
 
-// 1. Imports de Autenticação
+import "./App.css";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { FaBirthdayCake, FaTimes } from "react-icons/fa";
+
+// 1. Contexto e Hooks
 import { AuthProvider } from "./AuthContext.jsx";
 import { useAuth } from "./hooks/useAuth.js";
 import api from "./services/api.js";
@@ -19,30 +21,28 @@ import Matriculas from "./pages/Matriculas/index.jsx";
 import Agenda from "./pages/Agenda/index.jsx";
 import Financeiro from "./pages/Financeiro/index.jsx";
 import Usuarios from "./pages/Usuarios/index.jsx";
-import PaginaFantasma from "./pages/Template/index.jsx";
 import Boletim from "./pages/Boletim/index.jsx";
 import AuditLogs from "./pages/Logs/index.jsx";
 
-
-// 🎂 Componente de Notificação de Aniversariantes
+// 🎂 Componente de Aniversário (Otimizado para aparecer apenas 1x por sessão)
 function NotificacaoAniversario() {
   const [aniversariantes, setAniversariantes] = useState([]);
-  const [visivel, setVisivel] = useState(true);
+  const [visivel, setVisivel] = useState(false);
 
   useEffect(() => {
-    const buscarDados = async () => {
-      try {
-        const dados = await api.getAniversariantes();
-        console.log("DEBUG ANIVERSARIANTES:", dados); // Veja isso no F12 do navegador
-
-        if (Array.isArray(dados)) {
-          setAniversariantes(dados);
-        }
-      } catch (err) {
-        console.error("Erro ao buscar aniversariantes:", err);
-      }
-    };
-    buscarDados();
+    const jaExibiu = sessionStorage.getItem("@App:exibiuAniversario");
+    if (!jaExibiu) {
+      api
+        .getAniversariantes()
+        .then((dados) => {
+          if (Array.isArray(dados) && dados.length > 0) {
+            setAniversariantes(dados);
+            setVisivel(true);
+            sessionStorage.setItem("@App:exibiuAniversario", "true");
+          }
+        })
+        .catch((err) => console.error("Erro aniversariantes:", err));
+    }
   }, []);
 
   if (!visivel || aniversariantes.length === 0) return null;
@@ -62,18 +62,25 @@ function NotificacaoAniversario() {
   );
 }
 
-// 🛡️ Componente de Proteção Geral
-function PrivateRoute({ children }) {
+// 🛡️ Wrapper de Proteção e Layout (Garante que o Menu apareça em todas)
+function PrivateLayout({ children }) {
   const { user, loading } = useAuth();
 
-  if (loading) return <div style={{ padding: "20px" }}>Carregando...</div>;
+  if (loading) return <div style={{ padding: "20px" }}>Sincronizando...</div>;
   if (!user) return <Navigate to="/login" replace />;
 
-  if (user.primeiroAcesso === true) {
-    return <Navigate to="/reset-password" replace />;
-  }
+  // Redireciona se for primeiro acesso
+  if (user.primeiroAcesso === true) return <Navigate to="/reset-password" replace />;
 
-  return children;
+  return (
+    <div className="app-layout">
+      <Menu />
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
+        <NotificacaoAniversario />
+        <main className="conteudo-principal">{children}</main>
+      </div>
+    </div>
+  );
 }
 
 export default function App() {
@@ -81,46 +88,101 @@ export default function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          {/* Rotas Públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<AuthConsumerReset />} />
 
+          {/* Rotas Privadas (Estrutura Plana) */}
           <Route
-            path="/*"
+            path="/"
             element={
-              <PrivateRoute>
-                <div className="app-layout">
-                  <Menu />
-                  {/* Container flex para empilhar o alerta e o conteúdo */}
-                  <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
-                    <NotificacaoAniversario />
-                    <main className="conteudo-principal">
-                      <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/alunos" element={<Alunos />} />
-                        <Route path="/boletim/:termoId" element={<Boletim />} />
-                        <Route path="/cursos" element={<Cursos />} />
-                        <Route path="/mapa" element={<Mapa />} />
-                        <Route path="/matriculas" element={<Matriculas />} />
-                        <Route path="/agenda" element={<Agenda />} />
-                        <Route path="/financeiro" element={<Financeiro />} />
-                        <Route path="/usuarios" element={<Usuarios />} />
-                        {<Route path="/logs" element={<AuditLogs />} />}
-                        <Route path="/developer/template" element={<PaginaFantasma />} />
-                        {/*<Route path="*" element={<Navigate to="/" replace />} />*/}
-                      </Routes>
-                    </main>
-                  </div>
-                </div>
-              </PrivateRoute>
+              <PrivateLayout>
+                <Home />
+              </PrivateLayout>
             }
           />
+          <Route
+            path="/alunos"
+            element={
+              <PrivateLayout>
+                <Alunos />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/matriculas"
+            element={
+              <PrivateLayout>
+                <Matriculas />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/boletim/:termoId"
+            element={
+              <PrivateLayout>
+                <Boletim />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/cursos"
+            element={
+              <PrivateLayout>
+                <Cursos />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/mapa"
+            element={
+              <PrivateLayout>
+                <Mapa />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/agenda"
+            element={
+              <PrivateLayout>
+                <Agenda />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/financeiro"
+            element={
+              <PrivateLayout>
+                <Financeiro />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/usuarios"
+            element={
+              <PrivateLayout>
+                <Usuarios />
+              </PrivateLayout>
+            }
+          />
+          <Route
+            path="/logs"
+            element={
+              <PrivateLayout>
+                <AuditLogs />
+              </PrivateLayout>
+            }
+          />
+
+          {/* Rota de escape */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
   );
 }
 
-// 🔑 Componente de Reset Integrado
+// 🔑 Componente de Reset Integrado (Mantenha como estava)
 function AuthConsumerReset() {
   const { user, authenticated, logout } = useAuth();
   const [novaSenha, setNovaSenha] = useState("");
@@ -147,34 +209,31 @@ function AuthConsumerReset() {
 
   return (
     <div className="reset-password-container">
-      <div className="reset-password-card">
-        <h2 style={{ textAlign: "center", color: "#333" }}>Nova Senha</h2>
-        <p style={{ textAlign: "center", color: "#666" }}>
+      <form onSubmit={handleReset} className="reset-password-card">
+        <h2>Nova Senha</h2>
+        <p>
           Olá <strong>{user?.nome}</strong>, altere sua senha inicial.
         </p>
-
-        <form onSubmit={handleReset} className="reset-password-form">
-          <input
-            className="input-reset"
-            type="password"
-            placeholder="Nova senha"
-            required
-            value={novaSenha}
-            onChange={(e) => setNovaSenha(e.target.value)}
-          />
-          <input
-            className="input-reset"
-            type="password"
-            placeholder="Confirme a nova senha"
-            required
-            value={confirmar}
-            onChange={(e) => setConfirmar(e.target.value)}
-          />
-          <button type="submit" disabled={loading} className="btn-reset">
-            {loading ? "Processando..." : "Salvar Nova Senha"}
-          </button>
-        </form>
-      </div>
+        <input
+          type="password"
+          placeholder="Nova senha"
+          required
+          value={novaSenha}
+          onChange={(e) => setNovaSenha(e.target.value)}
+          className="input-field"
+        />
+        <input
+          type="password"
+          placeholder="Confirme senha"
+          required
+          value={confirmar}
+          onChange={(e) => setConfirmar(e.target.value)}
+          className="input-field"
+        />
+        <button type="submit" disabled={loading} className="btn btn-primary">
+          Salvar Nova Senha
+        </button>
+      </form>
     </div>
   );
 }

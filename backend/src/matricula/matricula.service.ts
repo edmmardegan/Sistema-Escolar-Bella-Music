@@ -237,21 +237,16 @@ export class MatriculaService {
     return await this.repository.delete(id);
   }
 
-  async getDetalhesBoletim(termoId: number) {
-    const termo = await this.termoRepo.findOne({
-      where: { id: termoId },
-      relations: ['matricula'],
-    });
-    if (!termo) throw new NotFoundException('Termo não encontrado');
-
+  async getDetalhesBoletim(matriculaId: number) {
+    // Busca a matrícula diretamente pelo ID dela
     const fullMat = await this.repository.findOne({
-      where: { id: termo.matricula.id },
-      relations: ['aluno', 'curso', 'termos.aulas'],
+      where: { id: matriculaId },
+      relations: ['aluno', 'curso', 'termos', 'termos.aulas'],
       order: { termos: { numeroTermo: 'ASC' } },
     });
 
     if (!fullMat) {
-      throw new NotFoundException('Matrícula não encontrada para este termo');
+      throw new NotFoundException('Matrícula não encontrada');
     }
 
     return {

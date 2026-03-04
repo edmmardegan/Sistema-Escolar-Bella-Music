@@ -1,3 +1,5 @@
+//Local: /src/pages/Financeiro/index.jsx
+
 import React, { useState, useEffect, useCallback } from "react";
 import { FaDollarSign, FaMagic, FaTrash, FaCheck, FaUndo, FaHandHoldingUsd, FaListOl, FaTimes, FaSearch } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
@@ -285,7 +287,7 @@ export default function Financeiro() {
                       <td className="acoes" style={{ justifyContent: "center" }}>
                         {!isPaga ? (
                           <>
-                            <button onClick={() => handleAcao(p.id, "pagar")} className="btn-icon btn-edit" title="Pagar">
+                            <button onClick={() => handleAcao(p.id, "pagar")} className="btn-icon btn-edit" title="Baixar">
                               <FaCheck />
                             </button>
                             <button
