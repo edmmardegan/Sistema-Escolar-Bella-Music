@@ -23,15 +23,10 @@ export class FinanceiroService {
   ) {}
 
   async findAll() {
-    console.log('--- CHAMANDO FINDALL FINANCEIRO ---');
     const dados = await this.repository.find({
       relations: ['aluno', 'matricula'], // Força o Join com as duas tabelas
       order: { dataVencimento: 'ASC' },
     });
-
-    // Esse log vai aparecer no terminal onde o seu NestJS está rodando.
-    // Se aqui aparecer o nome do aluno, o backend está corrigido!
-    console.log('PRIMEIRO REGISTRO:', dados[0]);
 
     return dados;
   }

@@ -153,10 +153,10 @@ export default function Cursos() {
               </div>
 
               <div className="acoes-form">
-                <button id="btn-salvar-curso" type="submit" className="btn btn-primary">
+                <button id="btn-salvar-curso" type="submit" className="btn btn-success">
                   <FaSave /> Salvar [F4]
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={limparECancelar}>
+                <button type="button" className="btn btn-danger" onClick={limparECancelar}>
                   <FaTimes /> Cancelar [Esc]
                 </button>
               </div>

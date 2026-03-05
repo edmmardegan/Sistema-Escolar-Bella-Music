@@ -1,3 +1,5 @@
+//Local: /src/entities/curso.entity.ts
+
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Matricula } from './matricula.entity';
 

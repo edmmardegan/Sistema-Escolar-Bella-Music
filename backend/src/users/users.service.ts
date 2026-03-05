@@ -158,9 +158,6 @@ export class UsersService implements OnModuleInit {
     forcarTroca: boolean,
     userName: string = 'SISTEMA',
   ) {
-    console.log('--- TENTANDO RESETAR SENHA ---');
-    console.log('ID recebido:', id);
-    console.log('Senha recebida (tamanho):', novaSenha?.length);
     // 1. Busca o usuário antes para saber o nome no log
     const usuario = await this.userRepository.findOneBy({ id });
 

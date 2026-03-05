@@ -30,7 +30,6 @@ export class AuditSubscriber
     if (!this.dataSource.subscribers.includes(this)) {
       this.dataSource.subscribers.push(this);
     }
-    console.log('🚀 [Subscriber] Vinculado com sucesso ao DataSource!');
   }
 
   listenTo() {

@@ -42,6 +42,7 @@ export default function Matriculas() {
   const [buscaNome, setBuscaNome] = useState("");
   const inputFocoRef = useRef(null);
   const navigate = useNavigate();
+  const [ordenacao, setOrdenacao] = useState({ campo: "aluno.nome", direcao: "asc" });
 
   const [form, setForm] = useState({
     aluno: "",
@@ -61,6 +62,11 @@ export default function Matriculas() {
     termo_atual: 1,
     professor: "Cristiane",
   });
+
+  const handleOrdenar = (campo) => {
+    const novaDirecao = ordenacao.campo === campo && ordenacao.direcao === "asc" ? "desc" : "asc";
+    setOrdenacao({ campo, direcao: novaDirecao });
+  };
 
   // --- FUNÇÃO DE FORMATAÇÃO PROTEGIDA ---
   const formatarSafe = (d) => {
@@ -126,7 +132,53 @@ export default function Matriculas() {
       const matchProfessor = filtroProfessor === "Todas" ? true : m.professor === filtroProfessor;
       return matchSituacao && matchProfessor;
     })
-    .sort((a, b) => (a.aluno?.nome || "").localeCompare(b.aluno?.nome || ""));
+    .sort((a, b) => {
+      let valorA, valorB;
+
+      // Mapeia os campos do clique para os dados do objeto
+      switch (ordenacao.campo) {
+        case "aluno":
+          valorA = a.aluno?.nome || "";
+          valorB = b.aluno?.nome || "";
+          break;
+        case "curso":
+          valorA = a.curso?.nome || "";
+          valorB = b.curso?.nome || "";
+          break;
+        case "dia":
+          valorA = a.diaSemana?.none || "";
+          valorB = b.diaSemana?.none || "";
+          break;
+        case "situacao":
+          valorA = a.diaSemana?.none || "";
+          valorB = b.diaSemana?.none || "";
+          break;
+
+        case "data":
+          valorA = a.dataInicio || "";
+          valorB = b.dataInicio || "";
+          break;
+        case "dataTrancamento":
+          valorA = a.dataTrancamento || "";
+          valorB = b.dataTrancamento || "";
+          break;
+        case "dataConclusao":
+          valorA = a.dataConclusao || "";
+          valorB = b.dataConclusao || "";
+          break;
+        case "matricula":
+          valorA = a.id;
+          valorB = b.id;
+          break;
+        default:
+          valorA = a.aluno?.nome || "";
+          valorB = b.aluno?.nome || "";
+      }
+
+      if (valorA < valorB) return ordenacao.direcao === "asc" ? -1 : 1;
+      if (valorA > valorB) return ordenacao.direcao === "asc" ? 1 : -1;
+      return 0;
+    });
 
   // --- AÇÕES ---
   const salvar = async (e) => {
@@ -324,7 +376,6 @@ export default function Matriculas() {
                 </select>
               </div>
 
-              {/* LINHA 2 */}
               <div className="input-group campo-curto">
                 <label>Curso:</label>
                 <select required name="curso" value={form.curso} onChange={handleChange} className="input-field" disabled={!!editandoId}>
@@ -340,10 +391,26 @@ export default function Matriculas() {
               </div>
 
               <div className="input-group campo-curto">
+                <label>Professora:</label>
+                <select name="professor" value={form.professor} onChange={handleChange} className="input-field">
+                  <option value="Cristiane">Cristiane</option>
+                  <option value="Daiane">Daiane</option>
+                </select>
+              </div>
+
+              <div className="input-group campo-curto">
                 <label>Modalidade:</label>
                 <select name="tipo" value={form.tipo} onChange={handleChange} className="input-field">
                   <option value="Presencial">Presencial</option>
                   <option value="Residencial">Residencial</option>
+                </select>
+              </div>
+
+              <div className="input-group campo-curto">
+                <label>Frequência:</label>
+                <select name="frequencia" value={form.frequencia} onChange={handleChange} className="input-field">
+                  <option value="Semanal">Semanal</option>
+                  <option value="Quinzenal">Quinzenal</option>
                 </select>
               </div>
 
@@ -365,11 +432,8 @@ export default function Matriculas() {
               </div>
 
               <div className="input-group campo-curto">
-                <label>Frequência:</label>
-                <select name="frequencia" value={form.frequencia} onChange={handleChange} className="input-field">
-                  <option value="Semanal">Semanal</option>
-                  <option value="Quinzenal">Quinzenal</option>
-                </select>
+                <label>Termo Atual:</label>
+                <input type="number" name="termo_atual" value={form.termo_atual} onChange={handleChange} className="input-field" />
               </div>
 
               {/* LINHA 4 - VALORES */}
@@ -390,7 +454,6 @@ export default function Matriculas() {
                 />
               </div>
 
-              {/* LINHA 5 */}
               <div className="input-group campo-curto">
                 <label>Dia Venc.:</label>
                 <select name="diaVencimento" value={form.diaVencimento} onChange={handleChange} className="input-field">
@@ -402,24 +465,6 @@ export default function Matriculas() {
                 </select>
               </div>
 
-              <div className="input-group campo-curto">
-                <label>Situação:</label>
-                <select name="situacao" value={form.situacao} onChange={handleChange} className="input-field">
-                  <option value="Em Andamento">Em Andamento</option>
-                  <option value="Trancado">Trancado</option>
-                  <option value="Finalizado">Finalizado</option>
-                </select>
-              </div>
-
-              <div className="input-group campo-curto">
-                <label>Professora:</label>
-                <select name="professor" value={form.professor} onChange={handleChange} className="input-field">
-                  <option value="Cristiane">Cristiane</option>
-                  <option value="Daiane">Daiane</option>
-                </select>
-              </div>
-
-              {/* LINHA 6 */}
               <div className="input-group campo-curto">
                 <label>Data Início:</label>
                 <input type="date" name="dataInicio" value={form.dataInicio} onChange={handleChange} className="input-field" />
@@ -450,15 +495,19 @@ export default function Matriculas() {
               </div>
 
               <div className="input-group campo-curto">
-                <label>Termo Atual:</label>
-                <input type="number" name="termo_atual" value={form.termo_atual} onChange={handleChange} className="input-field" />
+                <label>Situação:</label>
+                <select name="situacao" value={form.situacao} onChange={handleChange} className="input-field">
+                  <option value="Em Andamento">Em Andamento</option>
+                  <option value="Trancado">Trancado</option>
+                  <option value="Finalizado">Finalizado</option>
+                </select>
               </div>
 
               <div className="acoes-form">
-                <button id="btn-salvar-mat" type="submit" className="btn btn-primary">
+                <button id="btn-salvar-mat" type="submit" className="btn btn-success">
                   <FaSave /> Salvar [F4]
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={limparForm}>
+                <button type="button" className="btn btn-danger" onClick={limparForm}>
                   <FaTimes /> Cancelar [Esc]
                 </button>
               </div>
@@ -505,36 +554,63 @@ export default function Matriculas() {
           <table className="tabela">
             <thead>
               <tr>
-                <th>Aluno / Profa.</th>
-                <th>Curso / Termo</th>
+                <th onClick={() => handleOrdenar("aluno")} style={{ cursor: "pointer" }}>
+                  Aluno / Profa. {ordenacao.campo === "aluno" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                </th>
+
+                <th onClick={() => handleOrdenar("curso")} style={{ cursor: "pointer" }}>
+                  Curso / Termo {ordenacao.campo === "curso" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                </th>
 
                 {filtroSituacao === "Em Andamento" && (
                   <>
-                    <th>Dia / Horário</th>
-                    <th>Data Matrícula</th>
+                    <th onClick={() => handleOrdenar("diaSemana")} style={{ cursor: "pointer" }}>
+                      Dia / Horário {ordenacao.campo === "diaSemana" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                    </th>
+
+                    <th onClick={() => handleOrdenar("data")} style={{ cursor: "pointer" }}>
+                      Data Matrícula {ordenacao.campo === "data" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                    </th>
                   </>
                 )}
 
                 {filtroSituacao === "Trancado" && (
                   <>
-                    <th>Data Matrícula</th>
-                    <th>Data Trancamento</th>
+                    <th onClick={() => handleOrdenar("data")} style={{ cursor: "pointer" }}>
+                      Data Matrícula {ordenacao.campo === "data" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                    </th>
+
+                    <th onClick={() => handleOrdenar("dataTrancamento")} style={{ cursor: "pointer" }}>
+                      Data Trancamento {ordenacao.campo === "dataTrancamento" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                    </th>
                   </>
                 )}
 
                 {filtroSituacao === "Finalizado" && (
                   <>
-                    <th>Data Matrícula</th>
-                    <th>Data Conclusão</th>
+                    <th onClick={() => handleOrdenar("data")} style={{ cursor: "pointer" }}>
+                      Data Matrícula {ordenacao.campo === "data" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                    </th>
+
+                    <th onClick={() => handleOrdenar("dataConclusao")} style={{ cursor: "pointer" }}>
+                      Data Conclusão {ordenacao.campo === "dataConclusao" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                    </th>
                   </>
                 )}
 
                 {filtroSituacao === "Todos" && (
                   <>
-                    <th>Dia / Horário</th>
-                    <th>Data Matrícula</th>
+                    <th onClick={() => handleOrdenar("diaSemana")} style={{ cursor: "pointer" }}>
+                      Dia / Horário {ordenacao.campo === "diaSemana" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                    </th>
+
+                    <th onClick={() => handleOrdenar("data")} style={{ cursor: "pointer" }}>
+                      Data Matrícula {ordenacao.campo === "data" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                    </th>
                     <th>Data Final</th>
-                    <th>Status</th>
+                    <th onClick={() => handleOrdenar("situacao")} style={{ cursor: "pointer" }}>
+                      Status {ordenacao.campo === "situacao" && (ordenacao.direcao === "asc" ? "🔼" : "🔽")}
+                    </th>
                   </>
                 )}
 

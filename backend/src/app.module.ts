@@ -35,10 +35,10 @@ const nodeEnv = process.env.NODE_ENV || 'development';
 const envFile =
   nodeEnv === 'production' ? '.env.production' : '.env.development';
 
-console.log('====================================');
-console.log('🚀 Ambiente:', nodeEnv);
-console.log('📄 Arquivo .env carregado:', envFile);
-console.log('====================================');
+//console.log('====================================');
+//console.log('🚀 Ambiente:', nodeEnv);
+//console.log('📄 Arquivo .env carregado:', envFile);
+//console.log('====================================');
 
 @Module({
   imports: [
@@ -56,11 +56,6 @@ console.log('====================================');
         const database = config.get<string>('DB_DATABASE');
         const username = config.get<string>('DB_USERNAME');
         const password = config.get<string>('DB_PASSWORD');
-
-        console.log('🔎 DB_HOST:', host);
-        console.log('🔎 DB_PORT:', port);
-        console.log('🔎 DB_DATABASE:', database);
-        console.log('🔎 DB_USERNAME:', username);
 
         return {
           type: 'postgres',

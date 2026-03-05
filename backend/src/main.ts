@@ -17,13 +17,10 @@ async function bootstrap() {
       forbidNonWhitelisted: false,
       transform: true,
       exceptionFactory: (errors) => {
-        console.log('--- ERRO DE VALIDAÇÃO DETECTADO ---');
         errors.forEach((err) => {
-          console.log(`Campo: ${err.property}`);
-          console.log(
-            `Erros: ${Object.values(err.constraints || {}).join(', ')}`,
-          );
-          console.log(`Valor recebido:`, err.value);
+          //console.log(`Campo: ${err.property}`);
+          //console.log(`Erros: ${Object.values(err.constraints || {}).join(', ')}`,);
+          //console.log(`Valor recebido:`, err.value);
         });
         return new BadRequestException(errors);
       },

@@ -42,7 +42,6 @@ export class AlunoController {
     @Body() dados: UpdateAlunoDto,
     @Req() req: any,
   ) {
-    console.log('👤 Usuário logado na requisição:', req.user);
     const userName = req.user?.email || req.user?.username || 'SISTEMA_LOCAL';
 
     // Unimos o ID com os dados para o método save

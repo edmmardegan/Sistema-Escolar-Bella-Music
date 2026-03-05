@@ -299,6 +299,11 @@ export default function Alunos() {
                 <input type="date" name="dataNascimento" value={form.dataNascimento || ""} onChange={handleChange} className="input-field" />
               </div>
 
+              <div className="input-group campo-pequeno">
+                <label>Cep:</label>
+                <input name="cep" value={form.cep || ""} onChange={handleChange} className="input-field" />
+              </div>
+
               <div className="input-group campo-medio">
                 <label>Endereço:</label>
                 <input name="endereco" value={form.endereco || ""} onChange={handleChange} className="input-field" />
@@ -319,11 +324,6 @@ export default function Alunos() {
                 <input name="bairro" value={form.bairro || ""} onChange={handleChange} className="input-field" />
               </div>
 
-              <div className="input-group campo-pequeno">
-                <label>Cep:</label>
-                <input name="cep" value={form.cep || ""} onChange={handleChange} className="input-field" />
-              </div>
-
               <div className="input-group campo-curto">
                 <label>Cidade:</label>
                 <input name="cidade" value={form.cidade || ""} onChange={handleChange} className="input-field" />
@@ -341,10 +341,10 @@ export default function Alunos() {
 
               {/* BOTOES DO FORMULARIO */}
               <div className="acoes-form">
-                <button id="btn-salvar-aluno" type="submit" className="btn btn-primary">
+                <button id="btn-salvar-aluno" type="submit" className="btn btn-success">
                   <FaSave /> Salvar Ficha [F4]
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={fecharFormulario}>
+                <button type="button" className="btn btn-danger" onClick={fecharFormulario}>
                   <FaTimes /> Cancelar [Esc]
                 </button>
               </div>
@@ -389,6 +389,7 @@ export default function Alunos() {
               <thead>
                 <tr>
                   <th>Nome / Endereço</th>
+                  <th>Curso</th>
                   <th>Telefone</th>
                   <th>Nascimento</th>
                   <th>Status</th>
@@ -418,6 +419,12 @@ export default function Alunos() {
                           {a.endereco ? `End.: ${a.endereco}, ${a.numero} - ${a.bairro}` : "Sem endereço cadastrado"}
                         </small>
                       </td>
+
+                      <tr key={aluno.id}>
+                        <td>{aluno.nome}</td>
+                        <td>{nomeCurso}</td> {/* O nome do curso "jogado" aqui */}
+                        <td>{aluno.telefone}</td>
+                      </tr>
                       <td>
                         <a
                           href={`https://wa.me/55${a.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${a.nome}, tudo bem? Aqui é da Escola Bella Music.`)}`}

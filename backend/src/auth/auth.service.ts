@@ -17,14 +17,8 @@ export class AuthService {
   ): Promise<Partial<User> | null> {
     // 1. Primeiro buscamos o usuário
     const user = await this.usersService.findOne(loginInformado);
-    const hashManual =
-      '$2b$10$Xo8v314W8.Rtm1X35f1uS.7yWpC6iR/eN.X2Ea0N9R5H9o3r3I.G.';
-    const testeIsolado = await bcrypt.compare('admin123', hashManual);
-    console.log('--- TESTE DE LABORATÓRIO ---');
-    console.log('O BcryptJS funciona com admin123?', testeIsolado);
 
     if (!user) {
-      console.log('LOG: Usuário não encontrado:', loginInformado);
       return null;
     }
 
@@ -32,18 +26,8 @@ export class AuthService {
     const senhaLimpa = senhaDigitada.trim();
     const hashLimpo = user.senha.trim();
 
-    console.log('--- DEBUG DE PRODUÇÃO ---');
-    console.log('Login informado:', loginInformado);
-    console.log('Senha (original):', `|${senhaDigitada}|`);
-    console.log('Senha (limpa):', `|${senhaLimpa}|`);
-    console.log('Hash do banco:', `|${hashLimpo}|`);
-    console.log('Tamanho da Senha:', senhaLimpa.length);
-    console.log('Tamanho do Hash:', hashLimpo.length);
-
     // 3. Comparamos usando os valores limpos
     const isMatch = await bcrypt.compare(senhaLimpa, hashLimpo);
-
-    console.log('✅ Usuário achado! Senha bateu?', isMatch);
 
     if (isMatch) {
       const userSeguro = { ...user };
@@ -51,7 +35,6 @@ export class AuthService {
       return result as Partial<User>;
     }
 
-    console.log('LOG: Senha incorreta para:', loginInformado);
     return null;
   }
 

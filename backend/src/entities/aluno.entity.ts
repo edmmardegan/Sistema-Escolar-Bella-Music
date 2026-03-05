@@ -74,4 +74,13 @@ export class Aluno {
 
   @OneToMany(() => Matricula, (matricula) => matricula.aluno)
   matriculas: Matricula[];
+
+  // CAMPO VIRTUAL: Retorna o nome do curso se houver matrícula ativa
+  get cursoAtual(): string {
+    if (!this.matriculas || this.matriculas.length === 0) return 'Sem curso';
+
+    // Busca a matrícula que está "Em Andamento"
+    const ativa = this.matriculas.find((m) => m.situacao === 'Em Andamento');
+    return ativa?.curso?.nome || 'Sem curso ativo';
+  }
 }

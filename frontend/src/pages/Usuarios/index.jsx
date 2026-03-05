@@ -149,10 +149,10 @@ const Usuarios = () => {
               </div>
 
               <div className="acoes-form">
-                <button id="btn-salvar-usuario" type="submit" className="btn btn-primary" disabled={loading}>
+                <button id="btn-salvar-usuario" type="submit" className="btn btn-success" disabled={loading}>
                   <FaSave /> Salvar [F4]
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={limparForm}>
+                <button type="button" className="btn btn-danger" onClick={limparForm}>
                   <FaTimes /> Cancelar [Esc]
                 </button>
               </div>

@@ -12,7 +12,6 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { FinanceiroCalculoUtil } from '../financeiro/utils/financeiro-calculo.util';
 import { Financeiro } from 'src/entities/financeiro.entity';
 import { AuditService } from '../audit/audit.service';
-import { ILike } from 'typeorm';
 
 @Injectable()
 export class MatriculaService {
