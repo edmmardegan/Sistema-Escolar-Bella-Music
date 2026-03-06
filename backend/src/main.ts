@@ -29,7 +29,10 @@ async function bootstrap() {
 
   // Configuração de CORS aberta para facilitar a demonstração na rede interna
   app.enableCors({
-    origin: '*',
+    origin: (origin, callback) => {
+      // Permite qualquer origem (inclusive seu IP e localhost) para teste
+      callback(null, true);
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
