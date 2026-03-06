@@ -171,7 +171,7 @@ export default function Alunos() {
   };
 
   const alternarStatus = async (aluno) => {
-    // Verifica se o aluno tem ALGUMA matrícula "Em andamento"
+    // 1. Verificação de Matrícula (Lógica de Negócio)
     const possuiMatricula = aluno.matriculas?.some(
       (m) =>
         String(m.situacao || "")
@@ -181,18 +181,24 @@ export default function Alunos() {
 
     if (possuiMatricula) {
       alert("⚠️ Este aluno possui matrícula 'Em andamento' e não pode ter o status alterado.");
-      return; // Para a execução aqui
+      return;
     }
 
-    // Se não possuir, o código segue normal...
+    // 2. Definição do novo valor boolean
     const novoStatus = !aluno.ativo;
     if (!window.confirm(`Deseja realmente alterar para ${novoStatus ? "Ativo" : "Inativo"}?`)) return;
 
     try {
-      await api.saveAluno({ ...aluno, ativo: novoStatus }, aluno.id);
+      // AQUI ESTÁ O SEGREDO:
+      // Enviamos um objeto novo contendo APENAS o campo 'ativo'
+      // Isso garante que o TypeORM faça um: UPDATE aluno SET ativo = ... WHERE id = ...
+      await api.saveAluno({ ativo: novoStatus }, aluno.id);
+
+      // 3. Feedback e Atualização da Tela
       carregar();
     } catch (error) {
-      console.error(error);
+      console.error("Erro ao alterar status:", error);
+      alert("Erro ao salvar alteração no banco de dados.");
     }
   };
 
@@ -402,29 +408,24 @@ export default function Alunos() {
                     <tr key={a.id}>
                       <td>
                         <strong className="txt-registros">{a.nome}</strong>
-
-                        {/* Seq quiser mostrar os cursos em andamento 
-                        {a.matriculas && a.matriculas.length > 0 && (
-                          <div style={{ marginTop: "5px" }}>
-                            {a.matriculas.map((m) => (
-                              <span key={m.id} style={{ backgroundColor: "#e8f0fe", padding: "2px 8px", borderRadius: "4px", fontSize: "11px" }}>
-                                Matricula: {m.id} - Curso: {m.curso?.nome} - Situação: ({m.situacao})
-                              </span>
-                            ))}
-                          </div>
-                        )}*/}
-
                         <br />
                         <small className="txt-registros txt-complemento">
                           {a.endereco ? `End.: ${a.endereco}, ${a.numero} - ${a.bairro}` : "Sem endereço cadastrado"}
                         </small>
                       </td>
-
-                      <tr key={aluno.id}>
-                        <td>{aluno.nome}</td>
-                        <td>{nomeCurso}</td> {/* O nome do curso "jogado" aqui */}
-                        <td>{aluno.telefone}</td>
-                      </tr>
+                      <td>
+                        {a.matriculas && a.matriculas.length > 0 && (
+                          <div>
+                            {a.matriculas.map((m) => (
+                              <span key={m.id} style={{ backgroundColor: "#e8f0fe", fontSize: "11px" }}>
+                                {/*Matricula: {m.id} - */}
+                                Curso: {m.curso?.nome}
+                                <br />({m.situacao})
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </td>
                       <td>
                         <a
                           href={`https://wa.me/55${a.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${a.nome}, tudo bem? Aqui é da Escola Bella Music.`)}`}

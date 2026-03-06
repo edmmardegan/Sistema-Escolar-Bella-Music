@@ -9,6 +9,7 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
   Validate,
+  IsBoolean,
 } from 'class-validator';
 import { cpf } from 'cpf-cnpj-validator';
 
@@ -51,6 +52,10 @@ export class CreateAlunoDto {
   @Length(11, 14, { message: 'O CPF deve ter entre 11 e 14 caracteres' })
   @Validate(CpfValidoConstraint)
   cpf?: string;
+
+  @IsOptional()
+  @IsBoolean({ message: 'O status deve ser um valor booleano' }) // 👈 Adicione isso
+  ativo?: boolean;
 
   @IsOptional() @IsString() telefone?: string;
   @IsOptional() @IsString() dataNascimento?: string;
