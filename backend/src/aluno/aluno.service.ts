@@ -15,7 +15,7 @@ import { UpdateAlunoDto } from './dto/update-aluno.dto';
 export class AlunoService {
   constructor(
     @InjectRepository(Aluno)
-    private readonly repository: Repository<Aluno>,
+    private readonly alunoRepo: Repository<Aluno>,
 
     private readonly auditService: AuditService,
 
@@ -24,7 +24,7 @@ export class AlunoService {
   ) {}
 
   async findAll() {
-    return await this.repository.find({
+    return await this.alunoRepo.find({
       relations: ['matriculas', 'matriculas.curso'],
       order: { nome: 'ASC' },
     });
@@ -38,10 +38,10 @@ export class AlunoService {
 
       // 2. Se for uma edição, buscamos o estado atual ANTES de salvar
       if (dados.id) {
-        alunoAntigo = await this.repository.findOneBy({ id: dados.id });
+        alunoAntigo = await this.alunoRepo.findOneBy({ id: dados.id });
       }
       // 3. Salva no banco (O TypeORM retorna o objeto salvo do tipo Aluno)
-      const alunoSalvo: Aluno = await this.repository.save(dados);
+      const alunoSalvo: Aluno = await this.alunoRepo.save(dados);
       // 4. CHAMA A MÁQUINA DE LAVAR (AuditService)
       // Usamos 'dados' (o que veio da rota) para comparar com 'alunoAntigo'
       await this.auditService.createLog(
@@ -65,10 +65,10 @@ export class AlunoService {
   }
 
   async remove(id: number) {
-    const registro = await this.repository.findOneBy({ id });
+    const registro = await this.alunoRepo.findOneBy({ id });
     if (!registro) throw new NotFoundException('Aluno não encontrado');
 
-    const alunoRemovido = await this.repository.remove(registro);
+    const alunoRemovido = await this.alunoRepo.remove(registro);
 
     // Log de remoção
     await this.auditRepo
@@ -90,7 +90,7 @@ export class AlunoService {
       const mes = hoje.getMonth() + 1;
       const dia = hoje.getDate();
 
-      return await this.repository
+      return await this.alunoRepo
         .createQueryBuilder('aluno')
         .where('EXTRACT(MONTH FROM aluno.dataNascimento) = :mes', { mes })
         .andWhere('EXTRACT(DAY FROM aluno.dataNascimento) = :dia', { dia })
@@ -102,9 +102,9 @@ export class AlunoService {
 
   async update(id: number, updateDto: UpdateAlunoDto, userName: string) {
     // 1. Você BUSCA o aluno como ele está AGORA no banco (antes de mudar)
-    const alunoAntes = await this.repository.findOneBy({ id });
+    const alunoAntes = await this.alunoRepo.findOneBy({ id });
     // 2. Você executa o update
-    await this.repository.update(id, updateDto);
+    await this.alunoRepo.update(id, updateDto);
     // 3. VOCÊ PASSA O 'updateDto' (que só tem o que veio do form) para o createLog
     // Se você passar o objeto 'aluno' completo aqui, o filtro vai falhar!
     await this.auditService.createLog(

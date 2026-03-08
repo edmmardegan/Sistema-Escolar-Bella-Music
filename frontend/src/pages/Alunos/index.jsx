@@ -428,7 +428,9 @@ export default function Alunos() {
                       </td>
                       <td>
                         <a
-                          href={`https://wa.me/55${a.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${a.nome}, tudo bem? Aqui é da Escola Bella Music.`)}`}
+                          href={`https://wa.me/55${a.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(
+                            `Olá ${a.nome?.split(" ")[0]}, tudo bem? Aqui é da Escola Bella Music.`,
+                          )}`}
                           target="_blank"
                           rel="noreferrer"
                           className="link-whatsapp"
