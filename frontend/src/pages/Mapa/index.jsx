@@ -8,10 +8,10 @@ import "./styles.css";
 // Funções Auxiliares para a Grade
 const gerarGradeHorarios = () => {
   const lista = [];
-  for (let hora = 8; hora <= 21; hora++) {
+  for (let hora = 8; hora <= 22; hora++) {
     const hStr = String(hora).padStart(2, "0");
     lista.push(`${hStr}:00`);
-    lista.push(`${hStr}:30`);
+    lista.push(`${hStr}:15`);
   }
   return lista;
 };

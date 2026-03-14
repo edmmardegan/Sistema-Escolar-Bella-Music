@@ -64,7 +64,7 @@ export class AgendaService {
     }
 
     query
-      .orderBy('aula.data', tipo === 'historico' ? 'DESC' : 'ASC')
+      .orderBy('aula.data', tipo === 'historico' ? 'ASC' : 'DESC')
       .addOrderBy('aluno.nome', 'ASC');
 
     return await query.getMany();

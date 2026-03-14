@@ -3,19 +3,41 @@
 .input-pequeno {
   width: 80px;
 }
-
+/* Ajuste no flex do container para não espremer tudo */
 .filtro-container-flex {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 15px;
   margin-bottom: 12px;
   background: #f8f9fa;
   padding: 8px;
   border-radius: 8px;
+  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
 }
 
+.busca-container {
+  flex: 1; /* Faz o campo ocupar o espaço disponível no centro */
+  max-width: 300px;  
+}
+
+.input-busca {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.input-busca:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+
 .input-group-filtro {
-  display: flex;
   align-items: center;
   gap: 8px;
   font-size: 13px;
@@ -101,31 +123,4 @@
   color: #aaa;
 }
 
-.busca-container {
-  flex: 1; /* Faz o campo ocupar o espaço disponível no centro */
-  max-width: 300px;
-}
 
-.input-busca {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
-  transition: border-color 0.2s;
-}
-
-.input-busca:focus {
-  border-color: var(--primary);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
-}
-
-/* Ajuste no flex do container para não espremer tudo */
-.filtro-container-flex {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap; /* Permite quebrar linha em telas menores */
-}

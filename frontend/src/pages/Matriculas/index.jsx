@@ -328,6 +328,22 @@ export default function Matriculas() {
     }
   };
 
+  const validarHorarioAoSair = (e) => {
+    const valor = e.target.value; // Ex: "14:10"
+    if (!valor) return;
+
+    const minutos = valor.split(":")[1];
+    const minutosValidos = ["00", "15", "30", "45"];
+
+    if (!minutosValidos.includes(minutos)) {
+      alert("Horário inválido! As aulas devem ser marcadas em intervalos de 15 minutos (00, 15, 30 ou 45).");
+
+      // Opcional: Resetar para a hora cheia mais próxima ou para "08:00"
+      const horaApenas = valor.split(":")[0];
+      setForm((prev) => ({ ...prev, horario: `${horaApenas}:00` }));
+    }
+  };
+
   return (
     <main className="conteudo-principal">
       <div className="container-principal">
@@ -428,7 +444,7 @@ export default function Matriculas() {
 
               <div className="input-group campo-curto">
                 <label>Horário:</label>
-                <input type="time" name="horario" value={form.horario} onChange={handleChange} className="input-field" />
+                <input type="time" name="horario" value={form.horario} onChange={handleChange} onBlur={validarHorarioAoSair} className="input-field" />
               </div>
 
               <div className="input-group campo-curto">
@@ -537,7 +553,7 @@ export default function Matriculas() {
 
             <div className="input-group-filtro">
               <label>Professora:</label>
-              <select className="input-field" style={{ width: "130px" }} value={filtroProfessor} onChange={(e) => setFiltroProfessor(e.target.value)}>
+              <select className="input-field" value={filtroProfessor} onChange={(e) => setFiltroProfessor(e.target.value)}>
                 <option value="Todas">Todas</option>
                 <option value="Cristiane">Cristiane</option>
                 <option value="Daiane">Daiane</option>

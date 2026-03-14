@@ -416,13 +416,18 @@ export default function Alunos() {
                       <td>
                         {a.matriculas && a.matriculas.length > 0 && (
                           <div>
-                            {a.matriculas.map((m) => (
-                              <span key={m.id} style={{ backgroundColor: "#e8f0fe", fontSize: "11px" }}>
-                                {/*Matricula: {m.id} - */}
-                                Curso: {m.curso?.nome}
-                                <br />({m.situacao})
-                              </span>
-                            ))}
+                            {a.matriculas
+                              .filter((m) => m.situacao === "Em Andamento")
+                              .map((m) => (
+                                <span key={m.id} style={{ backgroundColor: "#e8f0fe", fontSize: "11px" }}>
+                                  {/*Matricula: {m.id} - */}
+                                  Curso:
+                                    <span style={{ color: "red", fontSize: "11px" }}>
+                                  {m.curso?.nome}
+                                  {/*<br />({m.situacao})*/}
+                                  </span>
+                                </span>
+                              ))}
                           </div>
                         )}
                       </td>

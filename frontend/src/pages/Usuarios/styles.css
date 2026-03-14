@@ -30,3 +30,61 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/*Utilizado para Reset-Password  */
+.container-reset {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card-reset {
+  background: var(--white);
+  padding: 40px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+
+.input-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px 15px ;
+  border: 2px solid #e1e1e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  outline: none;
+  box-sizing: border-box; /* Garante que o padding não quebre a largura */
+  margin-bottom: 15px;
+}
+
+/* Responsividade para celulares pequenos */
+@media (max-width: 480px) {
+  .card-reset {
+    padding: 30px 20px;
+  }
+}
