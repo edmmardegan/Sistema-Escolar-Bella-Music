@@ -329,18 +329,28 @@ export default function Matriculas() {
   };
 
   const validarHorarioAoSair = (e) => {
-    const valor = e.target.value; // Ex: "14:10"
+    const valor = e.target.value; // Formato "HH:mm"
     if (!valor) return;
 
-    const minutos = valor.split(":")[1];
+    const [hora, minutos] = valor.split(":").map(Number);
+    const minutosString = valor.split(":")[1];
     const minutosValidos = ["00", "15", "30", "45"];
 
-    if (!minutosValidos.includes(minutos)) {
-      alert("Horário inválido! As aulas devem ser marcadas em intervalos de 15 minutos (00, 15, 30 ou 45).");
+    let erro = "";
 
-      // Opcional: Resetar para a hora cheia mais próxima ou para "08:00"
-      const horaApenas = valor.split(":")[0];
-      setForm((prev) => ({ ...prev, horario: `${horaApenas}:00` }));
+    // Validação do Intervalo de Horas (8h às 22h)
+    if (hora < 8 || hora > 22) {
+      erro = "O horário de aula deve ser entre 08:00 e 22:00.";
+    }
+    // Validação dos Minutos (Múltiplos de 15)
+    else if (!minutosValidos.includes(minutosString)) {
+      erro = "Os minutos devem ser 00, 15, 30 ou 45.";
+    }
+
+    if (erro) {
+      alert(erro);
+      // Opcional: Reseta para um valor seguro para evitar que o erro persista
+      setForm((prev) => ({ ...prev, horario: "08:00" }));
     }
   };
 
@@ -444,7 +454,14 @@ export default function Matriculas() {
 
               <div className="input-group campo-curto">
                 <label>Horário:</label>
-                <input type="time" name="horario" value={form.horario} onChange={handleChange} onBlur={validarHorarioAoSair} className="input-field" />
+                <input
+                  type="time"
+                  name="horario"
+                  value={form.horario}
+                  onChange={handleChange}
+                  onBlur={validarHorarioAoSair}
+                  className="input-field"
+                />
               </div>
 
               <div className="input-group campo-curto">
@@ -553,7 +570,7 @@ export default function Matriculas() {
 
             <div className="input-group-filtro">
               <label>Professora:</label>
-              <select className="input-field" value={filtroProfessor} onChange={(e) => setFiltroProfessor(e.target.value)}>
+              <select className="input-field" style={{ width: "130px" }} value={filtroProfessor} onChange={(e) => setFiltroProfessor(e.target.value)}>
                 <option value="Todas">Todas</option>
                 <option value="Cristiane">Cristiane</option>
                 <option value="Daiane">Daiane</option>

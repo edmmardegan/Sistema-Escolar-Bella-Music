@@ -14,7 +14,7 @@ import { AuditService } from 'src/audit/audit.service';
 export class FinanceiroService {
   constructor(
     @InjectRepository(Financeiro)
-    private readonly financeiroRepo: Repository<Financeiro>,
+    private readonly repository: Repository<Financeiro>,
 
     @InjectRepository(Matricula)
     private readonly matriculaRepo: Repository<Matricula>,
@@ -23,7 +23,7 @@ export class FinanceiroService {
   ) {}
 
   async findAll() {
-    const dados = await this.financeiroRepo.find({
+    const dados = await this.repository.find({
       relations: ['aluno', 'matricula'], // Força o Join com as duas tabelas
       order: { dataVencimento: 'ASC' },
     });
@@ -32,7 +32,7 @@ export class FinanceiroService {
   }
 
   async findByMatricula(matriculaId: number): Promise<Financeiro[]> {
-    return this.financeiroRepo.find({
+    return this.repository.find({
       where: { matricula: { id: matriculaId } },
       relations: ['aluno', 'matricula'],
       order: { dataVencimento: 'ASC' },
@@ -44,7 +44,7 @@ export class FinanceiroService {
     status: 'Paga' | 'Aberta',
     userName: string = 'SISTEMA', // 👈 Adicione o userName
   ): Promise<Financeiro> {
-    const parcelaAntes = await this.financeiroRepo.findOne({
+    const parcelaAntes = await this.repository.findOne({
       where: { id },
       relations: ['aluno'], // Importante para o log saber de quem é
     });
@@ -60,7 +60,7 @@ export class FinanceiroService {
     };
 
     parcelaAntes.status = status;
-    const salva = await this.financeiroRepo.save(parcelaAntes);
+    const salva = await this.repository.save(parcelaAntes);
 
     await this.auditService.createLog(
       'financeiro',
@@ -85,7 +85,7 @@ export class FinanceiroService {
       relations: ['aluno'],
     });
 
-    const parcelasExistentes = await this.financeiroRepo
+    const parcelasExistentes = await this.repository
       .createQueryBuilder('f')
       .select('f.matriculaId', 'matriculaId')
       .where('f.dataVencimento >= :inicio AND f.dataVencimento <= :fim', {
@@ -124,7 +124,7 @@ export class FinanceiroService {
     }
 
     if (todasAsNovasParcelas.length > 0) {
-      await this.financeiroRepo.save(todasAsNovasParcelas as Financeiro[], {
+      await this.repository.save(todasAsNovasParcelas as Financeiro[], {
         chunk: 500,
       });
 
@@ -149,7 +149,7 @@ export class FinanceiroService {
 
   // --- AJUSTE NO REMOVE ---
   async remove(id: number, userName: string = 'SISTEMA'): Promise<any> {
-    const parcela = await this.financeiroRepo.findOne({
+    const parcela = await this.repository.findOne({
       where: { id },
       relations: ['aluno'],
     });
@@ -167,7 +167,7 @@ export class FinanceiroService {
       userName,
     );
 
-    return await this.financeiroRepo.delete(id);
+    return await this.repository.delete(id);
   }
 
   // --- 2. REAJUSTE ANUAL (OTIMIZADO) ---
@@ -186,7 +186,7 @@ export class FinanceiroService {
       await this.matriculaRepo.save(mat);
       matriculasAtualizadas++;
 
-      const parcelasParaReajustar = await this.financeiroRepo.find({
+      const parcelasParaReajustar = await this.repository.find({
         where: {
           matricula: { id: mat.id },
           status: 'Aberta',
@@ -196,7 +196,7 @@ export class FinanceiroService {
 
       for (const parcela of parcelasParaReajustar) {
         parcela.valorTotal = Number(parcela.valorTotal || 0) + valorAumento;
-        await this.financeiroRepo.save(parcela);
+        await this.repository.save(parcela);
         parcelasAtualizadas++;
       }
     }

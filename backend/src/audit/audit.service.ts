@@ -9,7 +9,7 @@ import { AuditLog } from '../entities/auditLog';
 export class AuditService {
   constructor(
     @InjectRepository(AuditLog)
-    private readonly auditRepo: Repository<AuditLog>,
+    private readonly auditRepository: Repository<AuditLog>,
   ) {}
 
   // Definimos que o retorno é uma Promise de uma Array de AuditLog
@@ -48,7 +48,7 @@ export class AuditService {
       }
 
       // 2. AQUI ESTÁ O SEGREDO: Usar a variável takeValue
-      return await this.auditRepo.find({
+      return await this.auditRepository.find({
         where: whereClause,
         order: { created_at: 'DESC' },
         take: takeValue, // 👈 Antes estava fixo, agora obedece o seu select
@@ -67,7 +67,7 @@ export class AuditService {
     user: string,
   ): Promise<AuditLog> {
     try {
-      const log = this.auditRepo.create({
+      const log = this.auditRepository.create({
         table_name: table,
         action,
         old_values: oldV,
@@ -75,7 +75,7 @@ export class AuditService {
         user_name: user,
       });
 
-      return await this.auditRepo.save(log);
+      return await this.auditRepository.save(log);
     } catch (error) {
       console.error('Falha ao criar log:', error);
       throw new InternalServerErrorException('Falha ao gravar auditoria');

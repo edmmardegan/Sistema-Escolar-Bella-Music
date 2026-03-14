@@ -419,12 +419,12 @@ export default function Alunos() {
                             {a.matriculas
                               .filter((m) => m.situacao === "Em Andamento")
                               .map((m) => (
-                                <span key={m.id} style={{ backgroundColor: "#e8f0fe", fontSize: "11px" }}>
+                                <span key={m.id} style={{ fontSize: "11px", fontWeight: "bold" }}>
                                   {/*Matricula: {m.id} - */}
-                                  Curso:
-                                    <span style={{ color: "red", fontSize: "11px" }}>
-                                  {m.curso?.nome}
-                                  {/*<br />({m.situacao})*/}
+                                  Curso: {}
+                                  <span style={{ color: "#007bff", fontSize: "11px", fontWeight: "bold" }}>
+                                    {m.curso?.nome}
+                                    {/*<br />({m.situacao})*/}
                                   </span>
                                 </span>
                               ))}
@@ -433,14 +433,17 @@ export default function Alunos() {
                       </td>
                       <td>
                         <a
-                          href={`https://wa.me/55${a.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(
-                            `Olá ${a.nome?.split(" ")[0]}, tudo bem? Aqui é da Escola Bella Music.`,
-                          )}`}
+                          href={`https://wa.me/55${a.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${a.nome}, tudo bem? Aqui é da Escola Bella Music.`)}`}
                           target="_blank"
                           rel="noreferrer"
                           className="link-whatsapp"
                         >
-                          <FaWhatsapp /> {a.telefone || "Sem fone"}
+                          {/*Ocultar o simbolo do whatzap quando não tem telefone cadastrado*/}
+                          {a.telefone && (
+                            <>
+                              <FaWhatsapp /> {a.telefone}
+                            </>
+                          )}
                         </a>
                       </td>
                       <td>

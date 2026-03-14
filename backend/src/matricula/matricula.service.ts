@@ -17,10 +17,10 @@ import { AuditService } from '../audit/audit.service';
 export class MatriculaService {
   constructor(
     @InjectRepository(Matricula)
-    private readonly matriculaRepo: Repository<Matricula>,
+    private readonly repository: Repository<Matricula>,
 
     @InjectRepository(Financeiro)
-    private readonly financeiroRepo: Repository<Financeiro>,
+    private readonly repositoryFinanceiro: Repository<Financeiro>,
 
     @InjectRepository(MatriculaTermo)
     private readonly termoRepo: Repository<MatriculaTermo>,
@@ -29,7 +29,7 @@ export class MatriculaService {
   ) {}
 
   async findAll(nome?: string): Promise<Matricula[]> {
-    const query = this.matriculaRepo
+    const query = this.repository
       .createQueryBuilder('matricula')
       .leftJoinAndSelect('matricula.aluno', 'aluno')
       .leftJoinAndSelect('matricula.curso', 'curso')
@@ -91,7 +91,7 @@ export class MatriculaService {
       const id = data.id;
 
       // A. Busca a foto do registro ANTES da alteração
-      const matriculaAntes = await this.matriculaRepo.findOne({
+      const matriculaAntes = await this.repository.findOne({
         where: { id },
         relations: ['aluno', 'curso'],
       });
@@ -105,14 +105,14 @@ export class MatriculaService {
       delete (dadosParaAtualizar as any).aluno; // 🛡️ Bloqueia mudança de aluno
 
       // B. Executa o Update no Banco
-      await this.matriculaRepo.update(id, {
+      await this.repository.update(id, {
         ...dadosParaAtualizar,
         dataTermino: dataTerminoLimpa,
         dataTrancamento: dataTrancamentoLimpa,
       } as QueryDeepPartialEntity<Matricula>);
 
       // C. Busca a foto do registro DEPOIS da alteração
-      const matriculaDepois = await this.matriculaRepo.findOne({
+      const matriculaDepois = await this.repository.findOne({
         where: { id },
         relations: ['aluno', 'curso'],
       });
@@ -135,15 +135,15 @@ export class MatriculaService {
     }
 
     // --- MODO CRIAÇÃO ---
-    const nova = this.matriculaRepo.create({
+    const nova = this.repository.create({
       ...data,
       dataTermino: dataTerminoLimpa,
       dataTrancamento: dataTrancamentoLimpa,
     } as DeepPartial<Matricula>);
 
-    const salvo = await this.matriculaRepo.save(nova);
+    const salvo = await this.repository.save(nova);
 
-    const matCompleta = await this.matriculaRepo.findOne({
+    const matCompleta = await this.repository.findOne({
       where: { id: salvo.id },
       relations: ['curso', 'aluno'],
     });
@@ -233,12 +233,12 @@ export class MatriculaService {
   }
 
   async remove(id: number) {
-    return await this.matriculaRepo.delete(id);
+    return await this.repository.delete(id);
   }
 
   async getDetalhesBoletim(matriculaId: number) {
     // Busca a matrícula diretamente pelo ID dela
-    const fullMat = await this.matriculaRepo.findOne({
+    const fullMat = await this.repository.findOne({
       where: { id: matriculaId },
       relations: ['aluno', 'curso', 'termos', 'termos.aulas'],
       order: { termos: { numeroTermo: 'ASC' } },
@@ -266,7 +266,7 @@ export class MatriculaService {
     ano: number,
   ): Promise<Financeiro[] | { message: string }> {
     // 🔍 Busca no repositório de Matricula (this.repository)
-    const matricula = await this.matriculaRepo.findOne({
+    const matricula = await this.repository.findOne({
       where: { id: matriculaId },
       relations: ['aluno'],
     });
@@ -275,14 +275,14 @@ export class MatriculaService {
       throw new NotFoundException('Matrícula não encontrada.');
     }
     // 1. Verifique se já existe QUALQUER taxa de matrícula para este ID
-    const jaTemTaxa = await this.financeiroRepo.findOne({
+    const jaTemTaxa = await this.repositoryFinanceiro.findOne({
       where: {
         matricula: { id: matriculaId },
         descricao: Like('%Taxa de Matrícula%'),
       },
     });
     // 🛡️ Verifica duplicidade no Financeiro (this.repositoryFinanceiro)
-    const jaTem = await this.financeiroRepo.count({
+    const jaTem = await this.repositoryFinanceiro.count({
       where: {
         matricula: { id: matriculaId },
         dataVencimento: Like(`${ano}%`),
@@ -341,6 +341,6 @@ export class MatriculaService {
     }
 
     // O TypeORM reconhece o retorno como um array de Financeiro
-    return await this.financeiroRepo.save(novasParcelas);
+    return await this.repositoryFinanceiro.save(novasParcelas);
   }
 }

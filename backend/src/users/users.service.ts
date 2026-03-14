@@ -14,7 +14,7 @@ import { AuditService } from 'src/audit/audit.service';
 export class UsersService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
-    private readonly usersRepo: Repository<User>,
+    private readonly userRepository: Repository<User>,
 
     private readonly auditService: AuditService,
   ) {}
@@ -28,13 +28,13 @@ export class UsersService implements OnModuleInit {
     const emailAdmin = 'admin@bellamusic.com';
 
     // Verifica se já existe para não duplicar toda vez que o server reiniciar
-    const jaExiste = await this.usersRepo.findOne({
+    const jaExiste = await this.userRepository.findOne({
       where: { email: emailAdmin },
     });
 
     if (!jaExiste) {
       const hash = await bcrypt.hash('admin123', 10);
-      await this.usersRepo.save({
+      await this.userRepository.save({
         nome: 'Administrador',
         email: emailAdmin,
         senha: hash,
@@ -48,14 +48,14 @@ export class UsersService implements OnModuleInit {
   }
 
   async findAll() {
-    return await this.usersRepo.find({
+    return await this.userRepository.find({
       select: ['id', 'nome', 'email', 'role', 'primeiroAcesso'],
       order: { nome: 'ASC' },
     });
   }
 
   async findOne(identificador: string): Promise<User | null> {
-    return await this.usersRepo.findOne({
+    return await this.userRepository.findOne({
       where: { email: identificador }, // Simplificado para evitar erro de array no where
     });
   }
@@ -78,7 +78,7 @@ export class UsersService implements OnModuleInit {
     if (userData.id) {
       const id = userData.id;
 
-      const antes = await this.usersRepo.findOneBy({ id });
+      const antes = await this.userRepository.findOneBy({ id });
 
       const dadosParaAtualizar = { ...userData };
       delete (dadosParaAtualizar as any).id;
@@ -90,12 +90,12 @@ export class UsersService implements OnModuleInit {
         );
       }
 
-      await this.usersRepo.update(
+      await this.userRepository.update(
         id,
         dadosParaAtualizar as QueryDeepPartialEntity<User>,
       );
 
-      const depois = await this.usersRepo.findOneBy({ id });
+      const depois = await this.userRepository.findOneBy({ id });
 
       // 🛡️ Auditoria com dados limpos
       await this.auditService.createLog(
@@ -113,13 +113,13 @@ export class UsersService implements OnModuleInit {
     const passwordToHash = (userData as any).senha || '123456';
     const hashedPassword = await bcrypt.hash(passwordToHash, 10);
 
-    const newUser = this.usersRepo.create({
+    const newUser = this.userRepository.create({
       ...userData,
       senha: hashedPassword,
       primeiroAcesso: true,
     } as DeepPartial<User>);
 
-    const salvo = await this.usersRepo.save(newUser);
+    const salvo = await this.userRepository.save(newUser);
 
     // 🛡️ Auditoria de Inserção
     await this.auditService.createLog(
@@ -135,7 +135,7 @@ export class UsersService implements OnModuleInit {
 
   // --- AJUSTE NO REMOVE ---
   async remove(id: number, userName: string = 'SISTEMA') {
-    const registro = await this.usersRepo.findOneBy({ id });
+    const registro = await this.userRepository.findOneBy({ id });
     if (!registro) throw new NotFoundException('Usuário não encontrado');
 
     // 🛡️ Log de Delete
@@ -148,7 +148,7 @@ export class UsersService implements OnModuleInit {
       userName,
     );
 
-    return await this.usersRepo.delete(id);
+    return await this.userRepository.delete(id);
   }
 
   // --- AJUSTE NO UPDATE PASSWORD ---
@@ -159,7 +159,7 @@ export class UsersService implements OnModuleInit {
     userName: string = 'SISTEMA',
   ) {
     // 1. Busca o usuário antes para saber o nome no log
-    const usuario = await this.usersRepo.findOneBy({ id });
+    const usuario = await this.userRepository.findOneBy({ id });
 
     if (!usuario) {
       throw new NotFoundException(
@@ -171,7 +171,7 @@ export class UsersService implements OnModuleInit {
     const hashedPassword = await bcrypt.hash(novaSenha, 10);
 
     // 3. Atualiza no banco
-    await this.usersRepo.update(id, {
+    await this.userRepository.update(id, {
       senha: hashedPassword,
       primeiroAcesso: forcarTroca,
     } as QueryDeepPartialEntity<User>);

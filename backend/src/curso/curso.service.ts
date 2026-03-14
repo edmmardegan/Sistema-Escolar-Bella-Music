@@ -14,13 +14,13 @@ import { AuditService } from '../audit/audit.service';
 export class CursoService {
   constructor(
     @InjectRepository(Curso)
-    private readonly cursoRepo: Repository<Curso>,
+    private readonly repository: Repository<Curso>,
 
     private readonly auditService: AuditService, // 👈 Injete o serviço de auditoria
   ) {}
 
   async findAll() {
-    return await this.cursoRepo.find({ order: { nome: 'ASC' } });
+    return await this.repository.find({ order: { nome: 'ASC' } });
   }
 
   // Adicionamos o userName como segundo parâmetro
@@ -34,10 +34,10 @@ export class CursoService {
 
       // 1. Se for UPDATE, busca como o curso era antes
       if (dados.id) {
-        cursoAntigo = await this.cursoRepo.findOneBy({ id: dados.id });
+        cursoAntigo = await this.repository.findOneBy({ id: dados.id });
       }
       // 2. Salva as alterações
-      const cursoSalvo: Curso = await this.cursoRepo.save(dados);
+      const cursoSalvo: Curso = await this.repository.save(dados);
       // 3. Chama a auditoria (a máquina de lavar vai filtrar os campos do curso)
       await this.auditService.createLog(
         'curso',
@@ -58,10 +58,10 @@ export class CursoService {
 
   async remove(id: number, userName: string) {
     // 👈 Recebe userName para o log de delete
-    const registro = await this.cursoRepo.findOneBy({ id });
+    const registro = await this.repository.findOneBy({ id });
     if (!registro) throw new NotFoundException('Curso não encontrado');
 
-    const cursoRemovido = await this.cursoRepo.remove(registro);
+    const cursoRemovido = await this.repository.remove(registro);
 
     // Log de remoção usando o auditService para manter o padrão
     await this.auditService.createLog(

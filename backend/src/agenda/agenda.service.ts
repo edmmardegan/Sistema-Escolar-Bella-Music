@@ -12,7 +12,7 @@ import { AuditService } from '../audit/audit.service';
 export class AgendaService {
   constructor(
     @InjectRepository(Aula)
-    private readonly aulaRepo: Repository<Aula>,
+    private readonly repository: Repository<Aula>,
 
     @InjectRepository(Matricula)
     private readonly matriculaRepo: Repository<Matricula>,
@@ -31,7 +31,7 @@ export class AgendaService {
   ): Promise<Aula[]> {
     const hoje = new Date().toISOString().split('T')[0];
 
-    const query = this.aulaRepo
+    const query = this.repository
       .createQueryBuilder('aula')
       .leftJoinAndSelect('aula.termo', 'termo')
       .leftJoinAndSelect('termo.matricula', 'matricula')
@@ -64,18 +64,18 @@ export class AgendaService {
     }
 
     query
-      .orderBy('aula.data', tipo === 'historico' ? 'ASC' : 'DESC')
+      .orderBy('aula.data', tipo === 'historico' ? 'DESC' : 'ASC')
       .addOrderBy('aluno.nome', 'ASC');
 
     return await query.getMany();
   }
 
   async remove(id: number, userName: string): Promise<{ success: boolean }> {
-    const aula = await this.aulaRepo.findOne({ where: { id } });
+    const aula = await this.repository.findOne({ where: { id } });
     if (!aula) throw new NotFoundException('Aula não encontrada');
 
     // 1. BANCO: Apenas a aula (1 argumento)
-    await this.aulaRepo.remove(aula);
+    await this.repository.remove(aula);
 
     // 2. AUDITORIA: Aqui sim você usa o userName (5 argumentos)
     await this.auditService.createLog('aula', 'DELETE', aula, {}, userName);
@@ -90,7 +90,7 @@ export class AgendaService {
     userName: string,
   ): Promise<any> {
     // 1. O SEGREDO ESTÁ AQUI: Carregar as relações para o log saber de quem é a aula
-    const aulaAntes = await this.aulaRepo.findOne({
+    const aulaAntes = await this.repository.findOne({
       where: { id },
       relations: [
         'termo',
@@ -133,7 +133,7 @@ export class AgendaService {
     }
 
     // 3. Atualizamos o banco
-    await this.aulaRepo.update(id, novosDados);
+    await this.repository.update(id, novosDados);
 
     // 4. AUDITORIA: Montagem manual para não ter erro
     const logAnterior = {
@@ -222,7 +222,7 @@ export class AgendaService {
             const dataIso = dataCursor.toISOString().split('T')[0];
 
             // Verifica se a aula já existe para evitar duplicidade
-            const existe = await this.aulaRepo.findOne({
+            const existe = await this.repository.findOne({
               where: {
                 termo: { id: termo.id },
                 data: Raw((alias) => `CAST(${alias} AS DATE) = :data`, {
@@ -242,7 +242,7 @@ export class AgendaService {
                 0,
               );
 
-              await this.aulaRepo.save({
+              await this.repository.save({
                 termo: termo,
                 data: dataFinal,
                 status: 'Pendente',
