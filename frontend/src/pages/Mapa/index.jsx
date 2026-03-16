@@ -12,6 +12,8 @@ const gerarGradeHorarios = () => {
     const hStr = String(hora).padStart(2, "0");
     lista.push(`${hStr}:00`);
     lista.push(`${hStr}:15`);
+    lista.push(`${hStr}:30`);
+    lista.push(`${hStr}:45`);
   }
   return lista;
 };

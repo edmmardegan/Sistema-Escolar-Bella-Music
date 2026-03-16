@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo "🚀 [PRODUÇÃO] Iniciando Deploy Geral..."
 
 # 1. Limpeza de processos antigos
