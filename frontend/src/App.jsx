@@ -23,6 +23,7 @@ import Financeiro from "./pages/Financeiro/index.jsx";
 import Usuarios from "./pages/Usuarios/index.jsx";
 import Boletim from "./pages/Boletim/index.jsx";
 import AuditLogs from "./pages/Logs/index.jsx";
+import ResetPassword from "./pages/Usuarios/ResetPassword.jsx";
 
 // 🎂 Componente de Aniversário (Otimizado para aparecer apenas 1x por sessão)
 function NotificacaoAniversario() {
@@ -70,7 +71,7 @@ function PrivateLayout({ children }) {
   if (!user) return <Navigate to="/login" replace />;
 
   // Redireciona se for primeiro acesso
-  if (user.primeiroAcesso === true) return <Navigate to="/reset-password" replace />;
+  if (user.primeiroAcesso === 1) return <Navigate to="/reset-password" replace />;
 
   return (
     <div className="app-layout">
@@ -90,89 +91,19 @@ export default function App() {
         <Routes>
           {/* Rotas Públicas */}
           <Route path="/login" element={<Login />} />
-          <Route path="/reset-password" element={<AuthConsumerReset />} />
 
           {/* Rotas Privadas (Estrutura Plana) */}
-          <Route
-            path="/"
-            element={
-              <PrivateLayout>
-                <Home />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/alunos"
-            element={
-              <PrivateLayout>
-                <Alunos />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/matriculas"
-            element={
-              <PrivateLayout>
-                <Matriculas />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/boletim/:termoId"
-            element={
-              <PrivateLayout>
-                <Boletim />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/cursos"
-            element={
-              <PrivateLayout>
-                <Cursos />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/mapa"
-            element={
-              <PrivateLayout>
-                <Mapa />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/agenda"
-            element={
-              <PrivateLayout>
-                <Agenda />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/financeiro"
-            element={
-              <PrivateLayout>
-                <Financeiro />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/usuarios"
-            element={
-              <PrivateLayout>
-                <Usuarios />
-              </PrivateLayout>
-            }
-          />
-          <Route
-            path="/logs"
-            element={
-              <PrivateLayout>
-                <AuditLogs />
-              </PrivateLayout>
-            }
-          />
+          <Route path="/" element={<PrivateLayout><Home /></PrivateLayout>}/>
+          <Route path="/alunos" element={<PrivateLayout><Alunos /></PrivateLayout>}/>
+          <Route path="/matriculas" element={<PrivateLayout><Matriculas /></PrivateLayout>}/>
+          <Route path="/boletim/:termoId" element={<PrivateLayout><Boletim /></PrivateLayout>}/>
+          <Route path="/cursos" element={<PrivateLayout><Cursos /></PrivateLayout>}/>
+          <Route path="/mapa" element={<PrivateLayout><Mapa /></PrivateLayout>}/>
+          <Route path="/agenda" element={<PrivateLayout><Agenda /></PrivateLayout>}/>
+          <Route path="/financeiro"element={<PrivateLayout><Financeiro /></PrivateLayout>}/>
+          <Route path="/usuarios"element={<PrivateLayout><Usuarios /></PrivateLayout>}/>
+          <Route path="/logs" element={<PrivateLayout><AuditLogs /></PrivateLayout>}/>
+          <Route path="/reset-password" element={<PrivateLayout> <ResetPassword /> </PrivateLayout>} />
 
           {/* Rota de escape */}
           <Route path="*" element={<Navigate to="/" replace />} />
@@ -181,7 +112,7 @@ export default function App() {
     </AuthProvider>
   );
 }
-
+/*
 // 🔑 Componente de Reset Integrado (Mantenha como estava)
 function AuthConsumerReset() {
   const { user, authenticated, logout } = useAuth();
@@ -237,3 +168,4 @@ function AuthConsumerReset() {
     </div>
   );
 }
+*/

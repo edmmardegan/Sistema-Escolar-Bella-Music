@@ -6,6 +6,7 @@ import { useAuth } from "../../hooks/useAuth.js";
 import {
   FaUserGraduate,
   FaBook,
+  FaKey,
   FaTable,
   FaFileSignature,
   FaCalendarAlt,
@@ -32,16 +33,17 @@ export default function Menu() {
     { to: "/agenda", label: "Agenda", icon: <FaCalendarAlt /> },
     { to: "/alunos", label: "Alunos", icon: <FaUserGraduate /> },
     { to: "/cursos", label: "Cursos", icon: <FaBook /> },
+    { to: "/financeiro", label: "Financeiro", icon: <FaWallet />, adminOnly: true },
     { to: "/mapa", label: "Mapa de Horários", icon: <FaTable /> },
     { to: "/matriculas", label: "Matrículas", icon: <FaFileSignature /> },
-    { to: "/financeiro", label: "Financeiro", icon: <FaWallet />, adminOnly: true },
+    { to: "/logs", label: "Auditoria", icon: <FaHistory />, adminOnly: true }, 
     { to: "/usuarios", label: "Usuários", icon: <FaUserCog />, adminOnly: true },
-    { to: "/logs", label: "Auditoria", icon: <FaHistory />, adminOnly: true }, // NOVO ITEM
+    { to: "/reset-password", label: "Alterar Senha", icon: <FaKey /> },
   ];
 
   const menuItems = allItems
     .filter((item) => !item.adminOnly || user?.role?.toLowerCase() === "admin")
-    .sort((a, b) => a.label.localeCompare(b.label));
+  //  .sort((a, b) => a.label.localeCompare(b.label));
 
   return (
     <nav className="sidebar-menu">

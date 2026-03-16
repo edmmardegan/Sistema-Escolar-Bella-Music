@@ -53,7 +53,7 @@ export class UsersController {
     // Garante que pega a senha independente do nome do campo no body
     const senhaFinal = body.novaSenha || body.senha || body.password;
 
-    return this.service.updatePassword(+id, senhaFinal, false, userName);
+    return this.service.updatePassword(+id, senhaFinal, true, userName);
   }
 
   @Patch(':id/update-own-password')

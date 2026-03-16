@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
-import { FaLock, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
-import "./styles.css";
+import { FaLock, FaKey, FaExclamationCircle } from "react-icons/fa";
+import "../Usuarios/resetpassword.style.css";
 
 export default function ResetPassword() {
   const [novaSenha, setNovaSenha] = useState("");
@@ -44,15 +44,30 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="container-reset">
-      <div className="card-reset">
-        <div className="header-reset">
-          <FaLock size={40} color="#007bff" />
-          <h2>Primeiro Acesso</h2>
-          <p>Para sua segurança, você precisa cadastrar uma nova senha antes de continuar.</p>
+    /* Mudei de conteudo-principal para reset-password-page */
+    <main className="reset-password-page">
+      {/* Mudei de card-principal para reset-password-card e removi a div container-principal que era desnecessária para centralizar */}
+      <section className="reset-password-card">
+        <div className="header-card">
+          {user?.primeiroAcesso ? (
+            <>
+              <FaLock size={30} color="#007bff" />
+              <h2>Primeiro Acesso</h2>
+              <p style={{ marginTop: "10px", color: "#666" }}>Para sua segurança, você precisa cadastrar uma nova senha antes de continuar.</p>
+            </>
+          ) : (
+            <>
+              <FaKey size={30} color="#007bff" />
+              <h2>Alterar Senha</h2>
+              <p style={{ marginTop: "10px", color: "#666" }}>
+                Olá <strong>{user?.nome}</strong>, preencha os campos abaixo 
+                para alterar sua senha.
+              </p>
+            </>
+          )}
         </div>
 
-        <form onSubmit={handleReset} className="form-reset">
+        <form onSubmit={handleReset} className="form-padrao">
           <div className="input-group">
             <label>Nova Senha</label>
             <input
@@ -66,7 +81,7 @@ export default function ResetPassword() {
             />
           </div>
 
-          <div className="input-group">
+          <div className="input-group" style={{ marginTop: "15px" }}>
             <label>Confirmar Nova Senha</label>
             <input
               type="password"
@@ -74,21 +89,32 @@ export default function ResetPassword() {
               required
               value={confirmarSenha}
               onChange={(e) => setConfirmarSenha(e.target.value)}
-              placeholder="Confirme a senha"
+              placeholder="Confirme a nova senha"
             />
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: "100%", marginTop: "20px" }}>
-            {loading ? "Processando..." : "Atualizar e Acessar Sistema"}
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+          >
+            {loading ? "Processando..." : "Salvar Nova Senha"}
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={() => navigate("/")} // Ou navigate(-1) para voltar onde estava
+          >
+            Cancelar e Voltar
           </button>
         </form>
 
-        <div className="footer-reset">
+        <div className="footer-card">
           <small>
-            <FaExclamationCircle /> Após atualizar, você será redirecionado para o login.
+            <FaExclamationCircle /> Após atualizar, o sistema solicitará um novo login por segurança.
           </small>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
