@@ -127,6 +127,7 @@ export const AuditLogs = () => {
               <th>Data/Hora</th>
               <th>Usuário</th>
               <th>Tabela</th>
+              <th>Contexto</th>
               <th>Operação</th>
               <th>Mudanças</th>
             </tr>
@@ -148,6 +149,7 @@ export const AuditLogs = () => {
                   <td>
                     <span className="tag-table">{log.table_name}</span>
                   </td>
+                  <td>{log.context}</td>
                   <td>
                     <span className={`badge-action ${log.action?.toLowerCase()}`}>{log.action}</span>
                   </td>

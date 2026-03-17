@@ -275,7 +275,7 @@ export default function Agenda() {
                                 <button onClick={() => registrarAcao(aula.id, "falta")} className="btn-icon btn-excluir" title="Falta">
                                   <FaTimes />
                                 </button>
-                                <button onClick={() => excluir(aula)} className="btn-icon btn-secondary" title="Remover Aula">
+                                <button onClick={() => excluir(aula)} className="btn-icon btn-danger" title="Remover Aula">
                                   <FaTrash />
                                 </button>
                               </>

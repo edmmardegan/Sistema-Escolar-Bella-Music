@@ -16,11 +16,7 @@ export class AlunoService {
   constructor(
     @InjectRepository(Aluno)
     private readonly repository: Repository<Aluno>,
-
     private readonly auditService: AuditService,
-
-    @InjectRepository(AuditLog) // Injetando o repositório de log diretamente
-    private readonly auditRepo: Repository<AuditLog>,
   ) {}
 
   async findAll() {
@@ -32,27 +28,72 @@ export class AlunoService {
 
   async save(dados: any, userName: string): Promise<Aluno> {
     try {
-      // 1. Inicializamos a variável fora dos blocos para ela ser "enxergada" depois
       let alunoAntigo: Aluno | null = null;
       const acao = dados.id ? 'UPDATE' : 'INSERT';
+      let contexto = '';
 
-      // 2. Se for uma edição, buscamos o estado atual ANTES de salvar
       if (dados.id) {
         alunoAntigo = await this.repository.findOneBy({ id: dados.id });
+        contexto = `Aluno: ${alunoAntigo?.nome || 'N/D'}`;
+      } else {
+        contexto = `Novo Aluno: ${dados.nome}`;
       }
-      // 3. Salva no banco (O TypeORM retorna o objeto salvo do tipo Aluno)
-      const alunoSalvo: Aluno = await this.repository.save(dados);
-      // 4. CHAMA A MÁQUINA DE LAVAR (AuditService)
-      // Usamos 'dados' (o que veio da rota) para comparar com 'alunoAntigo'
-      await this.auditService.createLog(
-        'aluno',
-        acao,
-        alunoAntigo || {},
-        dados,
-        userName,
-      );
 
-      // 5. Retornamos o objeto tipado corretamente
+      const alunoSalvo: Aluno = await this.repository.save(dados);
+
+      // Função de limpeza para não repetir ID e Nome no JSON de alteração
+      const filtrarCampos = (antes: any, depois: any) => {
+        const objAntes: any = {};
+        const objDepois: any = {};
+
+        // Campos que não queremos mostrar ID e Nome (já estão no contexto)
+        const ignorarIdentificadores = [
+          'id',
+          'nome',
+          'criadoEm',
+          'atualizadoEm',
+        ];
+        // Campos que queremos registrar a mudança, mas esconder o valor real
+        const mascarar = ['cpf'];
+
+        Object.keys(depois).forEach((key) => {
+          if (ignorarIdentificadores.includes(key)) return;
+
+          if (JSON.stringify(antes[key]) !== JSON.stringify(depois[key])) {
+            if (mascarar.includes(key)) {
+              // 🔒 Se o CPF mudou, registramos o fato, mas escondemos o número
+              objAntes[key] = '*** CPF ANTERIOR ***';
+              objDepois[key] = '*** CPF ALTERADO ***';
+            } else {
+              // Para os demais campos, registra o valor normal (Telefone, Endereço, etc)
+              objAntes[key] = antes[key];
+              objDepois[key] = depois[key];
+            }
+          }
+        });
+        return { antes: objAntes, depois: objDepois };
+      };
+
+      const logs = { antes: alunoAntigo || {}, depois: dados };
+
+      if (acao === 'UPDATE' && alunoAntigo) {
+        const diff = filtrarCampos(alunoAntigo, dados);
+        logs.antes = diff.antes;
+        logs.depois = diff.depois;
+      }
+
+      // Só grava se houver mudança ou for inserção
+      if (acao === 'INSERT' || Object.keys(logs.depois).length > 0) {
+        await this.auditService.createLog(
+          'aluno',
+          acao,
+          logs.antes,
+          logs.depois,
+          userName,
+          contexto, // 👈 Identificação clara
+        );
+      }
+
       return alunoSalvo;
     } catch (error) {
       if (error.code === '23505') {
@@ -64,22 +105,22 @@ export class AlunoService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: number, userName: string = 'SISTEMA') {
     const registro = await this.repository.findOneBy({ id });
     if (!registro) throw new NotFoundException('Aluno não encontrado');
 
+    const contexto = `Exclusão Aluno: ${registro.nome}`;
     const alunoRemovido = await this.repository.remove(registro);
 
-    // Log de remoção
-    await this.auditRepo
-      .save({
-        table_name: 'aluno',
-        action: 'DELETE',
-        old_values: registro,
-        new_values: {},
-        user_name: 'SISTEMA_LOCAL',
-      })
-      .catch((e) => console.error('Erro ao logar remoção:', e));
+    // Usando o service padronizado em vez do repo direto
+    await this.auditService.createLog(
+      'aluno',
+      'DELETE',
+      { nome: registro.nome },
+      {},
+      userName,
+      contexto,
+    );
 
     return alunoRemovido;
   }
@@ -101,18 +142,20 @@ export class AlunoService {
   }
 
   async update(id: number, updateDto: UpdateAlunoDto, userName: string) {
-    // 1. Você BUSCA o aluno como ele está AGORA no banco (antes de mudar)
     const alunoAntes = await this.repository.findOneBy({ id });
-    // 2. Você executa o update
+    if (!alunoAntes) throw new NotFoundException('Aluno não encontrado');
+
+    const contexto = `Aluno: ${alunoAntes.nome}`;
+
     await this.repository.update(id, updateDto);
-    // 3. VOCÊ PASSA O 'updateDto' (que só tem o que veio do form) para o createLog
-    // Se você passar o objeto 'aluno' completo aqui, o filtro vai falhar!
+
     await this.auditService.createLog(
       'aluno',
       'UPDATE',
-      alunoAntes, // O que era
-      updateDto, // O que o usuário enviou (DADOS NOVOS)
+      alunoAntes, // O service de auditoria já faz o diff
+      updateDto,
       userName,
+      contexto,
     );
 
     return { message: 'Atualizado com sucesso' };

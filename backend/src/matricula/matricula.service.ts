@@ -59,15 +59,11 @@ export class MatriculaService {
     const gerarDiffParaLog = (antes: any, depois: any) => {
       const objAntes: any = {};
       const objDepois: any = {};
-
-      // Campos que não queremos comparar nem mostrar no log
       const ignorar = ['atualizadoEm', 'criadoEm', 'termos', 'financeiros'];
 
-      // Percorremos os campos do objeto novo (depois)
       Object.keys(depois).forEach((key) => {
         if (ignorar.includes(key)) return;
 
-        // Normaliza Aluno e Curso para comparar Nomes em vez de Objetos/IDs
         let valorAntes = antes[key];
         let valorDepois = depois[key];
 
@@ -76,7 +72,6 @@ export class MatriculaService {
           valorDepois = depois[key]?.nome || depois[key];
         }
 
-        // Compara se houve mudança real (usando stringify para arrays/objetos)
         if (JSON.stringify(valorAntes) !== JSON.stringify(valorDepois)) {
           objAntes[key] = valorAntes;
           objDepois[key] = valorDepois;
@@ -90,7 +85,6 @@ export class MatriculaService {
     if (data.id) {
       const id = data.id;
 
-      // A. Busca a foto do registro ANTES da alteração
       const matriculaAntes = await this.repository.findOne({
         where: { id },
         relations: ['aluno', 'curso'],
@@ -99,28 +93,27 @@ export class MatriculaService {
       if (!matriculaAntes)
         throw new NotFoundException('Matrícula não encontrada');
 
+      // 🚀 NOVO: Define o contexto (Quem está sendo alterado)
+      const contexto = `${matriculaAntes.aluno?.nome || 'S/ Nome'} - ${matriculaAntes.curso?.nome || 'S/ Curso'}`;
+
       const dadosParaAtualizar = { ...data };
       delete (dadosParaAtualizar as any).id;
-      delete (dadosParaAtualizar as any).curso; // 🛡️ Bloqueia mudança de curso
-      delete (dadosParaAtualizar as any).aluno; // 🛡️ Bloqueia mudança de aluno
+      delete (dadosParaAtualizar as any).curso;
+      delete (dadosParaAtualizar as any).aluno;
 
-      // B. Executa o Update no Banco
       await this.repository.update(id, {
         ...dadosParaAtualizar,
         dataTermino: dataTerminoLimpa,
         dataTrancamento: dataTrancamentoLimpa,
       } as QueryDeepPartialEntity<Matricula>);
 
-      // C. Busca a foto do registro DEPOIS da alteração
       const matriculaDepois = await this.repository.findOne({
         where: { id },
         relations: ['aluno', 'curso'],
       });
 
-      // D. Gera o diferencial entre os dois estados
       const diff = gerarDiffParaLog(matriculaAntes, matriculaDepois);
 
-      // E. Só gera o log se houver pelo menos uma mudança detectada
       if (Object.keys(diff.depois).length > 0) {
         await this.auditService.createLog(
           'matricula',
@@ -128,6 +121,7 @@ export class MatriculaService {
           diff.antes,
           diff.depois,
           userName,
+          contexto, // 👈 ENVIANDO O CONTEXTO AQUI
         );
       }
 
@@ -150,7 +144,9 @@ export class MatriculaService {
 
     if (!matCompleta) return null;
 
-    // No INSERT, usamos uma função simplificada para não salvar o objeto gigante
+    // 🚀 NOVO: Contexto para criação
+    const contextoNovo = `${matCompleta.aluno?.nome || 'S/ Nome'} - ${matCompleta.curso?.nome || 'S/ Curso'}`;
+
     const simplificarParaInsert = (obj: any) => ({
       aluno: obj.aluno?.nome || obj.aluno,
       curso: obj.curso?.nome || obj.curso,
@@ -165,9 +161,10 @@ export class MatriculaService {
       {},
       simplificarParaInsert(matCompleta),
       userName,
+      contextoNovo, // 👈 ENVIANDO O CONTEXTO AQUI
     );
 
-    // Automações de curso e financeiro
+    // Automações (mantenha igual)
     if (matCompleta.curso?.qtdeTermos) {
       await this.gerarTermosEAulas(matCompleta);
     }

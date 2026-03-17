@@ -350,7 +350,7 @@ export default function Alunos() {
                 <button id="btn-salvar-aluno" type="submit" className="btn btn-success">
                   <FaSave /> Salvar Ficha [F4]
                 </button>
-                <button type="button" className="btn btn-danger" onClick={fecharFormulario}>
+                <button type="button" className="btn btn-secondary" onClick={fecharFormulario}>
                   <FaTimes /> Cancelar [Esc]
                 </button>
               </div>

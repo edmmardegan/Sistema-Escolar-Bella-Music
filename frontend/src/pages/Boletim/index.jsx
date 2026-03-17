@@ -94,7 +94,7 @@ export default function Boletim() {
       <div className="container-principal">
         <header className="header-card">
           <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-            <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+            <button className="btn btn-danger" onClick={() => navigate(-1)}>
               <FaArrowLeft /> Voltar
             </button>{" "}
             <h2 style={{ margin: 0 }}>

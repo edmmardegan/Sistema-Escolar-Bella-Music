@@ -304,7 +304,7 @@ export default function Financeiro() {
                             </button>
                           </>
                         ) : (
-                          <button onClick={() => handleAcao(p.id, "estornar")} className="btn-icon btn-secondary" title="Estornar">
+                          <button onClick={() => handleAcao(p.id, "estornar")} className="btn-icon btn-danger" title="Estornar">
                             <FaUndo />
                           </button>
                         )}

@@ -17,6 +17,10 @@ export class AuditLog {
   @Column()
   action: string;
 
+  // Novo campo para salvar "Aluno X - Curso Y" ou "Email do Usuário"
+  @Column({ nullable: true })
+  context: string;
+
   @Column({ type: 'jsonb', nullable: true })
   old_values: any;
 

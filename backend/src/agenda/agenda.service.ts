@@ -8,6 +8,7 @@ import { Matricula } from '../entities/matricula.entity';
 import { MatriculaTermo } from '../entities/matricula-termo.entity';
 import { Raw, ILike } from 'typeorm';
 import { AuditService } from '../audit/audit.service';
+import { DateFormatUtil } from '../common/utils/date-format.util';
 @Injectable()
 export class AgendaService {
   constructor(
@@ -71,25 +72,42 @@ export class AgendaService {
   }
 
   async remove(id: number, userName: string): Promise<{ success: boolean }> {
-    const aula = await this.repository.findOne({ where: { id } });
+    const aula = await this.repository.findOne({
+      where: { id },
+      relations: ['termo', 'termo.matricula', 'termo.matricula.aluno'],
+    });
+
     if (!aula) throw new NotFoundException('Aula não encontrada');
 
-    // 1. BANCO: Apenas a aula (1 argumento)
+    // 🚀 CONTEXTO: Usando o utilitário para formatar a data (DD/MM/YYYY HH:mm)
+    // O nome do aluno vem da relação carregada acima
+    const alunoNome =
+      aula.termo?.matricula?.aluno?.nome || 'Aluno não identificado';
+    const dataFormatada = DateFormatUtil.formatarParaLog(aula.data);
+
+    const contexto = `Aula Deletada - Aluno: ${alunoNome} | Data: ${dataFormatada}`;
+
+    // Remove do banco
     await this.repository.remove(aula);
 
-    // 2. AUDITORIA: Aqui sim você usa o userName (5 argumentos)
-    await this.auditService.createLog('aula', 'DELETE', aula, {}, userName);
+    // Grava o log com o contexto amigável
+    await this.auditService.createLog(
+      'aula',
+      'DELETE',
+      { status: aula.status, data: aula.data },
+      {},
+      userName,
+      contexto,
+    );
 
     return { success: true };
   }
-
   async registrarFrequencia(
     id: number,
     acao: 'presenca' | 'falta' | 'reposicao',
     motivo: string | undefined,
     userName: string,
   ): Promise<any> {
-    // 1. O SEGREDO ESTÁ AQUI: Carregar as relações para o log saber de quem é a aula
     const aulaAntes = await this.repository.findOne({
       where: { id },
       relations: [
@@ -102,61 +120,35 @@ export class AgendaService {
 
     if (!aulaAntes) throw new NotFoundException('Aula não encontrada');
 
-    // 2. Montamos um objeto com as informações fixas da aula para o log
-    const infoAula = {
-      aluno: aulaAntes.termo?.matricula?.aluno?.nome || 'Não encontrado',
-      curso: aulaAntes.termo?.matricula?.curso?.nome || 'Não encontrado',
-      dataAula: aulaAntes.data,
-      horario: aulaAntes.termo?.matricula?.horario || 'N/D',
-    };
+    // 🚀 CONTEXTO: Quem e Quando
+    const dataFormatada = DateFormatUtil.formatarParaLog(aulaAntes.data);
+    const contexto = `Frequência - Aluno: ${aulaAntes.termo?.matricula?.aluno?.nome} | Data: ${dataFormatada}`;
 
     let novosDados: any = {};
-
     if (acao === 'presenca') {
-      novosDados = {
-        status: 'Presente',
-        motivoFalta: null,
-      };
+      novosDados = { status: 'Presente', motivoFalta: null };
     } else if (acao === 'falta') {
-      novosDados = {
-        status: 'Falta',
-        motivoFalta: motivo,
-      };
+      novosDados = { status: 'Falta', motivoFalta: motivo };
     } else if (acao === 'reposicao') {
       const dataHoje = new Date().toLocaleDateString('pt-BR');
       novosDados = {
         status: 'Presente',
         obs:
           (aulaAntes.obs ? `${aulaAntes.obs} | ` : '') +
-          `Reposição realizada em ${dataHoje}`,
+          `Reposição em ${dataHoje}`,
       };
     }
 
-    // 3. Atualizamos o banco
     await this.repository.update(id, novosDados);
 
-    // 4. AUDITORIA: Montagem manual para não ter erro
-    const logAnterior = {
-      aluno: aulaAntes.termo?.matricula?.aluno?.nome || 'Nome não carregado',
-      curso: aulaAntes.termo?.matricula?.curso?.nome || 'Curso não carregado',
-      dataAula: aulaAntes.data,
-      status: aulaAntes.status,
-    };
-
-    const logNovo = {
-      aluno: aulaAntes.termo?.matricula?.aluno?.nome || 'Nome não carregado',
-      curso: aulaAntes.termo?.matricula?.curso?.nome || 'Curso não carregado',
-      dataAula: aulaAntes.data,
-      status: novosDados.status,
-      motivo: novosDados.motivoFalta || null,
-    };
-
+    // ✅ LOG LIMPO: Não repetimos aluno/curso no JSON pois já estão no contexto
     await this.auditService.createLog(
       'aula',
       'UPDATE',
-      logAnterior,
-      logNovo,
+      { status: aulaAntes.status },
+      { status: novosDados.status },
       userName,
+      contexto, // 👈 Identificação clara
     );
   }
 
@@ -256,18 +248,22 @@ export class AgendaService {
     }
 
     // Auditoria
-    await this.auditService.createLog(
-      'agenda',
-      'INSERT',
-      {},
-      {
-        operacao: 'Geração Mensal',
-        mes: mes + 1,
-        ano,
-        totalAulas: totalCriado,
-      },
-      userName,
-    );
+    if (totalCriado > 0) {
+      // 🚀 CONTEXTO: Identifica o lote do mês
+      const contextoLote = `Geração Mensal Agenda - ${mes + 1}/${ano}`;
+
+      await this.auditService.createLog(
+        'agenda',
+        'INSERT',
+        {},
+        {
+          operacao: 'Geração Mensal',
+          totalAulas: totalCriado,
+        },
+        userName,
+        contextoLote, // 👈 Identificação do lote
+      );
+    }
 
     return { message: `Sucesso! Foram geradas ${totalCriado} novas aulas.` };
   }

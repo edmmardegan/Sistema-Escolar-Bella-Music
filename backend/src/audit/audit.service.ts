@@ -59,17 +59,21 @@ export class AuditService {
     }
   }
 
+  // src/audit/audit.service.ts
+
   async createLog(
     table: string,
     action: string,
     oldV: any,
     newV: any,
     user: string,
+    context?: string,
   ): Promise<AuditLog> {
     try {
       const log = this.auditRepository.create({
         table_name: table,
         action,
+        context, // 👈 Gravando o contexto (Nome Aluno, Curso, etc)
         old_values: oldV,
         new_values: newV,
         user_name: user,

@@ -16,76 +16,61 @@ export default function ResetPassword() {
 
   const handleReset = async (e) => {
     e.preventDefault();
-
-    if (novaSenha.length < 6) {
-      return alert("A senha deve ter pelo menos 6 caracteres.");
-    }
-
-    if (novaSenha !== confirmarSenha) {
-      return alert("As senhas não conferem!");
-    }
+    if (novaSenha.length < 6) return alert("A senha deve ter pelo menos 6 caracteres.");
+    if (novaSenha !== confirmarSenha) return alert("As senhas não conferem!");
 
     setLoading(true);
     try {
-      // Chama a rota PATCH /usuarios/:id/update-own-password que criamos no UsersController
       await api.updateOwnPassword(user.id, { novaSenha });
-
       alert("Senha atualizada com sucesso! Por favor, realize o login novamente.");
-
-      // Limpeza de segurança para forçar novo login
       localStorage.clear();
       window.location.href = "/login";
     } catch (error) {
-      console.error("Erro ao atualizar senha:", error);
-      alert("Erro ao atualizar senha. Tente novamente.");
+      alert("Erro ao atualizar senha.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    /* Mudei de conteudo-principal para reset-password-page */
-    <main className="reset-password-page">
-      {/* Mudei de card-principal para reset-password-card e removi a div container-principal que era desnecessária para centralizar */}
-      <section className="reset-password-card">
-        <div className="header-card">
+    <main className="reset-page-container">
+      <section className="auth-card-reset">
+        <div className="auth-header-reset">
           {user?.primeiroAcesso ? (
             <>
               <FaLock size={30} color="#007bff" />
               <h2>Primeiro Acesso</h2>
-              <p style={{ marginTop: "10px", color: "#666" }}>Para sua segurança, você precisa cadastrar uma nova senha antes de continuar.</p>
+              <p style={{ marginTop: "10px", color: "#666" }}>Cadastre uma nova senha para continuar.</p>
             </>
           ) : (
             <>
               <FaKey size={30} color="#007bff" />
               <h2>Alterar Senha</h2>
               <p style={{ marginTop: "10px", color: "#666" }}>
-                Olá <strong>{user?.nome}</strong>, preencha os campos abaixo 
-                para alterar sua senha.
+                Olá <strong>{user?.nome}</strong>, altere sua senha abaixo.
               </p>
             </>
           )}
         </div>
 
-        <form onSubmit={handleReset} className="form-padrao">
-          <div className="input-group">
+        <form onSubmit={handleReset} className="auth-form-reset">
+          <div className="auth-input-group">
             <label>Nova Senha</label>
             <input
               type="password"
-              className="input-field"
+              className="auth-input-field"
               required
-              minLength={6}
               value={novaSenha}
               onChange={(e) => setNovaSenha(e.target.value)}
               placeholder="Digite sua nova senha"
             />
           </div>
 
-          <div className="input-group" style={{ marginTop: "15px" }}>
+          <div className="auth-input-group">
             <label>Confirmar Nova Senha</label>
             <input
               type="password"
-              className="input-field"
+              className="auth-input-field"
               required
               value={confirmarSenha}
               onChange={(e) => setConfirmarSenha(e.target.value)}
@@ -93,26 +78,17 @@ export default function ResetPassword() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loading}
-          >
+          <button type="submit" className="auth-btn-reset btn-azul" disabled={loading}>
             {loading ? "Processando..." : "Salvar Nova Senha"}
           </button>
-          <button
-            type="button"
-            className="btn btn-danger"
-            onClick={() => navigate("/")} // Ou navigate(-1) para voltar onde estava
-          >
+          
+          <button type="button" className="auth-btn-reset btn-vermelho" onClick={() => navigate("/")}>
             Cancelar e Voltar
           </button>
         </form>
 
-        <div className="footer-card">
-          <small>
-            <FaExclamationCircle /> Após atualizar, o sistema solicitará um novo login por segurança.
-          </small>
+        <div className="auth-footer-reset">
+          <FaExclamationCircle /> Após atualizar, o sistema solicitará um novo login.
         </div>
       </section>
     </main>

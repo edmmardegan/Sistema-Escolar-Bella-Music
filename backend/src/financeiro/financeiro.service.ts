@@ -51,23 +51,20 @@ export class FinanceiroService {
 
     if (!parcelaAntes) throw new NotFoundException('Parcela não encontrada');
 
-    // Criamos o objeto de log com contexto fixo
-    const infoFixa = {
-      aluno: parcelaAntes.aluno?.nome || 'N/D',
-      descricao: parcelaAntes.descricao,
-      vencimento: parcelaAntes.dataVencimento,
-      valor: parcelaAntes.valorTotal,
-    };
+    // 🚀 NOVO: Contexto detalhado (Quem + Qual Parcela)
+    const contexto = `Aluno: ${parcelaAntes.aluno?.nome || 'N/D'} | Venc: ${parcelaAntes.dataVencimento}`;
 
+    const statusAnterior = parcelaAntes.status;
     parcelaAntes.status = status;
     const salva = await this.repository.save(parcelaAntes);
 
     await this.auditService.createLog(
       'financeiro',
       'UPDATE',
-      { ...infoFixa, status: status === 'Paga' ? 'Aberta' : 'Paga' },
-      { ...infoFixa, status: status },
+      { status: statusAnterior }, // Simplificado para mostrar só a mudança
+      { status: status },
       userName,
+      contexto,
     );
 
     return salva;
@@ -128,6 +125,8 @@ export class FinanceiroService {
         chunk: 500,
       });
 
+      const contextoLote = `Geração de Lote - Ano: ${dto.ano}`;
+
       // 2. AUDITORIA: Registramos apenas UM log com o resumo da operação
       await this.auditService.createLog(
         'financeiro',
@@ -141,6 +140,7 @@ export class FinanceiroService {
           totalParcelasCriadas: todasAsNovasParcelas.length,
         }, // NOVO: Resumo do que aconteceu
         userName,
+        contextoLote,
       );
     }
 
@@ -155,6 +155,8 @@ export class FinanceiroService {
     });
     if (!parcela) throw new NotFoundException('Parcela não encontrada');
 
+    const contextoExclusao = `Exclusão - Aluno: ${parcela.aluno?.nome} | Venc: ${parcela.dataVencimento}`;
+
     await this.auditService.createLog(
       'financeiro',
       'DELETE',
@@ -162,9 +164,11 @@ export class FinanceiroService {
         aluno: parcela.aluno?.nome,
         descricao: parcela.descricao,
         valor: parcela.valorTotal,
+        vencimento: parcela.dataVencimento,
       },
       {},
       userName,
+      contextoExclusao,
     );
 
     return await this.repository.delete(id);
