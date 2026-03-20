@@ -1,7 +1,7 @@
 //Local: /src/pages/Financeiro/index.jsx
 
 import React, { useState, useEffect, useCallback } from "react";
-import { FaDollarSign, FaMagic, FaTrash, FaCheck, FaUndo, FaHandHoldingUsd, FaListOl, FaTimes, FaSearch } from "react-icons/fa";
+import { FaDollarSign, FaMagic, FaTrash, FaFilter, FaCheck, FaUndo, FaHandHoldingUsd, FaListOl, FaTimes, FaSearch } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 import api from "../../services/api";
 import "./styles.css";
@@ -133,6 +133,15 @@ export default function Financeiro() {
   const totalPago = filtrados.filter((i) => i.status === "Paga").reduce((acc, curr) => acc + Number(curr.valorTotal || 0), 0);
   const totalAberto = filtrados.filter((i) => i.status === "Aberta").reduce((acc, curr) => acc + Number(curr.valorTotal || 0), 0);
 
+  const limparFiltros = () => {
+    setBuscaNome("");
+    const mesAtual = new Date().getMonth() + 1;
+    setMesFiltro(alunoIdViaUrl ? 0 : mesAtual);
+    setAnoFiltro(new Date().getUTCFullYear());
+    setStatusFiltro("Todos");
+    setProfessorFiltro("Todas");
+  };
+
   return (
     <main className="conteudo-principal">
       <div className="container-principal">
@@ -186,7 +195,7 @@ export default function Financeiro() {
                 <input
                   type="text"
                   className="input-field"
-                  placeholder="Nome do aluno..."
+                  placeholder="Pesquisar por nome..."
                   value={buscaNome}
                   onChange={(e) => setBuscaNome(e.target.value)}
                   style={{ paddingLeft: "35px" }}
@@ -244,6 +253,11 @@ export default function Financeiro() {
                 <option value="Aberta">Em Aberto</option>
                 <option value="Paga">Pagos</option>
               </select>
+            </div>
+            <div className="input-group">
+              <button type="button" className="btn-limpar-filtros" onClick={limparFiltros} title="Limpar todos os filtros">
+                <span className="icon-clear">🧹</span> Limpar
+              </button>
             </div>
           </div>
         </section>

@@ -1,0 +1,475 @@
+/* src/pages/Alunos/index.jsx */
+
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { 
+  FaWhatsapp, FaTrash, FaPen, FaUserPlus, FaSave, FaTimes, 
+  FaSearch, FaListOl, FaUserGraduate, FaCheckCircle 
+} from "react-icons/fa";
+import api from "../../services/api.js";
+import InputMask from "../../components/InputMask";
+import { validarCPF } from "../../components/validateCPF";
+import "./styles.css";
+
+export default function Alunos() {
+  // --- ESTADOS ---
+  const [registros, setRegistros] = useState([]);
+  const [exibindoForm, setExibindoForm] = useState(false);
+  const [editandoId, setEditandoId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [filtroAba, setFiltroAba] = useState("Ativos");
+  const [buscaNome, setBuscaNome] = useState("");
+  const [exibirCpfReal, setExibirCpfReal] = useState(false);
+  const [alunoSelecionado, setAlunoSelecionado] = useState(null); // Registro clicado
+  const inputNomeRef = useRef(null);
+
+  const estadoInicial = {
+    nome: "",
+    cpf: "",
+    telefone: "",
+    dataNascimento: null,
+    ativo: true,
+    nomePai: "",
+    nomeMae: "",
+    cep: "",
+    endereco: "",
+    numero: "",
+    complemento: "",
+    bairro: "",
+    cidade: "Araraquara",
+  };
+
+  const [form, setForm] = useState(estadoInicial);
+
+  // --- CARREGAMENTO ---
+  const carregar = useCallback(async () => {
+    try {
+      setLoading(true);
+      const resposta = await api.getAlunos();
+      setRegistros(Array.isArray(resposta) ? resposta : []);
+      setAlunoSelecionado(null); // Resetar seleção ao recarregar
+    } catch (e) {
+      console.error("Erro ao carregar alunos:", e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    carregar();
+  }, [carregar]);
+
+  // --- ATALHOS DE TECLADO ---
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "F2" && !exibindoForm) {
+        e.preventDefault();
+        setExibindoForm(true);
+      }
+      if (e.key === "F4" && exibindoForm) {
+        e.preventDefault();
+        document.getElementById("btn-salvar-aluno")?.click();
+      }
+      if (e.key === "Escape") {
+        fecharFormulario();
+        setAlunoSelecionado(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [exibindoForm]);
+
+  // --- FILTRAGEM ---
+  const listaExibida = registros
+    .filter((aluno) => {
+      const bateAba = filtroAba === "Ativos" ? aluno.ativo === true : filtroAba === "Inativos" ? aluno.ativo === false : true;
+      const bateNome = (aluno.nome || "").toLowerCase().includes(buscaNome.toLowerCase());
+      return bateAba && bateNome;
+    })
+    .sort((a, b) => (a.nome || "").localeCompare(b.nome || ""));
+
+  // --- FUNÇÕES DE AÇÃO ---
+  const salvar = async (e) => {
+    e.preventDefault();
+    const cpfLimpo = form.cpf ? form.cpf.replace(/\D/g, "") : null;
+    if (cpfLimpo && (cpfLimpo.length !== 11 || !validarCPF(cpfLimpo))) {
+      alert("CPF inválido.");
+      return;
+    }
+
+    try {
+      await api.saveAluno({ ...form, cpf: cpfLimpo }, editandoId);
+      alert("Aluno salvo com sucesso!");
+      fecharFormulario();
+      carregar();
+    } catch (error) {
+      alert("Erro ao salvar.");
+    }
+  };
+
+  const excluirSelt = async () => {
+    if (!alunoSelecionado) return;
+    if (!window.confirm(`Excluir permanentemente o aluno ${alunoSelecionado.nome}?`)) return;
+    try {
+      await api.deleteAluno(alunoSelecionado.id);
+      carregar();
+    } catch (e) {
+      alert("Erro ao excluir.");
+    }
+  };
+
+  const prepararEdicaoSelt = () => {
+    if (!alunoSelecionado) return;
+    const dataFormatada = alunoSelecionado.dataNascimento ? alunoSelecionado.dataNascimento.split("T")[0] : "";
+    setForm({ ...alunoSelecionado, dataNascimento: dataFormatada });
+    setEditandoId(alunoSelecionado.id);
+    setExibindoForm(true);
+  };
+
+  const alternarStatusSelt = async () => {
+    if (!alunoSelecionado) return;
+    const possuiMatricula = alunoSelecionado.matriculas?.some(m => m.situacao?.toLowerCase() === "em andamento");
+    if (possuiMatricula) {
+      alert("Aluno possui matrículas em andamento.");
+      return;
+    }
+    if (!window.confirm("Alterar status do aluno?")) return;
+    try {
+      await api.saveAluno({ ativo: !alunoSelecionado.ativo }, alunoSelecionado.id);
+      carregar();
+    } catch (e) {
+      alert("Erro ao alterar status.");
+    }
+  };
+
+  const fecharFormulario = () => {
+    setForm(estadoInicial);
+    setEditandoId(null);
+    setExibindoForm(false);
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    let valorFinal = type === "checkbox" ? checked : value;
+    if (name === "cpf") valorFinal = value.replace(/\D/g, "").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2").slice(0, 14);
+    setForm({ ...form, [name]: valorFinal });
+  };
+
+  const formatarDataTabela = (data) => {
+    if (!data) return "---";
+    const [ano, mes, dia] = data.split("T")[0].split("-");
+    return `${dia}/${mes}/${ano}`;
+  };
+
+  return (
+    <main className="conteudo-principal-fixo">
+      <div className="container-principal flex-col-container">
+        
+        {/* PARTE FIXA: HEADER E FORMULÁRIO */}
+        <div className="secao-topo-fixa">
+          <div className="card-principal">
+            <div className="header-card">
+              <div className="titulo-secao">
+                <h2><FaUserGraduate /> {editandoId ? "Editar Aluno" : "Gerenciar Alunos"}</h2>
+                
+                {!exibindoForm && alunoSelecionado && (
+                  <div className="acoes-contextuais-header">
+                    <span className="separador">|</span>
+                    <button className="btn-acao-header btn-status" onClick={alternarStatusSelt}>
+                      {alunoSelecionado.ativo ? "🔴 Inativar" : "🟢 Ativar"}
+                    </button>
+                    <button className="btn-acao-header btn-edit" onClick={prepararEdicaoSelt}>
+                      <FaPen /> Editar
+                    </button>
+                    <button className="btn-acao-header btn-excluir" onClick={excluirSelt}>
+                      <FaTrash /> Excluir
+                    </button>
+                    <button className="btn-acao-header btn-cancelar" onClick={() => setAlunoSelecionado(null)}>
+                      <FaTimes />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {!exibindoForm && !alunoSelecionado && (
+                <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
+                  <FaUserPlus /> Novo Aluno [F2]
+                </button>
+              )}
+            </div>
+
+            {exibindoForm && (
+              <form onSubmit={salvar} className="form-grid" style={{ padding: '15px' }}>
+                <div className="input-group campo-medio">
+                  <label>Nome Completo:</label>
+                  <input ref={inputNomeRef} required name="nome" value={form.nome} onChange={handleChange} className="input-field" autoComplete="off" />
+                </div>
+                <div className="input-group campo-curto">
+                  <label>CPF:</label>
+                  <input name="cpf" value={form.cpf || ""} onChange={handleChange} className="input-field" maxLength="14" />
+                </div>
+                <div className="input-group campo-pequeno">
+                  <InputMask label="Telefone:" mask="(99) 99999-9999" name="telefone" value={form.telefone || ""} onChange={(e) => setForm({ ...form, telefone: e.target.value })} />
+                </div>
+                <div className="input-group campo-pequeno">
+                  <label>Data Nasc:</label>
+                  <input type="date" name="dataNascimento" value={form.dataNascimento || ""} onChange={handleChange} className="input-field" />
+                </div>
+                {/* Outros campos de endereço resumidos para brevidade, mas mantenha todos os seus originais aqui */}
+                <div className="acoes-form">
+                  <button id="btn-salvar-aluno" type="submit" className="btn btn-success"><FaSave /> Salvar Ficha [F4]</button>
+                  <button type="button" className="btn btn-secondary" onClick={fecharFormulario}><FaTimes /> Cancelar [Esc]</button>
+                </div>
+              </form>
+            )}
+          </div>
+
+          <div className="filtro-e-header-tabela">
+            <div className="filtro-container-flex">
+              <div className="grupo-abas">
+                {["Ativos", "Inativos", "Todos"].map((aba) => (
+                  <button key={aba} className={`aba-item ${filtroAba === aba ? "ativa" : ""}`} onClick={() => setFiltroAba(aba)}>
+                    {aba}
+                  </button>
+                ))}
+              </div>
+              <div className="busca-nome-container">
+                <FaSearch className="icon-search" />
+                <input type="text" placeholder="Pesquisar por nome..." value={buscaNome} onChange={(e) => setBuscaNome(e.target.value)} className="input-field" />
+              </div>
+              <div className="contadores-flex">
+                <span className="count-badge"><FaListOl /> Total: <strong>{listaExibida.length}</strong></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* PARTE ROLÁVEL: TABELA */}
+        <div className="tabela-container-scroll">
+          {loading ? (
+            <p className="txt-carregando">Carregando dados...</p>
+          ) : (
+            <table className="tabela-moderna">
+              <thead>
+                <tr>
+                  <th style={{ width: "45px" }}></th>
+                  <th>Nome / Endereço</th>
+                  <th>Curso</th>
+                  <th>Telefone</th>
+                  <th>Nascimento</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {listaExibida.map((a) => (
+                  <tr 
+                    key={a.id} 
+                    onClick={() => setAlunoSelecionado(alunoSelecionado?.id === a.id ? null : a)}
+                    className={alunoSelecionado?.id === a.id ? "linha-selecionada" : ""}
+                  >
+                    <td className="col-check">
+                      {alunoSelecionado?.id === a.id ? <FaCheckCircle color="#007bff" /> : <div className="dot-placeholder" />}
+                    </td>
+                    <td>
+                      <strong className="txt-registros">{a.nome}</strong>
+                      <br />
+                      <small style={{ color: '#888' }}>{a.endereco}, {a.numero}</small>
+                    </td>
+                    <td>
+                      {a.matriculas?.filter(m => m.situacao === "Em Andamento").map(m => (
+                        <span key={m.id} className="badge-curso">{m.curso?.nome}</span>
+                      ))}
+                    </td>
+                    <td>
+                      {a.telefone && (
+                        <a href={`https://wa.me/55${a.telefone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="link-whatsapp">
+                          <FaWhatsapp /> {a.telefone}
+                        </a>
+                      )}
+                    </td>
+                    <td>{formatarDataTabela(a.dataNascimento)}</td>
+                    <td>
+                      <span className={`badge-status ${a.ativo ? "status-ativo" : "status-inativo"}`}>
+                        {a.ativo ? "ATIVO" : "INATIVO"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+
+
+
+/* --- 1. ESTRUTURA DE TRAVAMENTO DE TELA --- */
+.conteudo-principal-fixo {
+  /* Impede a página inteira de rolar, focando o scroll apenas na tabela */
+  height: 100vh; 
+  padding: 15px;
+  overflow: hidden; 
+  box-sizing: border-box;
+  background-color: #f4f7f6; /* Cor de fundo suave para o dashboard */
+}
+
+.flex-col-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Ocupa os 100vh do pai */
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden; /* Garante que as bordas arredondadas cortem o conteúdo */
+}
+
+/* --- 2. CABEÇALHO FIXO (AÇÕES E FORMULÁRIO) --- */
+.secao-topo-fixa {
+  flex-shrink: 0; /* Não permite que esta área seja "esmagada" quando a tabela crescer */
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: #fff;
+}
+
+/* --- 3. BARRA DE AÇÕES CONTEXTUAIS --- */
+.titulo-secao {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.acoes-contextuais-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.separador {
+  color: #ddd;
+  font-size: 20px;
+}
+
+.btn-acao-header {
+  border: 1px solid #dee2e6;
+  background: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-acao-header:hover { background: #f8f9fa; }
+.btn-acao-header.btn-edit { color: #f08c00; }
+.btn-acao-header.btn-excluir { color: #e03131; }
+.btn-acao-header.btn-status { color: #2b8a3e; }
+
+/* --- 4. ÁREA DE FILTROS (LOGO ABAIXO DO HEADER) --- */
+.filtro-e-header-tabela {
+  padding: 10px 20px;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+}
+
+.filtro-container-flex {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* --- 5. A MÁGICA DO SCROLL DA TABELA --- */
+.tabela-container-scroll {
+  flex-grow: 1; /* Faz a tabela ocupar todo o espaço restante da tela */
+  overflow-y: auto; /* Habilita o scroll vertical apenas nesta div */
+  background: #fff;
+}
+
+/* Fixar o Cabeçalho (thead) enquanto rola */
+.tabela-moderna {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela-moderna thead th {
+  position: sticky;
+  top: 0; /* Gruda no topo da div .tabela-container-scroll */
+  background: #f1f3f5;
+  color: #495057;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 12px 15px;
+  text-align: left;
+  z-index: 50;
+  box-shadow: inset 0 -1px 0 #dee2e6; /* Borda inferior que não some no scroll */
+}
+
+/* --- 6. ESTILOS DAS LINHAS --- */
+.tabela-moderna tbody tr {
+  border-bottom: 1px solid #f1f3f5;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.tabela-moderna tbody tr:hover {
+  background-color: #fdfdfe;
+}
+
+/* Destaque para a linha selecionada */
+.tabela-moderna tbody tr.linha-selecionada {
+  background-color: #e7f5ff !important;
+  color: #1971c2;
+}
+
+.col-check {
+  width: 40px;
+  text-align: center;
+}
+
+.dot-placeholder {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ced4da;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+/* Badges e Extras */
+.badge-status {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.status-ativo { background: #e6fcf5; color: #0ca678; }
+.status-inativo { background: #fff5f5; color: #fa5252; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ajuste para o formulário não quebrar o layout se for muito grande */
+.form-grid {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 15px;
+  border-bottom: 2px solid #eee;
+}

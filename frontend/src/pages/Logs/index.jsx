@@ -1,6 +1,7 @@
 //Local: /src/pages/Logs/index.jsx
 
 import React, { useEffect, useState, useCallback } from "react";
+import {FaFilter} from "react-icons/fa";
 import api from "../../services/api";
 import "./styles.css";
 
@@ -78,6 +79,7 @@ export const AuditLogs = () => {
       </div>
       {/* --- CONTAINER DE FILTROS --- */}
       <div className="filtro-container-flex">
+        <FaFilter style={{ color: "#aaa" }} />
         <div className="busca-nome-container">
           <span className="icon-search">🔍</span>
           <input

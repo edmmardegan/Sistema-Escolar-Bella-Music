@@ -115,7 +115,7 @@ export default function Agenda() {
     try {
       setLoading(true); // Opcional: ativa o loading enquanto gera
       const resultado = await api.gerarAgenda(payload);
-      
+
       alert(resultado.message || "Sucesso!"); // Usa a mensagem que vem do backend
 
       await carregar(); // recarregar com as novas aulas geradas
@@ -172,11 +172,12 @@ export default function Agenda() {
               <FaSearch className="icon-search" />
               <input
                 type="text"
-                placeholder="Pesquisar aluno..."
+                placeholder="Pesquisar por nome..."
                 value={buscaNome}
                 onChange={(e) => setBuscaNome(e.target.value)}
                 className="input-field"
               />
+              {buscaNome && <FaTimes className="icon-clear" onClick={() => setBuscaNome("")} />}
             </div>
 
             <div className="contadores-flex">

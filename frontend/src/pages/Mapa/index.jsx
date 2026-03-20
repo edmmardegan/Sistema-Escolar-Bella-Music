@@ -84,7 +84,7 @@ export default function Mapa() {
           <div className="painel-filtros-mapa">
             <div className="input-group-filtro">
               <FaFilter style={{ color: "#aaa" }} />
-              <select className="input-field" style={{ width: "250px" }} value={filtroProfessor} onChange={(e) => setFiltroProfessor(e.target.value)}>
+              <select className="input-field" style={{ width: "200px" }} value={filtroProfessor} onChange={(e) => setFiltroProfessor(e.target.value)}>
                 <option value="">Todos os Professores</option>
                 {professoresUnicos.map((prof) => (
                   <option key={prof} value={prof}>
