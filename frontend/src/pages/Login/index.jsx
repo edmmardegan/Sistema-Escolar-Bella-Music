@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.js";
 import api from "../../services/api.js";
 import { FaUserCircle, FaLock, FaSignInAlt } from "react-icons/fa";
-import "./styles.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -19,26 +18,23 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // Chama a função login da nossa api.js padronizada
       const data = await api.login(email, password);
 
       if (data && data.access_token) {
-        // Salva os dados no contexto de autenticação
         login(data.user, data.access_token);
 
-        // LÓGICA DE DIRECIONAMENTO:
-        // Se for o primeiro acesso, obriga a troca de senha.
         if (data.user?.primeiroAcesso) {
           navigate("/reset-password");
         } else {
-          navigate("/"); // Vai para a Home (Agenda)
+          navigate("/");
         }
       } else {
         alert("Erro inesperado na resposta do servidor.");
       }
     } catch (error) {
       console.error("Erro ao logar:", error);
-      const msg = error.response?.data?.message || "Usuário ou senha incorretos!";
+      const msg =
+        error.response?.data?.message || "Usuário ou senha incorretos!";
       alert(msg);
     } finally {
       setLoading(false);
@@ -46,50 +42,71 @@ export default function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <FaUserCircle size={60} color="#007bff" />
-          <h2>Acesso ao Sistema</h2>
-          <p>Entre com suas credenciais para continuar</p>
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+
+        {/* HEADER */}
+        <div className="text-center mb-6">
+          <FaUserCircle className="mx-auto text-blue-600" size={60} />
+          <h2 className="text-2xl font-bold text-gray-800 mt-2">
+            Acesso ao Sistema
+          </h2>
+          <p className="text-gray-500 text-sm">
+            Entre com suas credenciais para continuar
+          </p>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>
+        {/* FORM */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+
+          {/* EMAIL */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-600 mb-1">
               <FaSignInAlt /> Email
             </label>
             <input
               type="email"
               required
-              className="input-field"
               placeholder="seu@email.com"
+              className="w-full px-4 py-2 border rounded-md bg-white text-gray-800 
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                         transition"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
-          <div className="form-group">
-            <label>
+          {/* SENHA */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-600 mb-1">
               <FaLock /> Senha
             </label>
             <input
               type="password"
               required
-              className="input-field"
               placeholder="••••••••"
+              className="w-full px-4 py-2 border rounded-md bg-white text-gray-800 
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                         transition"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          <button type="submit" className="btn-login" disabled={loading}>
+          {/* BOTÃO */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 bg-blue-600 text-white font-bold rounded-md
+                       hover:bg-blue-700 transition disabled:opacity-50"
+          >
             {loading ? "Autenticando..." : "Entrar no Sistema"}
           </button>
         </form>
 
-        <div className="login-footer">
-          <small>&copy; 2026 Sistema de Gestão Escolar</small>
+        {/* FOOTER */}
+        <div className="text-center mt-6 text-xs text-gray-400">
+          © 2026 Sistema de Gestão Escolar
         </div>
       </div>
     </div>

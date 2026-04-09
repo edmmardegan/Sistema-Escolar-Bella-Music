@@ -1,5 +1,4 @@
 //Local: /src/App.jsx
-
 import "./App.css";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
@@ -112,60 +111,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-/*
-// 🔑 Componente de Reset Integrado (Mantenha como estava)
-function AuthConsumerReset() {
-  const { user, authenticated, logout } = useAuth();
-  const [novaSenha, setNovaSenha] = useState("");
-  const [confirmar, setConfirmar] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  if (!authenticated) return <Navigate to="/login" replace />;
-  if (user?.primeiroAcesso === false) return <Navigate to="/" replace />;
-
-  const handleReset = async (e) => {
-    e.preventDefault();
-    if (novaSenha !== confirmar) return alert("As senhas não coincidem!");
-    setLoading(true);
-    try {
-      await api.updateOwnPassword(user.id, { novaSenha });
-      alert("Senha atualizada com sucesso!");
-      logout();
-    } catch (err) {
-      alert("Erro ao atualizar senha.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="reset-password-container">
-      <form onSubmit={handleReset} className="reset-password-card">
-        <h2>Nova Senha</h2>
-        <p>
-          Olá <strong>{user?.nome}</strong>, altere sua senha inicial.
-        </p>
-        <input
-          type="password"
-          placeholder="Nova senha"
-          required
-          value={novaSenha}
-          onChange={(e) => setNovaSenha(e.target.value)}
-          className="input-field"
-        />
-        <input
-          type="password"
-          placeholder="Confirme senha"
-          required
-          value={confirmar}
-          onChange={(e) => setConfirmar(e.target.value)}
-          className="input-field"
-        />
-        <button type="submit" disabled={loading} className="btn btn-primary">
-          Salvar Nova Senha
-        </button>
-      </form>
-    </div>
-  );
-}
-*/

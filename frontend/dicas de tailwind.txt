@@ -1,0 +1,154 @@
+# 📚 Guia Rápido Tailwind CSS
+
+## 🔤 Texto
+
+text-xs       -> texto bem pequeno
+text-sm       -> pequeno
+text-base     -> padrão
+text-lg       -> médio
+text-xl       -> grande
+text-2xl      -> maior
+text-3xl      -> grande destaque
+text-4xl      -> título grande
+
+font-light     -> fino
+font-normal    -> normal
+font-medium    -> médio
+font-semibold  -> semi-negrito
+font-bold      -> negrito
+font-extrabold -> super negrito
+
+text-left    -> alinhado à esquerda
+text-center  -> centralizado
+text-right   -> à direita
+
+text-slate-800 -> cor do texto (cinza escuro)
+text-white     -> branco
+text-black     -> preto
+text-red-500   -> vermelho
+text-blue-500  -> azul
+text-green-500 -> verde
+
+---
+
+## 📦 Espaçamento
+
+m-4   -> margin (todos lados)
+mt-4  -> margin-top
+mb-4  -> margin-bottom
+ml-4  -> margin-left
+mr-4  -> margin-right
+mx-4  -> horizontal
+my-4  -> vertical
+
+p-4   -> padding (todos lados)
+pt-4  -> padding-top
+pb-4  -> padding-bottom
+px-4  -> horizontal
+py-4  -> vertical
+
+---
+
+## 📐 Tamanho
+
+w-40   -> largura (~160px)
+w-80   -> maior (~320px)
+w-full -> 100% largura
+w-screen -> largura da tela
+
+h-40     -> altura
+h-screen -> altura da tela inteira
+min-h-screen -> mínimo altura da tela
+
+Personalizado:
+w-[340px] -> largura exata
+
+---
+
+## 📊 Layout (Flexbox)
+
+flex           -> ativa flexbox
+flex-col       -> coluna
+flex-row       -> linha
+
+items-center     -> centraliza horizontal
+items-start      -> esquerda
+items-end        -> direita
+
+justify-center   -> centraliza vertical
+justify-between  -> espaço entre
+justify-around   -> espaço ao redor
+
+---
+
+## 🎯 Centralização completa
+
+flex items-center justify-center
+-> centraliza tudo (horizontal + vertical)
+
+---
+
+## 🎨 Fundo
+
+bg-white      -> fundo branco
+bg-black      -> fundo preto
+bg-slate-100  -> cinza claro
+bg-slate-800  -> cinza escuro
+bg-blue-500   -> azul
+bg-red-500    -> vermelho
+
+---
+
+## 🔲 Bordas e efeitos
+
+rounded       -> borda arredondada
+rounded-lg    -> mais arredondado
+rounded-full  -> círculo
+
+shadow        -> sombra leve
+shadow-lg     -> sombra forte
+
+---
+
+## 🖼️ Imagem
+
+object-contain -> mantém proporção
+object-cover   -> preenche cortando
+
+---
+
+## 🧠 Exemplo prático
+
+<div className="flex flex-col items-center justify-center min-h-screen bg-slate-100">
+  <img className="w-[340px] mb-6 shadow-lg" />
+  <h1 className="text-4xl font-extrabold text-slate-800 text-center">
+
+Tradução:
+
+flex flex-col          -> layout em coluna
+items-center           -> centraliza horizontal
+justify-center         -> centraliza vertical
+min-h-screen           -> altura da tela
+
+w-[340px]              -> largura da imagem
+mb-6                   -> margem embaixo
+shadow-lg              -> sombra
+
+text-4xl               -> texto grande
+font-extrabold         -> negrito forte
+text-slate-800         -> cor escura
+text-center            -> centralizado
+
+---
+
+## 🚀 Dica final
+
+Pense por prefixo:
+
+text-  -> texto
+bg-    -> fundo
+p- / m- -> espaçamento
+flex   -> layout
+w- / h- -> tamanho
+
+Você não precisa decorar tudo — com o uso, fica automático.
