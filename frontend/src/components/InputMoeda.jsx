@@ -1,6 +1,8 @@
+//Local: /src/components/InputMoeda.jsx
+
 import React, { useState, useEffect } from "react";
 
-export default function InputMoeda({ label, value, onChange, required }) {
+export default function InputMoeda({ label, value, onChange, required, className }) {
   // Estado local para gerenciar o texto que aparece (ex: "R$ 130,00")
   const [displayValue, setDisplayValue] = useState("");
 
@@ -38,16 +40,15 @@ export default function InputMoeda({ label, value, onChange, required }) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-      {label && <label style={{ fontWeight: "bold", fontSize: "14px" }}>{label}</label>}
-      <input
-        type="text"
-        className="input-field"
-        value={displayValue}
-        onChange={handleInputChange}
-        required={required}
-        placeholder="R$ 0,00"
-      />
+    <div className="flex flex-col gap-1">
+      {label && <label className="font-bold text-sm">{label}</label>}
+      <input 
+        type="text" 
+        className={className} 
+        value={displayValue} 
+        onChange={handleInputChange} 
+        required={required} 
+        placeholder="R$ 0,00" />
     </div>
   );
 }

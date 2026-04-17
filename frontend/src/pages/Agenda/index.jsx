@@ -15,7 +15,6 @@ import {
   FaSearch,
   FaListOl,
 } from "react-icons/fa";
-import "./styles.css";
 import { MESES } from "../../components/selecionarMeses";
 
 export default function Agenda() {
@@ -128,169 +127,276 @@ export default function Agenda() {
   };
 
   return (
-    <main className="conteudo-principal">
-      <div className="container-principal">
-        {/* CABEÇALHO E GERAÇÃO EM LOTE */}
-        <section className="card-principal">
-          <div className="header-card">
-            <h2>
+    <main className="p-4 bg-gray-100 min-h-screen">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* CARD FORM */}
+        <section className="bg-white rounded-xl shadow-md p-6">
+          {/* HEADER */}
+          <div className="flex justify-between items-center flex-wrap gap-3">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <FaCalendarAlt /> Controle de Frequência
             </h2>
-            <div className="bloco-geracao-compacto">
-              <span className="label-lote">Gerar Lote:</span>
-              <select value={mesGerar} onChange={(e) => setMesGerar(Number(e.target.value))} className="input-field select-mes">
+
+            {/* GERAR LOTE */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-semibold text-gray-600">Gerar Lote:</span>
+
+              <select
+                value={mesGerar}
+                onChange={(e) => setMesGerar(Number(e.target.value))}
+                className="h-11 px-3 border rounded-md bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
                 {MESES.map((m, idx) => (
                   <option key={idx} value={idx}>
                     {m}
                   </option>
                 ))}
               </select>
-              <input type="number" value={anoGerar} onChange={(e) => setAnoGerar(Number(e.target.value))} className="input-field input-ano" />
-              <button onClick={handleGerarAgenda} className="btn btn-primary" disabled={loading}>
+
+              <input
+                type="number"
+                value={anoGerar}
+                onChange={(e) => setAnoGerar(Number(e.target.value))}
+                className="h-11 w-24 px-3 border rounded-md bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              <button
+                onClick={handleGerarAgenda}
+                disabled={loading}
+                className="h-11 px-4 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-2"
+              >
                 <FaMagic /> Gerar
               </button>
             </div>
           </div>
 
-          <div className="painel-filtros-agenda">
-            <div className="grupo-abas">
-              <button className={`aba-item ${abaAtiva === "dia" ? "ativa" : ""}`} onClick={() => setAbaAtiva("dia")}>
-                <FaCalendarAlt /> Agenda
-              </button>
-              <button className={`aba-item ${abaAtiva === "pendentes" ? "ativa" : ""}`} onClick={() => setAbaAtiva("pendentes")}>
-                <FaExclamationTriangle /> Esquecidas
-              </button>
-              <button className={`aba-item ${abaAtiva === "faltas" ? "ativa" : ""}`} onClick={() => setAbaAtiva("faltas")}>
-                <FaUndoAlt /> Reposições
-              </button>
-              <button className={`aba-item ${abaAtiva === "historico" ? "ativa" : ""}`} onClick={() => setAbaAtiva("historico")}>
-                <FaHistory /> Histórico
-              </button>
+          {/* FILTROS */}
+          <div className="flex flex-wrap items-center gap-4 pt-4">
+            {/* ABAS */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { key: "dia", icon: <FaCalendarAlt />, label: "Agenda" },
+                { key: "pendentes", icon: <FaExclamationTriangle />, label: "Esquecidas" },
+                { key: "faltas", icon: <FaUndoAlt />, label: "Reposições" },
+                { key: "historico", icon: <FaHistory />, label: "Histórico" },
+              ].map((aba) => (
+                <button
+                  key={aba.key}
+                  onClick={() => setAbaAtiva(aba.key)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-semibold transition
+                  ${abaAtiva === aba.key ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
+                >
+                  {aba.icon} {aba.label}
+                </button>
+              ))}
             </div>
 
-            <div className="busca-nome-container">
-              <FaSearch className="icon-search" />
+            {/* BUSCA */}
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+
               <input
                 type="text"
                 placeholder="Pesquisar por nome..."
                 value={buscaNome}
                 onChange={(e) => setBuscaNome(e.target.value)}
-                className="input-field"
+                className="pl-9 pr-8 h-8 border rounded-md bg-white text-gray-800
+                         focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              {buscaNome && <FaTimes className="icon-clear" onClick={() => setBuscaNome("")} />}
+
+              {buscaNome && (
+                <FaTimes onClick={() => setBuscaNome("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer" />
+              )}
             </div>
 
-            <div className="contadores-flex">
-              <span className="count-badge">
-                <FaListOl /> Total: <strong>{registros.length}</strong>
-              </span>
-            </div>
+            {/* CONTADOR */}
+            <span className="ml-auto text-sm bg-gray-200 px-3 py-1 rounded-full flex items-center gap-2">
+              <FaListOl /> Total de Registros: <strong>{registros.length}</strong>
+            </span>
           </div>
 
-          <div className="linha-datas-agenda">
+          {/* DATAS */}
+          <div className="border-t pt-3 flex flex-wrap items-center gap-3 text-sm">
             {abaAtiva === "dia" && (
-              <div className="seletor-data-container">
-                <label>Data:</label>
-                <input type="date" value={dataFiltro} onChange={(e) => setDataFiltro(e.target.value)} className="input-data" />
-                <span className="label-dia-semana">{getDiaSemanaExtenso(dataFiltro)}</span>
-              </div>
+              <>
+                <label className="font-semibold text-gray-600">Data:</label>
+
+                <input type="date" value={dataFiltro} onChange={(e) => setDataFiltro(e.target.value)} className="h-10 px-3 border rounded-md" />
+
+                <span className="text-blue-600 font-semibold">{getDiaSemanaExtenso(dataFiltro)}</span>
+              </>
             )}
 
             {abaAtiva === "historico" && (
-              <div className="seletor-data-container">
-                <label>Período:</label>
-                <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="input-data" />
-                <span style={{ margin: "0 10px", fontSize: "13px" }}>até</span>
-                <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="input-data" />
-              </div>
+              <>
+                <label className="font-semibold text-gray-600">Período:</label>
+
+                <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className="h-10 px-3 border rounded-md" />
+
+                <span>até</span>
+
+                <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} className="h-10 px-3 border rounded-md" />
+              </>
             )}
           </div>
         </section>
 
-        {/* TABELA DE REGISTROS */}
-        <section className="tabela-container">
-          <table className="tabela">
-            <thead>
+        {/* TABELA */}
+        <section className="bg-white rounded-xl shadow-md overflow-hidden">
+          {loading && <p className="p-4 text-gray-600">Processando...</p>}
+
+          <table className="w-full text-sm text-left">
+            <thead className="text-white text-xs bg-blue-500">
               <tr>
-                <th>Data / Dia</th>
-                <th>Horário</th>
-                <th>Aluno / Professor</th>
-                <th>Curso / Termo</th>
-                <th>Status</th>
-                <th style={{ textAlign: "center" }}>Ações</th>
+                <th className="px-4 py-3">Data / Dia</th>
+                <th className="px-4 py-3">Horário</th>
+                <th className="px-4 py-3">Aluno / Professor</th>
+                <th className="px-4 py-3">Curso / Termo</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-center">Ações</th>
               </tr>
             </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan="6" className="texto-centralizado">
-                    Carregando dados...
-                  </td>
-                </tr>
-              ) : registros.length > 0 ? (
+
+            <tbody className="divide-y">
+              {registros.length > 0 ? (
                 registros.map((aula) => {
                   const dataLocal = new Date(aula.data);
+
                   return (
-                    <tr key={aula.id}>
-                      <td>
-                        <strong>{dataLocal.toLocaleDateString("pt-BR", { timeZone: "UTC" })}</strong>
-                        <div className="txt-complemento">{getDiaSemanaExtenso(new Date(aula.data).toISOString().split("T")[0])}</div>
+                    <tr key={aula.id} className="hover:bg-gray-100">
+                      <td className="px-4 py-3">
+                        {dataLocal.toLocaleDateString("pt-BR", { timeZone: "UTC" })}
+                        <div className="px-4 py-3 font-semibold text-gray-800">{getDiaSemanaExtenso(aula.data)}</div>
                       </td>
 
-                      <td className="txt-negrito">
-                        <FaClock style={{ marginRight: "5px", color: "#888" }} />
-                        {dataLocal.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                      <td className="px-4 py-3 font-semibold text-gray-800 flex items-center gap-1">
+                        <FaClock className="text-gray-400" />
+                        {dataLocal.toLocaleTimeString("pt-BR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </td>
 
-                      <td>
-                        <strong>{aula.termo?.matricula?.aluno?.nome || "Aluno não identificado"}</strong>
-                        <div className="txt-complemento">Prof: {aula.termo?.matricula?.professor || "Não atribuído"}</div>
+                      <td className="px-4 py-3 font-semibold text-gray-800">
+                        <strong>{aula.termo?.matricula?.aluno?.nome}</strong>
+                        <div className="text-xs text-red-500">Prof: {aula.termo?.matricula?.professor}</div>
+
                         {aula.obs && (
-                          <div className="txt-complemento txt-alerta">
+                          <div className="text-xs text-red-500 flex items-center gap-1">
                             <FaExclamationTriangle /> {aula.obs}
                           </div>
                         )}
                       </td>
 
-                      <td>
-                        <div className="txt-registro">{aula.termo?.matricula?.curso?.nome || "Curso"}</div>
-                        <div className="txt-complemento">{aula.termo?.numeroTermo}º Termo</div>
+                      <td className="px-4 py-3 font-semibold text-gray-800">
+                        <div>{aula.termo?.matricula?.curso?.nome}</div>
+                        <div className="text-xs text-red-500">{aula.termo?.numeroTermo}º Termo</div>
                       </td>
 
-                      <td>
-                        <span className={`badge-status status-${aula.status?.toLowerCase()}`}>{aula.status}</span>
+                      {/* STATUS */}
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold
+                        ${
+                          aula.status === "Pendente"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : aula.status === "Presente"
+                              ? "bg-green-100 text-green-600"
+                              : aula.status === "Falta"
+                                ? "bg-red-100 text-red-600"
+                                : "bg-blue-100 text-blue-600"
+                        }`}
+                        >
+                          {aula.status}
+                        </span>
                       </td>
 
-                      <td className="acoes" style={{ justifyContent: "center" }}>
-                        {abaAtiva === "faltas" ? (
-                          <button onClick={() => registrarAcao(aula.id, "reposicao")} className="btn btn-primary btn-pequeno">
-                            <FaCheck /> Reposição
-                          </button>
-                        ) : (
-                          <>
-                            {aula.status === "Pendente" && (
-                              <>
-                                <button onClick={() => registrarAcao(aula.id, "presenca")} className="btn-icon btn-edit" title="Presença">
-                                  <FaCheck />
-                                </button>
-                                <button onClick={() => registrarAcao(aula.id, "falta")} className="btn-icon btn-excluir" title="Falta">
-                                  <FaTimes />
-                                </button>
-                                <button onClick={() => excluir(aula)} className="btn-icon btn-danger" title="Remover Aula">
-                                  <FaTrash />
-                                </button>
-                              </>
-                            )}
-                          </>
-                        )}
+                      {/* AÇÕES */}
+                      <td className="px-4 py-3 align-middle">
+                        <div className="flex justify-center items-center gap-2">
+                          {/* ABA: DIA - Tipos status: Pendente, Falta, Presente */}
+                          {abaAtiva === "dia"  (
+                            <>
+                              <button
+                                onClick={() => registrarAcao(aula.id, "presenca")}
+                                className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
+                              >
+                                <FaCheck />
+                              </button>
+
+                              <button
+                                onClick={() => registrarAcao(aula.id, "falta")}
+                                className="p-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md"
+                              >
+                                <FaTimes />
+                              </button>
+
+                              <button onClick={() => excluir(aula)} className="p-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md">
+                                <FaTrash />
+                              </button>
+                            </>
+                          )}
+
+                          {/* ABA: PENDENTES (ESQUECIDAS) Tipos status: Pendente */}
+                          {abaAtiva === "pendentes" && status === "Pendente" && (
+                            <>
+                              <button
+                                onClick={() => registrarAcao(aula.id, "presenca")}
+                                className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
+                              >
+                                <FaCheck />
+                              </button>
+
+                              <button
+                                onClick={() => registrarAcao(aula.id, "falta")}
+                                className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
+                              >
+                                <FaTimes />
+                              </button>
+                            </>
+                          )}
+
+                          {/* ABA: FALTAS Tipos status: Falta */}
+                          {abaAtiva === "faltas" && status === "falta" && (
+                            <button
+                              onClick={() => registrarAcao(aula.id, "reposicao")}
+                              className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+                            >
+                              <FaUndoAlt />
+                            </button>
+                          )}
+
+                          {/* ABA: HISTÓRICO Tipos status: Pendente, Falta, Presente */}
+                          {abaAtiva === "historico" && <span className="text-gray-400 text-xs">Sem ações</span>}
+                                                      <>
+                              <button
+                                onClick={() => registrarAcao(aula.id, "presenca")}
+                                className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
+                              >
+                                <FaCheck />
+                              </button>
+
+                              <button
+                                onClick={() => registrarAcao(aula.id, "falta")}
+                                className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
+                              >
+                                <FaTimes />
+                              </button>
+
+                              <button onClick={() => excluir(aula)} className="p-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md">
+                                <FaTrash />
+                              </button>
+                            </>
+
+                        </div>
                       </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan="6" className="texto-centralizado">
-                    Nenhum registro encontrado para este filtro.
+                  <td colSpan="6" className="text-center py-10 text-gray-500">
+                    Nenhum registro encontrado.
                   </td>
                 </tr>
               )}

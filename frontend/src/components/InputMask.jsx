@@ -32,15 +32,16 @@ const InputMask = ({ label, mask, value, onChange, name, placeholder }) => {
   };
 
   return (
-    <div className="input-group">
+    <div >
       {label && <label>{label}</label>}
       <input
+        className="w-40 h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
         type="text"
         name={name}
         value={value}
         onChange={handleInputChange}
         placeholder={placeholder}
-        className="input-field"
+        
       />
     </div>
   );

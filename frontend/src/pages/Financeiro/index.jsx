@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { FaDollarSign, FaMagic, FaTrash, FaFilter, FaCheck, FaUndo, FaHandHoldingUsd, FaListOl, FaTimes, FaSearch } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 import api from "../../services/api";
-import "./styles.css";
+//import "./styles.css";
 
 export default function Financeiro() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -143,67 +143,85 @@ export default function Financeiro() {
   };
 
   return (
-    <main className="conteudo-principal">
-      <div className="container-principal">
-        <section className="card-principal">
-          <div className="header-card">
-            <h2>
+    <main className="p-4">
+      <div className="max-w-7xl mx-auto space-y-4">
+        {/* CARD */}
+        <section className="bg-white rounded-xl shadow p-4">
+          {/* HEADER */}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
               <FaDollarSign /> Financeiro Global
             </h2>
-            <div className="bloco-geracao-compacto">
-              <span style={{ fontSize: "12px", fontWeight: "bold" }}>Lote:</span>
-              <select className="input-field select-mes" value={mesGerar} onChange={(e) => setMesGerar(e.target.value)}>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold">Lote:</span>
+
+              <select className="h-10 px-3 border rounded-md" value={mesGerar} onChange={(e) => setMesGerar(e.target.value)}>
                 {meses.map((m, i) => (
                   <option key={i} value={i + 1}>
                     {m}
                   </option>
                 ))}
               </select>
-              <input type="number" className="input-data" style={{ width: "80px" }} value={anoGerar} onChange={(e) => setAnoGerar(e.target.value)} />
-              <button onClick={handleGerarLote} className="btn btn-primary" disabled={loading}>
+
+              <input type="number" className="h-10 px-3 border rounded-md w-20" value={anoGerar} onChange={(e) => setAnoGerar(e.target.value)} />
+
+              <button
+                onClick={handleGerarLote}
+                disabled={loading}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 h-10 rounded-md"
+              >
                 <FaMagic /> Gerar
               </button>
             </div>
           </div>
 
-          <div className="resumo-financeiro-grid">
-            <div className="resumo-box pago">
-              <FaCheck className="resumo-icon" />
-              <div className="resumo-txt">
-                <span>Total Pago</span>
+          {/* RESUMO */}
+          <div className="flex flex-wrap gap-3 mb-4">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-lg border bg-green-50 border-green-200 text-green-800">
+              <FaCheck className="text-lg opacity-70" />
+              <div>
+                <span className="text-xs font-bold uppercase block">Total Pago</span>
                 <strong>{fMoeda(totalPago)}</strong>
               </div>
             </div>
-            <div className="resumo-box aberto">
-              <FaHandHoldingUsd className="resumo-icon" />
-              <div className="resumo-txt">
-                <span>Em Aberto</span>
+
+            <div className="flex items-center gap-3 px-4 py-2 rounded-lg border bg-yellow-50 border-yellow-200 text-yellow-700">
+              <FaHandHoldingUsd className="text-lg opacity-70" />
+              <div>
+                <span className="text-xs font-bold uppercase block">Em Aberto</span>
                 <strong>{fMoeda(totalAberto)}</strong>
               </div>
             </div>
-            <div className="contadores-flex">
-              <span className="count-badge">
-                <FaListOl /> Total: <strong>{filtrados.length}</strong>
+
+            <div className="ml-auto">
+              <span className="bg-gray-100 border px-4 py-2 rounded-full text-sm">
+                <FaListOl className="inline mr-1" />
+                Total: <strong>{filtrados.length}</strong>
               </span>
             </div>
           </div>
 
-          <div className="painel-filtros-linha">
-            <div className="input-group" style={{ flex: 2 }}>
-              <label>Pesquisar Aluno</label>
-              <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+          {/* FILTROS */}
+          <div className="flex flex-wrap gap-3 border-t pt-4">
+            {/* BUSCA */}
+            <div className="flex flex-col flex-1 min-w-[220px]">
+              <label className="text-xs font-bold mb-1 text-gray-600">Pesquisar Aluno</label>
+
+              <div className="relative">
                 <input
                   type="text"
-                  className="input-field"
-                  placeholder="Pesquisar por nome..."
                   value={buscaNome}
                   onChange={(e) => setBuscaNome(e.target.value)}
-                  style={{ paddingLeft: "35px" }}
+                  placeholder="Pesquisar por nome..."
+                  className="w-full h-10 pl-10 pr-10 border rounded-md"
                 />
-                <FaSearch style={{ position: "absolute", left: "12px", color: "#999" }} />
+
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+
                 {buscaNome && (
                   <FaTimes
-                    style={{ position: "absolute", right: "12px", cursor: "pointer", color: "#999" }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-red-500"
                     onClick={() => {
                       setBuscaNome("");
                       setSearchParams({});
@@ -214,9 +232,10 @@ export default function Financeiro() {
               </div>
             </div>
 
-            <div className="input-group">
-              <label>Mês</label>
-              <select className="input-field select-mes" value={mesFiltro} onChange={(e) => setMesFiltro(e.target.value)}>
+            {/* MÊS */}
+            <div className="flex flex-col">
+              <label className="text-xs font-bold mb-1 text-gray-600">Mês</label>
+              <select className="h-10 px-3 border rounded-md" value={mesFiltro} onChange={(e) => setMesFiltro(e.target.value)}>
                 <option value="0">Todos</option>
                 {meses.map((n, i) => (
                   <option key={i} value={i + 1}>
@@ -226,57 +245,58 @@ export default function Financeiro() {
               </select>
             </div>
 
-            <div className="input-group">
-              <label>Ano</label>
-              <input
-                type="number"
-                className="input-data"
-                style={{ width: "90px" }}
-                value={anoFiltro}
-                onChange={(e) => setAnoFiltro(e.target.value)}
-              />
+            {/* ANO */}
+            <div className="flex flex-col">
+              <label className="text-xs font-bold mb-1 text-gray-600">Ano</label>
+              <input type="number" className="h-10 px-3 border rounded-md w-24" value={anoFiltro} onChange={(e) => setAnoFiltro(e.target.value)} />
             </div>
 
-            <div className="input-group">
-              <label>Professora</label>
-              <select className="input-field" style={{ width: "130px" }} value={professorFiltro} onChange={(e) => setProfessorFiltro(e.target.value)}>
+            {/* PROFESSOR */}
+            <div className="flex flex-col">
+              <label className="text-xs font-bold mb-1 text-gray-600">Professora</label>
+              <select className="h-10 px-3 border rounded-md" value={professorFiltro} onChange={(e) => setProfessorFiltro(e.target.value)}>
                 <option value="Todas">Todas</option>
                 <option value="Cristiane">Cristiane</option>
                 <option value="Daiane">Daiane</option>
               </select>
             </div>
 
-            <div className="input-group">
-              <label>Status</label>
-              <select className="input-field" style={{ width: "120px" }} value={statusFiltro} onChange={(e) => setStatusFiltro(e.target.value)}>
+            {/* STATUS */}
+            <div className="flex flex-col">
+              <label className="text-xs font-bold mb-1 text-gray-600">Status</label>
+              <select className="h-10 px-3 border rounded-md" value={statusFiltro} onChange={(e) => setStatusFiltro(e.target.value)}>
                 <option value="Todos">Todos</option>
                 <option value="Aberta">Em Aberto</option>
                 <option value="Paga">Pagos</option>
               </select>
             </div>
-            <div className="input-group">
-              <button type="button" className="btn-limpar-filtros" onClick={limparFiltros} title="Limpar todos os filtros">
-                <span className="icon-clear">🧹</span> Limpar
+
+            {/* LIMPAR */}
+            <div className="flex items-end">
+              <button onClick={limparFiltros} className="h-10 px-4 rounded-md border bg-gray-100 hover:bg-gray-200">
+                🧹 Limpar
               </button>
             </div>
           </div>
         </section>
 
-        <section className="tabela-container">
-          <table className="tabela">
-            <thead>
+        {/* TABELA */}
+        <section className="bg-white rounded-xl shadow overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-100">
               <tr>
-                <th>Vencimento</th>
-                <th>Aluno / Professor</th>
-                <th>Valor Total</th>
-                <th>Status</th>
-                <th style={{ textAlign: "center" }}>Ações</th>
+                <th className="px-4 py-3 text-left">Vencimento</th>
+                <th className="px-4 py-3 text-left">Aluno / Professor</th>
+                <th className="px-4 py-3 text-left">Valor</th>
+                <th className="px-4 py-3 text-left">Status</th>
+                <th className="px-4 py-3 text-center">Ações</th>
               </tr>
             </thead>
+
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="texto-centralizado">
+                  <td colSpan="5" className="text-center py-10 text-gray-400">
                     Carregando dados...
                   </td>
                 </tr>
@@ -286,42 +306,57 @@ export default function Financeiro() {
                   const isVencida = !isPaga && new Date(p.dataVencimento) < new Date().setHours(0, 0, 0, 0);
 
                   return (
-                    <tr key={p.id}>
-                      <td>{fData(p.dataVencimento)}</td>
-                      <td>
+                    <tr key={p.id} className="border-t hover:bg-gray-50">
+                      <td className="px-4 py-3">{fData(p.dataVencimento)}</td>
+
+                      <td className="px-4 py-3">
                         <strong>{p.aluno?.nome || p.matricula?.aluno?.nome || "Sem Nome"}</strong>
-                        <div className="txt-detalhe-vermelho">Profa. {p.matricula?.professor || "---"}</div>
+                        <div className="text-xs text-red-500">Profa. {p.matricula?.professor || "---"}</div>
                       </td>
-                      <td className="txt-negrito">{fMoeda(p.valorTotal)}</td>
-                      <td>
-                        <span className={`badge-status ${isPaga ? "status-pago" : isVencida ? "status-vencido" : "status-aberto"}`}>
+
+                      <td className="px-4 py-3 font-semibold">{fMoeda(p.valorTotal)}</td>
+
+                      <td className="px-4 py-3">
+                        <span
+                          className={`px-2 py-1 text-xs rounded font-bold
+                        ${isPaga && "bg-green-100 text-green-700"}
+                        ${!isPaga && isVencida && "bg-red-100 text-red-600 border border-red-200"}
+                        ${!isPaga && !isVencida && "bg-yellow-100 text-yellow-700"}
+                      `}
+                        >
                           {isPaga ? "PAGA" : isVencida ? "VENCIDA" : "ABERTA"}
                         </span>
                       </td>
-                      <td className="acoes" style={{ justifyContent: "center" }}>
-                        {!isPaga ? (
-                          <>
-                            <button onClick={() => handleAcao(p.id, "pagar")} className="btn-icon btn-edit" title="Baixar">
-                              <FaCheck />
-                            </button>
+
+                      <td className="px-4 py-3">
+                        <div className="flex justify-center gap-2">
+                          {!isPaga ? (
+                            <>
+                              <button onClick={() => handleAcao(p.id, "pagar")} className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
+                                <FaCheck />
+                              </button>
+
+                              <button
+                                onClick={async () => {
+                                  if (window.confirm("Excluir?")) {
+                                    await api.deleteParcela(p.id);
+                                    carregar();
+                                  }
+                                }}
+                                className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
+                              >
+                                <FaTrash />
+                              </button>
+                            </>
+                          ) : (
                             <button
-                              onClick={async () => {
-                                if (window.confirm("Excluir?")) {
-                                  await api.deleteParcela(p.id);
-                                  carregar();
-                                }
-                              }}
-                              className="btn-icon btn-excluir"
-                              title="Excluir"
+                              onClick={() => handleAcao(p.id, "estornar")}
+                              className="p-2 bg-orange-400 hover:bg-orange-500 text-white rounded-md"
                             >
-                              <FaTrash />
+                              <FaUndo />
                             </button>
-                          </>
-                        ) : (
-                          <button onClick={() => handleAcao(p.id, "estornar")} className="btn-icon btn-danger" title="Estornar">
-                            <FaUndo />
-                          </button>
-                        )}
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );

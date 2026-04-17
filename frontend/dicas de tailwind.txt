@@ -103,6 +103,7 @@ bg-red-500    -> vermelho
 
 rounded       -> borda arredondada
 rounded-lg    -> mais arredondado
+rounded-xl    -> 4 lados
 rounded-full  -> círculo
 
 shadow        -> sombra leve

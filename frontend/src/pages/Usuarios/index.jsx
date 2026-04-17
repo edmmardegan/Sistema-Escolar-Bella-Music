@@ -45,7 +45,7 @@ const Usuarios = () => {
       }
       if (e.key === "F4" && exibindoForm) {
         e.preventDefault();
-        document.getElementById("btn-salvar-usuario")?.click();
+        document.getElementById("btn-salvar")?.click();
       }
       if (e.key === "Escape" && exibindoForm) {
         limparForm();
@@ -111,10 +111,13 @@ const Usuarios = () => {
   return (
     <main className="p-4 bg-gray-100 min-h-screen">
       <div className="max-w-6xl mx-auto space-y-6">
+        {/* CARD FORM */}
         <section className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center justify-between mb-6">
+          {/* HEADER */}
+            <div className="flex justify-between items-center flex-wrap gap-3">
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <FaUserShield /> {editandoId ? "Editar Usuário" : "Gestão de Usuários"}
+              <FaUserShield />
+              {editandoId ? "Editar Usuário" : exibindoForm ? "Novo Usuário" : "Gerenciar Usuários"}
             </h2>
             {!exibindoForm && (
               <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 transition" onClick={() => setExibindoForm(true)}>
@@ -123,8 +126,12 @@ const Usuarios = () => {
             )}
           </div>
 
+          {/* FORM */}
           {exibindoForm && (
-            <form className="grid grid-cols-1 md:grid-cols-3 gap-4 itens-end" onSubmit={salvar}>
+            <form className="grid grid-cols-1 md:grid-cols-3 gap-4 itens-end"
+                  onSubmit={salvar}>
+
+              {/* NOME */}
               <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
                 <label>Nome Completo</label>
                 <input 
@@ -134,7 +141,7 @@ const Usuarios = () => {
                   onChange={(e) => 
                   setForm({ ...form, nome: e.target.value })}/>
               </div>
-
+              {/* LOGIN - EMAIL*/}
               <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
                 <label>E-mail (Login)</label>
                 <input
@@ -146,6 +153,8 @@ const Usuarios = () => {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
               </div>
+              
+              {/* NIVEL ACESSO */}
               <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
                 <label>Nível de Acesso</label>
                 <select 
@@ -159,25 +168,31 @@ const Usuarios = () => {
                 </select>
               </div>
 
+              {/* BOTÕES */}
               <div className="md:col-span-3 flex gap-3 mt-2">
                 <button 
                 className="h-[35px] flex items-center gap-2 bg-green-500 text-white px-4 rounded-md font-semibold hover:bg-green-700 transition disabled:opacity-50" 
-                id="btn-salvar-usuario" 
+                id="btn-salvar"
+                title="Salvar Registro"
                 type="submit" 
                 disabled={loading}>
                   <FaSave /> Salvar [F4]
                 </button>
+
                 <button 
                 className="flex items-center gap-2 bg-red-500 text-white px-4 rounded-md font-semibold hover:bg-red-700 transition disabled:opacity-50" 
-                type="button"                 
+                type="button"
+                title="Cancelar Operação"       
                 onClick={limparForm}>
                   <FaTimes /> Cancelar [Esc]
                 </button>
               </div>
+
             </form>
           )}
         </section>
 
+        {/* LISTAGEM */}
         <section className="bg-white rounded-xl shadow-md overflow-hidden">
           {loading && (
             <p className="p-4 text-gray-600">
@@ -194,10 +209,11 @@ const Usuarios = () => {
                 <th className="px-4 py-3 text-center w-[150px]">AÇOES</th>
               </tr>
             </thead>
+
             <tbody className="divide-y">
               {registros.map((u) => (
                 <tr 
-                  className="hover:bg-gray-50 transition"
+                  className="hover:bg-gray-100 transition"
                   key={u.id}>
                   <td className="px-4 py-3 font-semi-bold text-gray-800">
                     <strong>{u.nome}</strong>
@@ -215,6 +231,7 @@ const Usuarios = () => {
                               {u.role.toUpperCase()}</span>
                   </td>
 
+                  {/* AÇÕES */}
                   <td className="px-4 py-3 gap-2 flex justify-center">
                     <button 
                       className="p-2 bg-green-600 hover:bg-green-400 text-white rounded-md" 
@@ -225,19 +242,18 @@ const Usuarios = () => {
                     </button>
                     <button 
                       className="p-2 bg-yellow-600 hover:bg-orange-400 text-white rounded-md" 
-                      onClick={() => 
-                      handleReset(u.id, u.nome)} 
+                      onClick={() => handleReset(u.id, u.nome)} 
                       title="Resetar Senha">
                       <FaKey />
                     </button>
                     <button  
                       className="p-2 bg-red-600 hover:bg-red-400 text-white rounded-md"
-                      onClick={() => 
-                      excluir(u.id)} 
+                      onClick={() => excluir(u.id)} 
                       title="Excluir">
                       <FaTrash />
                     </button>
                   </td>
+
                 </tr>
               ))}
             </tbody>

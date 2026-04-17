@@ -6,7 +6,7 @@ import api from "../../services/api.js";
 import InputMask from "../../components/InputMask";
 import { validarCPF } from "../../components/validateCPF"; // Ajuste o caminho
 
-import "./styles.css";
+//import "./styles.css";
 import { Navigate } from "react-router-dom";
 
 export default function Alunos() {
@@ -79,7 +79,7 @@ export default function Alunos() {
         if (exibindoForm) document.getElementById("btn-salvar-aluno")?.click();
       }
       if (e.key === "Escape") {
-        if (exibindoForm) fecharFormulario();
+        if (exibindoForm) limparForm();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -126,7 +126,7 @@ export default function Alunos() {
     try {
       await api.saveAluno(dadosParaEnviar, editandoId);
       alert("Aluno salvo com sucesso!");
-      fecharFormulario();
+      limparForm();
       carregar();
     } catch (error) {
       console.error("Erro completo:", error);
@@ -164,7 +164,7 @@ export default function Alunos() {
     }, 100);
   };
 
-  const fecharFormulario = () => {
+  const limparForm = () => {
     setForm(estadoInicial);
     setEditandoId(null);
     setExibindoForm(false);
@@ -240,246 +240,331 @@ export default function Alunos() {
   };
 
   return (
-    <main className="conteudo-principal">
-      <div className="container-principal">
-        {/* CARD DE FORMULÁRIO */}
-        <div className="card-principal">
-          <div className="header-card">
-            <h2>
-              <FaUserGraduate /> {editandoId ? "Editar Aluno" : exibindoForm ? "Novo Aluno" : "Gerenciar Alunos"}
+    <main className="p-4 bg-gray-100 min-h-screen">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* CARD FORM */}
+        <section className="bg-white rounded-xl shadow-md p-6 ">
+          {/* HEADER */}
+          <div className="flex justify-between items-center flex-wrap gap-3">
+            <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800">
+              <FaUserGraduate />
+              {editandoId ? "Editar Aluno" : exibindoForm ? "Novo Aluno" : "Gerenciar Alunos"}
             </h2>
+
             {!exibindoForm && (
-              <button className="btn btn-primary" onClick={() => setExibindoForm(true)}>
+              <button
+                onClick={() => setExibindoForm(true)}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 h-11 rounded-md font-semibold hover:bg-blue-700 transition"
+              >
                 <FaUserPlus /> Novo Aluno [F2]
               </button>
             )}
           </div>
 
+          {/* FORM */}
           {exibindoForm && (
-            <form onSubmit={salvar} className="form-grid">
-              <div className="input-group campo-medio">
-                <label>Nome Completo:</label>
-                <input ref={inputNomeRef} required name="nome" value={form.nome} onChange={handleChange} className="input-field" autoComplete="off" />
+            <form className="grid grid-cols-1 md:grid-cols-4 gap-4 itens-end" onSubmit={salvar}>
+              {/* NOME */}
+              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Nome Completo</label>
+                <input
+                  className="w-full h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ref={inputNomeRef}
+                  name="nome"
+                  value={form.nome}
+                  onChange={handleChange}
+                  required
+                />
               </div>
-
-              <div className="input-group campo-curto">
-                <label>CPF:</label>
-                <div className="cpf-container">
+              {/* CPF */}
+              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">CPF</label>
+                <div className="relative w-40">
                   <input
+                    className="w-full h-8 px-3 pr-10 border rounded-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     type="text"
                     name="cpf"
-                    className="input-field"
-                    maxLength="14"
-                    // Lógica de exibição:
                     value={exibirCpfReal ? form.cpf : ocultarCPF(form.cpf)}
                     onChange={handleChange}
-                    // Desabilitamos a edição se estiver oculto para evitar salvar asteriscos
                     readOnly={!exibirCpfReal}
                     placeholder="000.000.000-00"
                   />
                   <button
                     type="button"
-                    className="btn-toggle-cpf"
                     onClick={() => setExibirCpfReal(!exibirCpfReal)}
-                    title={exibirCpfReal ? "Ocultar CPF" : "Mostrar CPF"}
+                    className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
                   >
                     {exibirCpfReal ? "👁️" : "🙈"}
                   </button>
-                  {!exibirCpfReal && form.cpf && <small style={{ fontSize: "10px", color: "#999" }}>Clique no ícone para editar</small>}
                 </div>
               </div>
-
-              <div className="input-group campo-pequeno">
+              {/* TELEFONE */}
+              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Telefone</label>
                 <InputMask
-                  label="Telefone:"
+                  className="w-40 h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   mask="(99) 99999-9999"
                   name="telefone"
                   value={form.telefone || ""}
                   onChange={(e) => setForm({ ...form, telefone: e.target.value })}
-                  placeholder="(00) 00000-0000"
+                />
+              </div>
+              {/* DATA NASCIMENTO*/}
+              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Data Nascimento</label>
+                <input
+                  className="w-40 h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  type="date"
+                  name="dataNascimento"
+                  value={form.dataNascimento || ""}
+                  onChange={handleChange}
+                />
+              </div>
+              {/* CEP */}
+              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Cep</label>
+                <input
+                  className="w-40 h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ref={inputNomeRef}
+                  name="cep"
+                  value={form.cep}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              {/* ENDERECO */}
+              <div className="col-span-2 text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Endereço</label>
+                <input
+                  className="w-full h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ref={inputNomeRef}
+                  name="endereco"
+                  value={form.endereco}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              {/* NUMERO */}
+              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Numero</label>
+                <input
+                  className="w-40 h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ref={inputNomeRef}
+                  name="numero"
+                  value={form.numero}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              {/* COMPLEMENTO */}
+              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Complemento</label>
+                <input
+                  className="w-40 h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ref={inputNomeRef}
+                  name="complemento"
+                  value={form.complemento}
+                  onChange={handleChange}
+                />
+              </div>
+              {/* BAIRRO */}
+              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Bairro</label>
+                <input
+                  className="w-40 h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ref={inputNomeRef}
+                  name="bairro"
+                  value={form.bairro}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              {/* CIDADE */}
+              <div className="col-span-2 text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Cidade</label>
+                <input
+                  className="w-80 h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ref={inputNomeRef}
+                  name="cidade"
+                  value={form.cidade}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              {/* NOME PAI */}
+              <div className="col-span-2 text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Nome do Pai</label>
+                <input
+                  className="w-[350px] h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ref={inputNomeRef}
+                  name="nomePai"
+                  value={form.nomePai}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              {/* NOME MAE */}
+              <div className="col-span-2 text-sm font-semibold text-gray-600 flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-600">Nome do Mãe</label>
+                <input
+                  className="w-[350px] full h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ref={inputNomeRef}
+                  name="nomeMae"
+                  value={form.nomeMae}
+                  onChange={handleChange}
+                  required
                 />
               </div>
 
-              <div className="input-group campo-pequeno">
-                <label>Data Nasc:</label>
-                <input type="date" name="dataNascimento" value={form.dataNascimento || ""} onChange={handleChange} className="input-field" />
-              </div>
-
-              <div className="input-group campo-pequeno">
-                <label>Cep:</label>
-                <input name="cep" value={form.cep || ""} onChange={handleChange} className="input-field" />
-              </div>
-
-              <div className="input-group campo-medio">
-                <label>Endereço:</label>
-                <input name="endereco" value={form.endereco || ""} onChange={handleChange} className="input-field" />
-              </div>
-
-              <div className="input-group campo-pequeno">
-                <label>Número:</label>
-                <input name="numero" value={form.numero || ""} onChange={handleChange} className="input-field" />
-              </div>
-
-              <div className="input-group campo-curto">
-                <label>Complemento:</label>
-                <input name="complemento" value={form.complemento || ""} onChange={handleChange} className="input-field" />
-              </div>
-
-              <div className="input-group campo-curto">
-                <label>Bairro:</label>
-                <input name="bairro" value={form.bairro || ""} onChange={handleChange} className="input-field" />
-              </div>
-
-              <div className="input-group campo-curto">
-                <label>Cidade:</label>
-                <input name="cidade" value={form.cidade || ""} onChange={handleChange} className="input-field" />
-              </div>
-
-              <div className="input-group campo-medio">
-                <label>Nome do Pai:</label>
-                <input name="nomePai" value={form.nomePai || ""} onChange={handleChange} className="input-field" />
-              </div>
-
-              <div className="input-group campo-medio">
-                <label>Nome da Mãe:</label>
-                <input name="nomeMae" value={form.nomeMae || ""} onChange={handleChange} className="input-field" />
-              </div>
-
-              {/* BOTOES DO FORMULARIO */}
-              <div className="acoes-form">
-                <button id="btn-salvar-aluno" type="submit" className="btn btn-success">
-                  <FaSave /> Salvar Ficha [F4]
+              {/* BOTÕES */}
+              <div className="md:col-span-3 flex gap-3 mt-2">
+                <button 
+                className="h-[35px] flex items-center gap-2 bg-green-500 text-white px-4 rounded-md font-semibold hover:bg-green-700 transition disabled:opacity-50" 
+                id="btn-salvar"
+                title="Salvar Registro"
+                type="submit" 
+                disabled={loading}>
+                  <FaSave /> Salvar [F4]
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={fecharFormulario}>
+
+                <button 
+                className="flex items-center gap-2 bg-red-500 text-white px-4 rounded-md font-semibold hover:bg-red-700 transition disabled:opacity-50" 
+                type="button"
+                title="Cancelar Operação"       
+                onClick={limparForm}>
                   <FaTimes /> Cancelar [Esc]
                 </button>
               </div>
+
             </form>
           )}
-        </div>
+        </section>
 
-        {/* LISTAGEM E TABELA */}
-        <div className="tabela-container">
-          <div className="filtro-container-flex">
-            <div className="grupo-abas">
+        {/* LISTAGEM */}
+        <section className="bg-white rounded-xl shadow-md p-4 space-y-4">
+          {loading && <p className="p-4 text-gray-600">Processando...</p>}
+
+          {/* FILTROS */}
+          <div className="flex flex-wrap items-center gap-4">
+            {/* ABAS */}
+            <div className="flex gap-2">
               {["Ativos", "Inativos", "Todos"].map((aba) => (
-                <button key={aba} className={`aba-item ${filtroAba === aba ? "ativa" : ""}`} onClick={() => setFiltroAba(aba)}>
+                <button
+                  key={aba}
+                  onClick={() => setFiltroAba(aba)}
+                  className={`px-3 py-2 rounded-md text-sm font-semibold
+                  ${filtroAba === aba ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+                >
                   {aba}
                 </button>
               ))}
             </div>
 
-            <div className="busca-nome-container">
-              <FaSearch className="icon-search" />
+            {/* BUSCA */}
+            <div className="relative">
+              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+
               <input
-                type="text"
-                placeholder="Pesquisar por nome..."
                 value={buscaNome}
                 onChange={(e) => setBuscaNome(e.target.value)}
-                className="input-field"
+                placeholder="Pesquisar por nome..."
+                className="pl-9 pr-8 h-11 border rounded-md"
               />
-              {buscaNome && <FaTimes className="icon-clear" onClick={() => setBuscaNome("")} />}
+
+              {buscaNome && (
+                <FaTimes 
+                  onClick={() => 
+                  setBuscaNome("")} 
+                  className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400" />
+              )}
             </div>
 
-            <div className="contadores-flex">
-              <span className="count-badge">
-                <FaListOl /> Total: <strong>{listaExibida.length}</strong> registros
-              </span>
-            </div>
+            {/* TOTAL */}
+            <span className="ml-auto bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+              <FaListOl /> Total de Registros: {listaExibida.length}
+            </span>
           </div>
 
-          {loading ? (
-            <p className="txt-carregando">Carregando dados...</p>
-          ) : (
-            <table className="tabela">
-              <thead>
+          {/* TABELA */}
+          <div className="overflow-x-auto rounded-md overflow-hidden">
+          <table className="w-full text-sm text-left">
+            <thead className="text-white text-xs bg-blue-500">
                 <tr>
-                  <th>Nome / Endereço</th>
-                  <th>Curso</th>
-                  <th>Telefone</th>
-                  <th>Nascimento</th>
-                  <th>Status</th>
-                  <th>Ações</th>
+                  <th className="px-4 py-3">Nome</th>
+                  <th className="px-4 py-3">Telefone</th>
+                  <th className="px-4 py-3">Nascimento</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3 text-center">Ações</th>
                 </tr>
               </thead>
-              <tbody>
-                {listaExibida.length > 0 ? (
-                  listaExibida.map((a) => (
-                    <tr key={a.id}>
-                      <td>
-                        <strong className="txt-registros">{a.nome}</strong>
-                        <br />
-                        <small className="txt-registros txt-complemento">
-                          {a.endereco ? `End.: ${a.endereco}, ${a.numero} - ${a.bairro}` : "Sem endereço cadastrado"}
-                        </small>
-                      </td>
-                      <td>
-                        {a.matriculas && a.matriculas.length > 0 && (
-                          <div>
-                            {a.matriculas
-                              .filter((m) => m.situacao === "Em Andamento")
-                              .map((m) => (
-                                <span key={m.id} style={{ fontSize: "11px", fontWeight: "bold" }}>
-                                  {/*Matricula: {m.id} - */}
-                                  Curso: {}
-                                  <span style={{ color: "#007bff", fontSize: "11px", fontWeight: "bold" }}>
-                                    {m.curso?.nome}
-                                    {/*<br />({m.situacao})*/}
-                                  </span>
-                                </span>
-                              ))}
-                          </div>
-                        )}
-                      </td>
-                      <td>
-                        <a
-                          href={`https://wa.me/55${a.telefone?.replace(/\D/g, "")}?text=${encodeURIComponent(`Olá ${a.nome}, tudo bem? Aqui é da Escola Bella Music.`)}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="link-whatsapp"
-                        >
-                          {/*Ocultar o simbolo do whatzap quando não tem telefone cadastrado*/}
-                          {a.telefone && (
-                            <>
-                              <FaWhatsapp /> {a.telefone}
-                            </>
-                          )}
+
+              <tbody className="divide-y">
+                {listaExibida.map((a) => (
+                  <tr key={a.id} className="hover:bg-gray-100">
+                    <td className="px-4 py-3">
+                      <strong>{a.nome}</strong>
+                      <div className="text-xs text-red-500">{a.endereco ? `${a.endereco}, ${a.numero}` : "Sem endereço"}</div>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      {a.telefone && (
+                        <a 
+                        className="flex items-center gap-1"
+                        href={`https://wa.me/55${a.telefone.replace(/\D/g, "")}`} 
+                        target="_blank">
+                          <FaWhatsapp className="text-green-600"/> {a.telefone}
                         </a>
-                      </td>
-                      <td>
-                        <small className="txt-registros">{formatarDataTabela(a.dataNascimento)}</small>
-                      </td>
-                      <td>
-                        <span className={`badge-status ${a.ativo ? "status-ativo" : "status-inativo"}`}>{a.ativo ? "ATIVO" : "INATIVO"}</span>
-                      </td>
-                      <td className="acoes">
-                        <button onClick={() => alternarStatus(a)} className={`btn-icon status`} title={a.ativo ? "Inativar Aluno" : "Ativar Aluno"}>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-3 text-gray-600">{formatarDataTabela(a.dataNascimento)}</td>
+
+                    <td className="px-4 py-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold
+                        ${a.ativo ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
+                      >
+                        {a.ativo ? "ATIVO" : "INATIVO"}
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 align-middle">
+                      <div className="flex justify-center gap-2">
+                        <button 
+                          title="Ativar / Inativar"
+                          onClick={() => 
+                          alternarStatus(a)} 
+                          className="p-2 bg-gray-400 text-white rounded-md hover:bg-gray-600 transition disabled:opacity-50">
                           {a.ativo ? "🟢" : "🔴"}
                         </button>
-                        <button onClick={() => prepararEdicao(a)} className="btn-icon btn-edit" title="Editar">
+
+                        <button 
+                          title="Editar Registro"
+                          onClick={() => 
+                          prepararEdicao(a)} 
+                          className="p-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-600 transition disabled:opacity-50">
                           <FaPen />
                         </button>
-                        <button onClick={() => excluir(a.id)} className="btn-icon btn-excluir" title="Excluir">
+
+                        <button 
+                          title="Excluir Registro"
+                          onClick={() => 
+                          excluir(a.id)} 
+                          className="p-2 bg-red-400 text-white rounded-md hover:bg-red-600 transition disabled:opacity-50">
                           <FaTrash />
                         </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" style={{ textAlign: "center", padding: "20px" }}>
-                      Nenhum aluno encontrado.
+
+                      </div>
+
                     </td>
+
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
-          )}
-        </div>
+          </div>
+        </section>
       </div>
     </main>
   );
 }
-
-
-
