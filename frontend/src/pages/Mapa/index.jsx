@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import api from "../../services/api";
 import { FaClock, FaWhatsapp, FaTable, FaFilter, FaListOl } from "react-icons/fa";
-//import "./styles.css";
 
 // Funções Auxiliares para a Grade
 const gerarGradeHorarios = () => {
@@ -65,12 +64,13 @@ export default function Mapa() {
   };
 
   return (
-    <main className="p-4">
-      <div className="max-w-full">
-        {/* HEADER */}
-        <section className="bg-white rounded-lg shadow p-4 mb-4">
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-lg font-bold">
+    <main className="p-4 bg-gray-100 min-h-screen">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* CARD FORM */}
+        <section className="bg-white rounded-xl shadow-md p-6">
+          {/* HEADER */}
+          <div className="flex justify-between items-center flex-wrap gap-3">
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <FaTable /> Mapa Geral de Horários
             </h2>
 
@@ -101,16 +101,16 @@ export default function Mapa() {
         </section>
 
         {/* TABELA */}
-        <section className="bg-white rounded-lg shadow overflow-hidden">
+        <section className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="overflow-auto max-h-[calc(100vh-220px)]">
-            <table className="min-w-[1000px] w-full border-separate border-spacing-0 text-xs">
+            <table className="min-w-[1000px] w-full border-separate border-spacing-0 text-sm text-left table-fixed">
               {/* HEADER FIXO */}
-              <thead>
+              <thead className="text-white text-xs bg-blue-500">
                 <tr>
-                  <th className="sticky top-0 left-0 z-30 bg-gray-100 w-[80px] p-2 border-r text-center font-bold">Hora</th>
+                  <th className="sticky top-0 left-0 z-30 bg-blue-500 w-[80px] p-2 border-r text-center font-bold">Hora</th>
 
                   {diasSemanas.map((d) => (
-                    <th key={d} className="sticky top-0 z-20 bg-blue-600 text-white p-2 border-r text-center">
+                    <th key={d} className="sticky top-0 z-30 bg-blue-500  p-2 border-r text-center font-bold">
                       {d === "Terca" ? "Terça" : d === "Sabado" ? "Sábado" : d}
                     </th>
                   ))}
@@ -130,7 +130,7 @@ export default function Mapa() {
                       return (
                         <td key={`${dia}-${hora}`} className={`border align-top p-1 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}>
                           {alunosNoSlot.map((m) => (
-                            <div key={m.id} className="bg-white border-l-4 border-blue-500 rounded p-1 mb-1 shadow-sm flex flex-col text-[10px]">
+                            <div key={m.id} className="bg-white border-l-4 border-blue-500 rounded p-1 mb-1 shadow-sm flex flex-col text-[10px] hover:bg-gray-200">
                               <span className="font-bold text-gray-800">{m.aluno?.nome}</span>
 
                               <span className="text-gray-500">{m.curso?.nome}</span>
