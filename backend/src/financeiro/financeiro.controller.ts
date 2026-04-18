@@ -6,6 +6,7 @@ import {
   Post,
   Body,
   Param,
+  Req,
   Delete,
   ParseIntPipe,
 } from '@nestjs/common';
@@ -52,7 +53,12 @@ export class FinanceiroController {
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    return await this.service.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+  ): Promise<any> {
+    const user = (req as any).user;
+
+    return await this.service.remove(id, user);
   }
 }

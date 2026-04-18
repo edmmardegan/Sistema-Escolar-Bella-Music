@@ -18,6 +18,14 @@ import {
 import { MESES } from "../../components/selecionarMeses";
 
 export default function Agenda() {
+
+  const usuario = JSON.parse(localStorage.getItem("@App:user") || "null");
+
+  console.log("USUARIO LOGADO:", usuario);
+
+  const isAdmin = usuario?.role?.toLowerCase() === "admin";
+
+
   // --- LÓGICA DE DATAS PADRÃO ---
   const hoje = new Date().toISOString().split("T")[0];
   const trintaAtras = (() => {
@@ -29,7 +37,7 @@ export default function Agenda() {
   // --- ESTADOS PADRONIZADOS ---
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [abaAtiva, setAbaAtiva] = useState("dia");
+  const [abaAtiva, setAbaAtiva] = useState("agenda");
 
   // Filtros
   const [dataFiltro, setDataFiltro] = useState(hoje);
@@ -53,16 +61,33 @@ export default function Agenda() {
   const carregar = useCallback(async () => {
     try {
       setLoading(true);
-      const tipoBusca = abaAtiva === "faltas" ? "reposicoes" : abaAtiva;
 
       const filtros = {
-        data: abaAtiva === "historico" ? dataInicio : dataFiltro,
+        data: abaAtiva === "agenda" ? dataFiltro : abaAtiva === "historico" ? dataInicio : null,
+
         dataFim: abaAtiva === "historico" ? dataFim : null,
+
         nome: buscaNome,
       };
 
-      const res = await api.getAgenda(tipoBusca, filtros);
-      setRegistros(Array.isArray(res) ? res : []);
+      const res = await api.getAgenda(abaAtiva, filtros);
+
+      let dados = Array.isArray(res) ? res : [];
+
+      // 🔒 GARANTIA EXTRA NO FRONT (opcional, mas seguro)
+      if (abaAtiva === "falta") {
+        dados = dados.filter((a) => a.status === "Falta");
+      }
+
+      if (abaAtiva === "pendente") {
+        dados = dados.filter((a) => a.status === "Pendente");
+      }
+
+      if (abaAtiva === "agenda") {
+        dados = dados.filter((a) => a.data?.split("T")[0] === dataFiltro);
+      }
+
+      setRegistros(dados);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       setRegistros([]);
@@ -72,8 +97,15 @@ export default function Agenda() {
   }, [abaAtiva, dataFiltro, dataInicio, dataFim, buscaNome]);
 
   useEffect(() => {
-    carregar();
-  }, [carregar]);
+    // Se for histórico, só carrega quando datas existirem
+    if (abaAtiva === "historico") {
+      if (dataInicio && dataFim) {
+        carregar();
+      }
+    } else {
+      carregar();
+    }
+  }, [abaAtiva, dataFiltro, dataInicio, dataFim, buscaNome]);
 
   // --- AÇÕES ---
   const registrarAcao = async (id, tipoAcao) => {
@@ -126,6 +158,100 @@ export default function Agenda() {
     }
   };
 
+  const REGRAS_ACOES = {
+    agenda: {
+      Pendente: isAdmin ? ["presenca", "falta", "excluir"] : ["presenca", "falta" ],
+      Presente: [],
+      Falta: ["reposicao"],
+    },
+    pendente: {
+      Pendente: isAdmin ? ["presenca", "falta", "excluir"] : ["presenca", "falta" ],
+    },
+    falta: {
+      Falta: ["reposicao"],
+    },
+    historico: {
+      Pendente: isAdmin ? ["presenca", "falta", "excluir"] : ["presenca", "falta"],
+      Presente: [],
+      Falta: ["reposicao"],
+    },
+  };
+
+  const ACAO_DESABILITADA = (acao, aula) => {
+    const status = aula.status;
+
+    if (acao === "presenca" && status === "Presente") return true;
+    if (acao === "falta" && status === "Falta") return true;
+    if (acao === "reposicao" && status !== "Falta") return true;
+    if (acao === "excluir" && status !== "Pendente") return true;
+
+    return false;
+  };
+
+  const renderBotao = (acao, aula) => {
+    const disabled = ACAO_DESABILITADA(acao, aula);
+
+    const base = "p-2 rounded-md text-white transition";
+    const disabledStyle = "bg-gray-300 cursor-not-allowed opacity-60";
+
+    switch (acao) {
+      case "presenca":
+        return (
+          <button
+            key="presenca"
+            disabled={disabled}
+            onClick={() => !disabled && registrarAcao(aula.id, "presenca")}
+            className={`${base} ${disabled ? disabledStyle : "bg-green-500 hover:bg-green-600"}`}
+            title={disabled ? "Já está presente" : "Registrar Presença"}
+          >
+            <FaCheck />
+          </button>
+        );
+
+      case "falta":
+        return (
+          <button
+            key="falta"
+            disabled={disabled}
+            onClick={() => !disabled && registrarAcao(aula.id, "falta")}
+            className={`${base} ${disabled ? disabledStyle : "bg-red-500 hover:bg-red-600"}`}
+            title={disabled ? "Já está como falta" : "Registrar Falta"}
+          >
+            <FaTimes />
+          </button>
+        );
+
+      case "reposicao":
+        return (
+          <button
+            key="reposicao"
+            disabled={disabled}
+            onClick={() => !disabled && registrarAcao(aula.id, "reposicao")}
+            className={`${base} ${disabled ? disabledStyle : "bg-blue-500 hover:bg-blue-600"}`}
+            title={disabled ? "Só disponível para faltas" : "Registrar Reposição"}
+          >
+            <FaUndoAlt />
+          </button>
+        );
+
+      case "excluir":         
+        return (
+          <button
+            key="excluir"
+            disabled={!isAdmin || disabled}
+            onClick={() => isAdmin && !disabled && excluir(aula)}
+            className={`${base} ${!isAdmin || disabled ? disabledStyle : "bg-gray-500 hover:bg-gray-600"}`}
+            title={!isAdmin ? "Apenas administrador pode excluir" : "Excluir"}
+          >
+            <FaTrash />
+          </button>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <main className="p-4 bg-gray-100 min-h-screen">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -175,14 +301,17 @@ export default function Agenda() {
             {/* ABAS */}
             <div className="flex flex-wrap gap-2">
               {[
-                { key: "dia", icon: <FaCalendarAlt />, label: "Agenda" },
-                { key: "pendentes", icon: <FaExclamationTriangle />, label: "Esquecidas" },
-                { key: "faltas", icon: <FaUndoAlt />, label: "Reposições" },
+                { key: "agenda", icon: <FaCalendarAlt />, label: "Agenda Diária" },
+                { key: "pendente", icon: <FaExclamationTriangle />, label: "Pendente" },
+                { key: "falta", icon: <FaUndoAlt />, label: "Falta" },
                 { key: "historico", icon: <FaHistory />, label: "Histórico" },
               ].map((aba) => (
                 <button
                   key={aba.key}
-                  onClick={() => setAbaAtiva(aba.key)}
+                  onClick={() => {
+                    console.log("ABA:", aba.key);
+                    setAbaAtiva(aba.key);
+                  }}
                   className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-semibold transition
                   ${abaAtiva === aba.key ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
                 >
@@ -215,9 +344,9 @@ export default function Agenda() {
             </span>
           </div>
 
-          {/* DATAS */}
+          {/* ABAS ATIVAS */}
           <div className="border-t pt-3 flex flex-wrap items-center gap-3 text-sm">
-            {abaAtiva === "dia" && (
+            {abaAtiva === "agenda" && (
               <>
                 <label className="font-semibold text-gray-600">Data:</label>
 
@@ -248,7 +377,7 @@ export default function Agenda() {
           <table className="w-full text-sm text-left">
             <thead className="text-white text-xs bg-blue-500">
               <tr>
-                <th className="px-4 py-3">Data / Dia</th>
+                <th className="px-4 py-3">Data</th>
                 <th className="px-4 py-3">Horário</th>
                 <th className="px-4 py-3">Aluno / Professor</th>
                 <th className="px-4 py-3">Curso / Termo</th>
@@ -264,17 +393,19 @@ export default function Agenda() {
 
                   return (
                     <tr key={aula.id} className="hover:bg-gray-100">
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 align-middle">
                         {dataLocal.toLocaleDateString("pt-BR", { timeZone: "UTC" })}
-                        <div className="px-4 py-3 font-semibold text-gray-800">{getDiaSemanaExtenso(aula.data)}</div>
+                        <div className="font-semibold text-gray-800">{getDiaSemanaExtenso(aula.data)}</div>
                       </td>
 
-                      <td className="px-4 py-3 font-semibold text-gray-800 flex items-center gap-1">
-                        <FaClock className="text-gray-400" />
-                        {dataLocal.toLocaleTimeString("pt-BR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                      <td className="px-4 py-3 align-middle">
+                        <div className="flex justify-center items-center gap-1 font-semibold text-gray-800">
+                          <FaClock className="text-gray-400" />
+                          {dataLocal.toLocaleTimeString("pt-BR", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </div>
                       </td>
 
                       <td className="px-4 py-3 font-semibold text-gray-800">
@@ -282,7 +413,7 @@ export default function Agenda() {
                         <div className="text-xs text-red-500">Prof: {aula.termo?.matricula?.professor}</div>
 
                         {aula.obs && (
-                          <div className="text-xs text-red-500 flex items-center gap-1">
+                          <div className="text-xs text-orange-500 flex items-center gap-1">
                             <FaExclamationTriangle /> {aula.obs}
                           </div>
                         )}
@@ -314,80 +445,7 @@ export default function Agenda() {
                       {/* AÇÕES */}
                       <td className="px-4 py-3 align-middle">
                         <div className="flex justify-center items-center gap-2">
-                          {/* ABA: DIA - Tipos status: Pendente, Falta, Presente */}
-                          {abaAtiva === "dia"  (
-                            <>
-                              <button
-                                onClick={() => registrarAcao(aula.id, "presenca")}
-                                className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
-                              >
-                                <FaCheck />
-                              </button>
-
-                              <button
-                                onClick={() => registrarAcao(aula.id, "falta")}
-                                className="p-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md"
-                              >
-                                <FaTimes />
-                              </button>
-
-                              <button onClick={() => excluir(aula)} className="p-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md">
-                                <FaTrash />
-                              </button>
-                            </>
-                          )}
-
-                          {/* ABA: PENDENTES (ESQUECIDAS) Tipos status: Pendente */}
-                          {abaAtiva === "pendentes" && status === "Pendente" && (
-                            <>
-                              <button
-                                onClick={() => registrarAcao(aula.id, "presenca")}
-                                className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
-                              >
-                                <FaCheck />
-                              </button>
-
-                              <button
-                                onClick={() => registrarAcao(aula.id, "falta")}
-                                className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
-                              >
-                                <FaTimes />
-                              </button>
-                            </>
-                          )}
-
-                          {/* ABA: FALTAS Tipos status: Falta */}
-                          {abaAtiva === "faltas" && status === "falta" && (
-                            <button
-                              onClick={() => registrarAcao(aula.id, "reposicao")}
-                              className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
-                            >
-                              <FaUndoAlt />
-                            </button>
-                          )}
-
-                          {/* ABA: HISTÓRICO Tipos status: Pendente, Falta, Presente */}
-                          {abaAtiva === "historico" && <span className="text-gray-400 text-xs">Sem ações</span>}
-                                                      <>
-                              <button
-                                onClick={() => registrarAcao(aula.id, "presenca")}
-                                className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
-                              >
-                                <FaCheck />
-                              </button>
-
-                              <button
-                                onClick={() => registrarAcao(aula.id, "falta")}
-                                className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
-                              >
-                                <FaTimes />
-                              </button>
-
-                              <button onClick={() => excluir(aula)} className="p-2 bg-gray-500 hover:bg-gray-600 text-white rounded-md">
-                                <FaTrash />
-                              </button>
-                            </>
-
+                          {(REGRAS_ACOES[abaAtiva]?.[aula.status] || []).map((acao) => renderBotao(acao, aula))}
                         </div>
                       </td>
                     </tr>

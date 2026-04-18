@@ -39,13 +39,13 @@ export class AgendaService {
       .leftJoinAndSelect('matricula.aluno', 'aluno')
       .leftJoinAndSelect('matricula.curso', 'curso');
 
-    if (tipo === 'dia') {
+    if (tipo === 'agenda') {
       query.where('CAST(aula.data AS DATE) = :data', { data: data || hoje });
-    } else if (tipo === 'pendentes') {
+    } else if (tipo === 'pendente') {
       query
         .where('aula.status = :status', { status: 'Pendente' })
         .andWhere('aula.data < :hoje', { hoje: new Date() });
-    } else if (tipo === 'reposicoes') {
+    } else if (tipo === 'falta') {
       query.where('aula.status = :status', { status: 'Falta' });
     } else if (tipo === 'historico') {
       if (data && dataFim) {

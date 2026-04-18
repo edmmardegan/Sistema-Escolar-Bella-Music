@@ -1,6 +1,10 @@
 // src/financeiro/financeiro.service.ts
 
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual } from 'typeorm';
 import { Financeiro } from '../entities/financeiro.entity';
@@ -148,11 +152,16 @@ export class FinanceiroService {
   }
 
   // --- AJUSTE NO REMOVE ---
-  async remove(id: number, userName: string = 'SISTEMA'): Promise<any> {
+  async remove(id: number, user: any): Promise<any> {
+    if (user?.role !== 'admin') {
+      throw new ForbiddenException('Apenas administradores podem excluir.');
+    }
+
     const parcela = await this.repository.findOne({
       where: { id },
       relations: ['aluno'],
     });
+
     if (!parcela) throw new NotFoundException('Parcela não encontrada');
 
     const contextoExclusao = `Exclusão - Aluno: ${parcela.aluno?.nome} | Venc: ${parcela.dataVencimento}`;
@@ -167,7 +176,7 @@ export class FinanceiroService {
         vencimento: parcela.dataVencimento,
       },
       {},
-      userName,
+      user?.nome || user?.username || 'SISTEMA',
       contextoExclusao,
     );
 
