@@ -14,12 +14,6 @@
   border-radius: 8px;
 }
 
-.input-group-filtro {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-}
 
 .status-emandamento {
   background: #e7f5ff;
@@ -43,48 +37,8 @@
   color: #e67700;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
 
-.modal-content {
-  background: white;
-  border-radius: 8px;
-  width: 95%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
-}
 
-.modal-header {
-  padding: 12px 15px;
-  background: var(--dark);
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.btn-fechar {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  font-size: 1.2rem;
-}
 
 .txt-detalhe-vermelho {
   color: #c41010;

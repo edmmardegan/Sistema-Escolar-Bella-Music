@@ -288,7 +288,7 @@ export default function Alunos() {
                     </td>
                     <td>{formatarDataTabela(a.dataNascimento)}</td>
                     <td>
-                      <span className={`badge-status ${a.ativo ? "status-ativo" : "status-inativo"}`}>
+                      <span className={` ${a.ativo ? "status-ativo" : "status-inativo"}`}>
                         {a.ativo ? "ATIVO" : "INATIVO"}
                       </span>
                     </td>
@@ -451,7 +451,7 @@ export default function Alunos() {
 }
 
 /* Badges e Extras */
-.badge-status {
+. {
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 10px;

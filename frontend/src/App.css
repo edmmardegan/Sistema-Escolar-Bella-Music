@@ -196,36 +196,7 @@ body {
 
 
 /* ================= TABELAS ================= */
-.tabela-container {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  padding: 12px;
-}
 
-.tabela {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.tabela thead th {
-  background-color: var(--primary);
-  color: #ffffff;
-  padding: 10px;
-  text-align: left;
-  font-size: 14px;
-}
-
-.tabela td {
-  padding: 8px 10px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-}
-
-.acoes {
-  display: flex;
-  gap: 6px;
-}
 
 /* src/styles/App.css */
 
@@ -242,35 +213,7 @@ body {
   outline: none;
 }
 
-/* CONTADOR DE REGISTROS PADRONIZADO (IGUAL ALUNOS) */
-.contadores-flex {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
 
-  /*para deixar a borda arredondada e azul nos contadores */
-  border-left: 5px solid var(--primary);
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
-  padding: 2px;
-}
-
-.count-badge {
-  background-color: #e9ecef;
-  padding: 6px 15px;
-  border-radius: 20px;
-  font-size: 13px;
-  border: 1px solid #dee2e6;
-  font-weight: 500;
-  color: #495057;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.count-badge strong {
-  color: var(--primary);
-}
 
 /*CONFIGURAÇÕES DOS REGISTROS */
 /* Detalhes de Texto registro principal */

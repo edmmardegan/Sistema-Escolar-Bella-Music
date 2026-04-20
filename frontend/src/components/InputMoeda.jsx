@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 
-export default function InputMoeda({ label, value, onChange, required, className }) {
+export default function InputMoeda({ label, value, onChange, required, className, disabled }) {
   // Estado local para gerenciar o texto que aparece (ex: "R$ 130,00")
   const [displayValue, setDisplayValue] = useState("");
 
@@ -48,6 +48,7 @@ export default function InputMoeda({ label, value, onChange, required, className
         value={displayValue} 
         onChange={handleInputChange} 
         required={required} 
+        disabled={disabled} 
         placeholder="R$ 0,00" />
     </div>
   );

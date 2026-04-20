@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { FaDollarSign, FaMagic, FaTrash, FaFilter, FaCheck, FaUndo, FaHandHoldingUsd, FaListOl, FaTimes, FaSearch } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 import api from "../../services/api";
-//import "./styles.css";
 
 export default function Financeiro() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -143,20 +142,24 @@ export default function Financeiro() {
   };
 
   return (
-    <main className="p-4">
-      <div className="max-w-7xl mx-auto space-y-4">
-        {/* CARD */}
-        <section className="bg-white rounded-xl shadow p-4">
+    <main className="p-4 bg-gray-100 min-h-screen">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* CARD FORM */}
+        <section className="bg-white rounded-xl shadow-md p-6 ">
           {/* HEADER */}
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
+          <div className="flex justify-between items-center flex-wrap gap-3">
+            <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800">
               <FaDollarSign /> Financeiro Global
             </h2>
 
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold">Lote:</span>
 
-              <select className="h-10 px-3 border rounded-md" value={mesGerar} onChange={(e) => setMesGerar(e.target.value)}>
+              <select 
+                className="h-10 px-3 border rounded-md" 
+                value={mesGerar} 
+                onChange={(e) => setMesGerar(e.target.value)}
+                >
                 {meses.map((m, i) => (
                   <option key={i} value={i + 1}>
                     {m}
@@ -164,7 +167,12 @@ export default function Financeiro() {
                 ))}
               </select>
 
-              <input type="number" className="h-10 px-3 border rounded-md w-20" value={anoGerar} onChange={(e) => setAnoGerar(e.target.value)} />
+              <input 
+                type="number" 
+                className="h-10 px-3 border rounded-md w-20" 
+                value={anoGerar} 
+                onChange={(e) => setAnoGerar(e.target.value)}
+              />
 
               <button
                 onClick={handleGerarLote}
@@ -182,7 +190,7 @@ export default function Financeiro() {
               <FaCheck className="text-lg opacity-70" />
               <div>
                 <span className="text-xs font-bold uppercase block">Total Pago</span>
-                <strong>{fMoeda(totalPago)}</strong>
+                <strong className="text-2xl">{fMoeda(totalPago)}</strong>
               </div>
             </div>
 
@@ -190,15 +198,17 @@ export default function Financeiro() {
               <FaHandHoldingUsd className="text-lg opacity-70" />
               <div>
                 <span className="text-xs font-bold uppercase block">Em Aberto</span>
-                <strong>{fMoeda(totalAberto)}</strong>
+                <strong className="text-2xl">{fMoeda(totalAberto)}</strong>
               </div>
             </div>
 
-            <div className="ml-auto">
-              <span className="bg-gray-100 border px-4 py-2 rounded-full text-sm">
-                <FaListOl className="inline mr-1" />
-                Total: <strong>{filtrados.length}</strong>
-              </span>
+            {/* TOTAL */}
+            <div className="ml-auto self-end ">
+            <span className="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-end gap-2">
+              <FaListOl />
+              Total Registros:
+              <strong className="text-[var(--primary)]">{filtrados.length}</strong>
+            </span>
             </div>
           </div>
 
@@ -235,7 +245,11 @@ export default function Financeiro() {
             {/* MÊS */}
             <div className="flex flex-col">
               <label className="text-xs font-bold mb-1 text-gray-600">Mês</label>
-              <select className="h-10 px-3 border rounded-md" value={mesFiltro} onChange={(e) => setMesFiltro(e.target.value)}>
+              <select 
+                className="h-10 px-3 border rounded-md" 
+                value={mesFiltro} 
+                onChange={(e) => setMesFiltro(e.target.value)}
+              >
                 <option value="0">Todos</option>
                 {meses.map((n, i) => (
                   <option key={i} value={i + 1}>
@@ -248,13 +262,21 @@ export default function Financeiro() {
             {/* ANO */}
             <div className="flex flex-col">
               <label className="text-xs font-bold mb-1 text-gray-600">Ano</label>
-              <input type="number" className="h-10 px-3 border rounded-md w-24" value={anoFiltro} onChange={(e) => setAnoFiltro(e.target.value)} />
+              <input 
+                type="number" 
+                className="h-10 px-3 border rounded-md w-24" 
+                value={anoFiltro} 
+                onChange={(e) => setAnoFiltro(e.target.value)} />
             </div>
 
             {/* PROFESSOR */}
             <div className="flex flex-col">
               <label className="text-xs font-bold mb-1 text-gray-600">Professora</label>
-              <select className="h-10 px-3 border rounded-md" value={professorFiltro} onChange={(e) => setProfessorFiltro(e.target.value)}>
+              <select 
+                className="h-10 px-3 border rounded-md" 
+                value={professorFiltro} 
+                onChange={(e) => setProfessorFiltro(e.target.value)}
+              >
                 <option value="Todas">Todas</option>
                 <option value="Cristiane">Cristiane</option>
                 <option value="Daiane">Daiane</option>
@@ -264,7 +286,11 @@ export default function Financeiro() {
             {/* STATUS */}
             <div className="flex flex-col">
               <label className="text-xs font-bold mb-1 text-gray-600">Status</label>
-              <select className="h-10 px-3 border rounded-md" value={statusFiltro} onChange={(e) => setStatusFiltro(e.target.value)}>
+              <select 
+                className="h-10 px-3 border rounded-md" 
+                value={statusFiltro} 
+                onChange={(e) => setStatusFiltro(e.target.value)}
+              >
                 <option value="Todos">Todos</option>
                 <option value="Aberta">Em Aberto</option>
                 <option value="Paga">Pagos</option>
@@ -273,7 +299,9 @@ export default function Financeiro() {
 
             {/* LIMPAR */}
             <div className="flex items-end">
-              <button onClick={limparFiltros} className="h-10 px-4 rounded-md border bg-gray-100 hover:bg-gray-200">
+              <button 
+                className="h-10 px-4 rounded-md border bg-gray-100 hover:bg-gray-200"
+                onClick={limparFiltros}>
                 🧹 Limpar
               </button>
             </div>
@@ -281,22 +309,22 @@ export default function Financeiro() {
         </section>
 
         {/* TABELA */}
-        <section className="bg-white rounded-xl shadow overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-100">
+          <div className="overflow-x-auto rounded-md overflow-hidden">
+          <table className="w-full text-sm text-left">
+            <thead className="text-white text-xs bg-blue-500">
               <tr>
-                <th className="px-4 py-3 text-left">Vencimento</th>
-                <th className="px-4 py-3 text-left">Aluno / Professor</th>
-                <th className="px-4 py-3 text-left">Valor</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-center">Ações</th>
+                <th className="px-2 py-2">Vencimento</th>
+                <th className="px-2 py-2">Aluno / Professor</th>
+                <th className="px-2 py-2">Valor</th>
+                <th className="px-2 py-2">Status</th>
+                <th className="px-2 py-2">Ações</th>
               </tr>
             </thead>
 
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-10 text-gray-400">
+                  <td className="text-center py-10 text-gray-400">
                     Carregando dados...
                   </td>
                 </tr>
@@ -332,7 +360,8 @@ export default function Financeiro() {
                         <div className="flex justify-center gap-2">
                           {!isPaga ? (
                             <>
-                              <button onClick={() => handleAcao(p.id, "pagar")} className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
+                              <button onClick={() => handleAcao(p.id, "pagar")} 
+                                className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
                                 <FaCheck />
                               </button>
 
@@ -364,7 +393,7 @@ export default function Financeiro() {
               )}
             </tbody>
           </table>
-        </section>
+        </div>
       </div>
     </main>
   );

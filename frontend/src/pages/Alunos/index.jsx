@@ -76,7 +76,7 @@ export default function Alunos() {
       }
       if (e.key === "F4") {
         e.preventDefault();
-        if (exibindoForm) document.getElementById("btn-salvar-aluno")?.click();
+        if (exibindoForm) document.getElementById("btn-salvar")?.click();
       }
       if (e.key === "Escape") {
         if (exibindoForm) limparForm();
@@ -329,7 +329,6 @@ export default function Alunos() {
                   name="cep"
                   value={form.cep}
                   onChange={handleChange}
-                  required
                 />
               </div>
               {/* ENDERECO */}
@@ -542,7 +541,7 @@ export default function Alunos() {
                           title="Editar Registro"
                           onClick={() => 
                           prepararEdicao(a)} 
-                          className="p-2 bg-yellow-400 text-white rounded-md hover:bg-yellow-600 transition disabled:opacity-50">
+                          className="p-2 bg-green-400 text-white rounded-md hover:bg-yellow-600 transition disabled:opacity-50">
                           <FaPen />
                         </button>
 
