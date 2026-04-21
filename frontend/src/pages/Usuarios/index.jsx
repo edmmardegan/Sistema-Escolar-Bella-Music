@@ -234,20 +234,20 @@ const Usuarios = () => {
                   {/* AÇÕES */}
                   <td className="px-4 py-3 gap-2 flex justify-center">
                     <button 
-                      className="p-2 bg-green-600 hover:bg-green-400 text-white rounded-md" 
+                      className="p-2 bg-green-400 hover:bg-green-600 text-white rounded-md" 
                       onClick={() => 
                       prepararEdicao(u)} 
                       title="Editar">
                       <FaPen />
                     </button>
                     <button 
-                      className="p-2 bg-yellow-600 hover:bg-orange-400 text-white rounded-md" 
+                      className="p-2 bg-yellow-400 hover:bg-orange-600 text-white rounded-md" 
                       onClick={() => handleReset(u.id, u.nome)} 
                       title="Resetar Senha">
                       <FaKey />
                     </button>
                     <button  
-                      className="p-2 bg-red-600 hover:bg-red-400 text-white rounded-md"
+                      className="p-2 bg-red-400 hover:bg-red-600 text-white rounded-md"
                       onClick={() => excluir(u.id)} 
                       title="Excluir">
                       <FaTrash />

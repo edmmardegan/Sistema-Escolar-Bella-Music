@@ -91,7 +91,7 @@ export default function Boletim() {
 
   return (
     <main className="p-4 bg-gray-100 min-h-screen">
-      <div className="max-w-7xl mx-auto space-y-4">
+      <div className="max-w-6xl mx-auto space-y-4">
         {/* HEADER */}
         <div className="flex justify-between items-center flex-wrap gap-3 bg-white p-4 rounded-xl shadow-md">
           <div className="flex items-center gap-4">
@@ -105,7 +105,15 @@ export default function Boletim() {
             </h2>
           </div>
 
-          <span className="bg-gray-200 px-3 py-1 rounded-full text-sm">{alunoInfo.curso}</span>
+           <span className="ml-auto bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+              Curso:
+              <strong 
+                className="text-blue-600">
+                {alunoInfo.curso}
+              </strong>
+            </span>
+
+
         </div>
 
         {/* LAYOUT */}
@@ -120,7 +128,7 @@ export default function Boletim() {
                   key={t.id}
                   onClick={() => setTermoAtivo(t)}
                   className={`p-3 border rounded-md cursor-pointer transition
-                  ${termoAtivo?.id === t.id ? "bg-blue-50 border-blue-500 border-l-4" : "hover:bg-gray-50"}`}
+                  ${termoAtivo?.id === t.id ? "bg-blue-50 border-blue-500 border-l-4" : "hover:bg-gray-100"}`}
                 >
                   <div className="flex justify-between items-center">
                     <strong>{t.numeroTermo}º Termo</strong>

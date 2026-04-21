@@ -480,7 +480,8 @@ export default function Alunos() {
 
             {/* TOTAL */}
             <span className="ml-auto bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-              <FaListOl /> Total de Registros: {listaExibida.length}
+              <FaListOl /> Total de Registros: 
+              <strong className="text-blue-600">{listaExibida.length}</strong>
             </span>
           </div>
 

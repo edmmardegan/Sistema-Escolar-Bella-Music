@@ -120,11 +120,13 @@ export const AuditLogs = () => {
           </div>
 
           {/* TOTAL */}
-          <div className="flex justify-end">
+          <div className="w-64 flex flex-end">
             <span className="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-              <FaListOl /> Total de Registros: {logs.length}
+              <FaListOl /> Total de Registros:  <strong className="text-blue-600">{logs.length}</strong>
             </span>
           </div>
+
+          
           
           {/* ERRO */}
           {error && <div className="text-red-500 mb-2">{error}</div>}

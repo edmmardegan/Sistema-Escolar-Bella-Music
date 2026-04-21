@@ -207,7 +207,7 @@ export default function Financeiro() {
             <span className="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-end gap-2">
               <FaListOl />
               Total Registros:
-              <strong className="text-[var(--primary)]">{filtrados.length}</strong>
+              <strong className="text-blue-600">{filtrados.length}</strong>
             </span>
             </div>
           </div>

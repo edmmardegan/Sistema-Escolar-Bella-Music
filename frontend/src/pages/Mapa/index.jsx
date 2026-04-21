@@ -73,10 +73,6 @@ export default function Mapa() {
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <FaTable /> Mapa Geral de Horários
             </h2>
-
-            <span className="flex items-center gap-2 text-sm bg-gray-100 border px-3 py-1 rounded-full">
-              <FaListOl /> Alunos: <strong>{matriculasFiltradas.length}</strong>
-            </span>
           </div>
 
           {/* FILTRO */}
@@ -95,6 +91,12 @@ export default function Mapa() {
                 </option>
               ))}
             </select>
+
+            {/* CONTADOR */}
+            <span className="ml-auto text-sm bg-gray-200 px-3 py-1 rounded-full flex items-center gap-2">
+              <FaListOl /> Total de Registros: 
+              <strong className="text-blue-600">{matriculasFiltradas.length}</strong>
+            </span>
 
             {loading && <span className="text-xs text-gray-500">Sincronizando...</span>}
           </div>

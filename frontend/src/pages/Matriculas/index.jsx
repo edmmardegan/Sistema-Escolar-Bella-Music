@@ -669,6 +669,7 @@ export default function Matriculas() {
           )}
         </section>
 
+
         {/* LISTAGEM */}
         <section className="bg-white rounded-xl shadow-md p-4 space-y-4">
           {loading && <p className="p-4 text-gray-600">Processando...</p>}
@@ -723,7 +724,7 @@ export default function Matriculas() {
             <span className="ml-auto bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
               <FaListOl />
               Total Registros:
-              <strong className="text-[var(--primary)]">{listaExibida.length}</strong>
+              <strong className="text-blue-600">{listaExibida.length}</strong>
             </span>
           </div>
 

@@ -18,13 +18,11 @@ import {
 import { MESES } from "../../components/selecionarMeses";
 
 export default function Agenda() {
-
   const usuario = JSON.parse(localStorage.getItem("@App:user") || "null");
 
   console.log("USUARIO LOGADO:", usuario);
 
   const isAdmin = usuario?.role?.toLowerCase() === "admin";
-
 
   // --- LÓGICA DE DATAS PADRÃO ---
   const hoje = new Date().toISOString().split("T")[0];
@@ -160,12 +158,12 @@ export default function Agenda() {
 
   const REGRAS_ACOES = {
     agenda: {
-      Pendente: isAdmin ? ["presenca", "falta", "excluir"] : ["presenca", "falta" ],
+      Pendente: isAdmin ? ["presenca", "falta", "excluir"] : ["presenca", "falta"],
       Presente: [],
       Falta: ["reposicao"],
     },
     pendente: {
-      Pendente: isAdmin ? ["presenca", "falta", "excluir"] : ["presenca", "falta" ],
+      Pendente: isAdmin ? ["presenca", "falta", "excluir"] : ["presenca", "falta"],
     },
     falta: {
       Falta: ["reposicao"],
@@ -201,7 +199,7 @@ export default function Agenda() {
             key="presenca"
             disabled={disabled}
             onClick={() => !disabled && registrarAcao(aula.id, "presenca")}
-            className={`${base} ${disabled ? disabledStyle : "bg-green-500 hover:bg-green-600"}`}
+            className={`${base} ${disabled ? disabledStyle : "bg-green-400 hover:bg-green-600"}`}
             title={disabled ? "Já está presente" : "Registrar Presença"}
           >
             <FaCheck />
@@ -214,7 +212,7 @@ export default function Agenda() {
             key="falta"
             disabled={disabled}
             onClick={() => !disabled && registrarAcao(aula.id, "falta")}
-            className={`${base} ${disabled ? disabledStyle : "bg-red-500 hover:bg-red-600"}`}
+            className={`${base} ${disabled ? disabledStyle : "bg-red-400 hover:bg-red-600"}`}
             title={disabled ? "Já está como falta" : "Registrar Falta"}
           >
             <FaTimes />
@@ -227,20 +225,20 @@ export default function Agenda() {
             key="reposicao"
             disabled={disabled}
             onClick={() => !disabled && registrarAcao(aula.id, "reposicao")}
-            className={`${base} ${disabled ? disabledStyle : "bg-blue-500 hover:bg-blue-600"}`}
+            className={`${base} ${disabled ? disabledStyle : "bg-orange-400 hover:bg-orange-600"}`}
             title={disabled ? "Só disponível para faltas" : "Registrar Reposição"}
           >
             <FaUndoAlt />
           </button>
         );
 
-      case "excluir":         
+      case "excluir":
         return (
           <button
             key="excluir"
             disabled={!isAdmin || disabled}
             onClick={() => isAdmin && !disabled && excluir(aula)}
-            className={`${base} ${!isAdmin || disabled ? disabledStyle : "bg-gray-500 hover:bg-gray-600"}`}
+            className={`${base} ${!isAdmin || disabled ? disabledStyle : "bg-gray-400 hover:bg-gray-600"}`}
             title={!isAdmin ? "Apenas administrador pode excluir" : "Excluir"}
           >
             <FaTrash />
@@ -338,9 +336,9 @@ export default function Agenda() {
               )}
             </div>
 
-            {/* CONTADOR */}
-            <span className="ml-auto text-sm bg-gray-200 px-3 py-1 rounded-full flex items-center gap-2">
-              <FaListOl /> Total de Registros: <strong>{registros.length}</strong>
+            <span className="ml-auto bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+              <FaListOl /> Total de Registros:
+              <strong className="text-blue-600">{registros.length}</strong>
             </span>
           </div>
 
@@ -447,6 +445,7 @@ export default function Agenda() {
                         <div className="flex justify-center items-center gap-2">
                           {(REGRAS_ACOES[abaAtiva]?.[aula.status] || []).map((acao) => renderBotao(acao, aula))}
                         </div>
+
                       </td>
                     </tr>
                   );
