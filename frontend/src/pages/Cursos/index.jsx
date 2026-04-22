@@ -1,136 +1,129 @@
 /* src/pages/Cursos/index.jsx */
 
+/* 1. IMPORTS */
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { FaTrash, FaPen, FaPlus, FaSave, FaTimes, FaMusic } from "react-icons/fa";
 import api from "../../services/api.js";
+
+/* 1.1 IMPORTS COMPONENTS*/
 import InputMoeda from "../../components/InputMoeda";
 import Input from "../../components/Input.jsx";
 import { useShortcuts } from "../../components/useShortcuts.js";
 import Button from "../../components/Button";
 
+/* 2. CONFIGURAÇÕES ESTÁTICAS */
+const estadoInicial = {
+  nome: "",
+  valorMensalidade: 0,
+  qtdeTermos: 0,
+};
+
 export default function Cursos() {
-  // 1. ESTADOS PADRONIZADOS
+  /* 3. ESTADOS E REFS */
   const [registros, setRegistros] = useState([]);
   const [exibindoForm, setExibindoForm] = useState(false);
   const [editandoId, setEditandoId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState(estadoInicial);
   const inputNomeRef = useRef(null);
 
-  const [form, setForm] = useState({
-    nome: "",
-    valorMensalidade: 0,
-    qtdeTermos: 0,
-  });
-
-  // --- CARREGAMENTO DE DADOS ---
+  /* 4. CARREGAMENTO (Callbacks) */
   const carregar = useCallback(async () => {
     try {
       setLoading(true);
       const resposta = await api.getCursos();
       setRegistros(Array.isArray(resposta) ? resposta : []);
     } catch (e) {
-      console.error("Erro ao buscar cursos:", e);
+      console.error("Erro ao carregar:", e);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Carregamento inicial
+  /* 5. EFEITOS (useEffect) */
   useEffect(() => {
     carregar();
   }, [carregar]);
 
-  // Controle de Foco
   useEffect(() => {
     if (exibindoForm && inputNomeRef.current) {
-      setTimeout(() => inputNomeRef.current.focus(), 50);
+      setTimeout(() => inputNomeRef.current.focus(), 100);
     }
-  }, [exibindoForm]); // Só executa quando abre/fecha o form
+  }, [exibindoForm]);
 
+  /* 6. ATALHOS */
   useShortcuts({
     F2: () => !exibindoForm && setExibindoForm(true),
     F4: (e) => exibindoForm && salvar(e),
     Escape: () => exibindoForm && limparForm(),
   });
 
-  // --- AÇÕES ---
-  const salvar = async (e) => {
-    e.preventDefault();
-    try {
-      const payload = {
-        ...form,
-        qtdeTermos: Number(form.qtdeTermos),
-      };
-
-      await api.saveCurso(payload, editandoId);
-      alert("Curso processado com sucesso!");
-      limparForm();
-      carregar();
-    } catch (e) {
-      alert("Erro ao salvar curso.");
-    }
-  };
-
-  const excluir = async (id) => {
-    if (!window.confirm("Deseja realmente excluir este curso?")) return;
-    try {
-      await api.deleteCurso(id);
-      carregar();
-    } catch (e) {
-      alert("Erro ao excluir. Verifique se existem matrículas vinculadas a este curso.");
-    }
+  /* 7. FUNÇÕES DE MANIPULAÇÃO (Ações) */
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
   };
 
   const limparForm = () => {
-    setForm({ nome: "", valorMensalidade: "", qtdeTermos: "" });
+    setForm(estadoInicial);
     setEditandoId(null);
     setExibindoForm(false);
   };
 
   const prepararEdicao = (curso) => {
-    setForm({
-      nome: curso.nome,
-      valorMensalidade: curso.valorMensalidade,
-      qtdeTermos: curso.qtdeTermos,
-    });
+    setForm({ ...curso });
     setEditandoId(curso.id);
     setExibindoForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    let valorFinal = type === "checkbox" ? checked : value;
-
-    setForm({ ...form, [name]: valorFinal });
+  const salvar = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      const payload = { ...form, qtdeTermos: Number(form.qtdeTermos) };
+      await api.saveCurso(payload, editandoId);
+      alert("Sucesso!");
+      limparForm();
+      carregar();
+    } catch (e) {
+      alert("Erro ao salvar.");
+    }
   };
 
+  const excluir = async (id) => {
+    if (!window.confirm("Excluir?")) return;
+    try {
+      await api.deleteCurso(id);
+      carregar();
+    } catch (e) {
+      alert("Erro ao excluir.");
+    }
+  };
+
+  /* 8. RENDERIZAÇÃO */
   return (
     <main className="p-4 bg-gray-100 min-h-screen">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* CARD FORM */}
-        <section className="bg-white rounded-xl shadow-md p-6">
-          {/* HEADER */}
-          <div className="flex justify-between items-center flex-wrap gap-3">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <FaMusic />
-              {editandoId ? "Editar Curso" : exibindoForm ? "Novo Curso" : "Gerenciar Cursos"}
-            </h2>
+        {/* HEADER SEMPRE VISÍVEL */}
+        <header className="bg-white p-6 h-20 rounded-xl shadow-md flex justify-between items-center">
+           <h2 className="text-xl font-bold flex items-center gap-2">
+             <FaMusic /> {editandoId ? "Editar Curso" : exibindoForm ? "Novo Curso" : "Gerenciar Cursos"}
+           </h2>
+           {!exibindoForm && (
+             <Button 
+              icon={FaPlus} 
+              onClick={() => setExibindoForm(true)}
+              className="px-4"
+            >
+              Novo [F2]
+            </Button>
+           )}
+        </header>
 
-            {/* BOTÃO NOVO REGISTRO */}
-            {!exibindoForm && (
-              <Button icon={FaPlus} onClick={() => setExibindoForm(true)} className="px-4">
-                Novo Curso [F2]
-              </Button>
-            )}
-          </div>
-        </section>
-        
-            
-          {/* FORM */}
         {exibindoForm ? (
-          <section className="bg-white rounded-xl shadow-md p-6">
-            <form className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end" onSubmit={salvar}>
+          /* TELA 1: FORMULÁRIO */
+          <section className="bg-white p-6 rounded-xl shadow-md">
+            <form onSubmit={salvar} className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* NOME */}
               <Input
                 ref={inputNomeRef}
@@ -167,20 +160,30 @@ export default function Cursos() {
 
               {/* BOTÃO AÇÃO REGISTRO FORM */}
               <div className="md:col-span-3 flex gap-3 mt-2">
-                <Button variant="green" icon={FaSave} type="submit" disabled={loading} className="px-4">
+                <Button 
+                  variant="green" 
+                  icon={FaSave} 
+                  type="submit" 
+                  disabled={loading} className="px-4"
+                >
                   Salvar [F4]
                 </Button>
 
-                <Button variant="red" icon={FaTimes} onClick={limparForm} className="px-4">
+                <Button 
+                  variant="red" 
+                  icon={FaTimes} 
+                  onClick={limparForm} 
+                  className="px-4"
+                >
                   Cancelar [Esc]
                 </Button>
+
               </div>
-
             </form>
-
-        </section>
-      ) : (
-        <section className="bg-white rounded-xl shadow-md overflow-hidden">
+          </section>
+        ) : (
+          /* TELA 2: TABELA */
+          <section className="bg-white rounded-xl shadow-md overflow-hidden">
           {loading && <p className="p-4 text-gray-600">Processando...</p>}
 
           <table className="w-full text-sm text-left">
@@ -219,21 +222,27 @@ export default function Cursos() {
                         title="Editar Registro"
                         className="p-2" // Sobrescrevendo o padding padrão se necessário
                       />
-                      <Button variant="red" icon={FaTrash} onClick={() => excluir(c.id)} title="Excluir Registro" className="p-2" />
+                      <Button 
+                        variant="red" 
+                        icon={FaTrash} 
+                        onClick={() => excluir(c.id)} 
+                        title="Excluir Registro" 
+                        className="p-2" 
+                      />
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td colSpan="4" className="text-center py-6 text-gray-400">
-                    Nenhum curso cadastrado.
+                    Nenhum registro cadastrado.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </section>
-      )}
+        )}
       </div>
     </main>
   );

@@ -6,6 +6,7 @@ const variants = {
   blue: "bg-blue-600 hover:bg-blue-700 text-white",
   green: "bg-green-500 hover:bg-green-600 text-white",
   red: "bg-red-500 hover:bg-red-600 text-white",
+  gray: "bg-gray-500 hover:bg-gray-600 text-white",
   ghost: "bg-transparent hover:bg-gray-100 text-gray-600", // Para botões de ícone na tabela
 };
 
