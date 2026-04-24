@@ -360,7 +360,6 @@ export default function Alunos() {
             {/* FILTROS */}
             <div className="flex items-center gap-4 px-6 h-[50px] flex-shrink-0 bg-white border-b">
               {/* ABAS */}
-
               <div className="flex gap-2">
                 {["Ativos", "Inativos", "Todos"].map((aba) => (
                   <button
@@ -378,11 +377,11 @@ export default function Alunos() {
               <div className="relative">
                 <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
-                <input
+                <Input
                   value={buscaNome}
                   onChange={(e) => setBuscaNome(e.target.value)}
                   placeholder="Pesquisar por nome..."
-                  className="pl-9 pr-11 h-9 border rounded-md"
+                  className="w-96 pl-9 pr-11 h-9 rounded-md"
                 />
 
                 {buscaNome && (
@@ -391,12 +390,13 @@ export default function Alunos() {
               </div>
 
               {/* TOTAL */}
-              <div className="flex-end">
+              <div className="ml-auto">
                 <span className="ml-auto bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                   <FaListOl /> Total de Registros:
                   <strong className="text-blue-600">{listaExibida.length}</strong>
                 </span>
               </div>
+
             </div>
 
             <div className="overflow-y-auto w-full rounded-xl">

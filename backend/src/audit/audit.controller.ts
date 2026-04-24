@@ -8,7 +8,6 @@ export class AuditController {
 
   @Get()
   async findAll(@Query() query: any): Promise<AuditLog[]> {
-    // Agora sim, ele captura os parâmetros da URL e manda para o Service
     return await this.auditService.findAll(query);
   }
 }

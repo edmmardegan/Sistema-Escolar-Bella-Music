@@ -114,7 +114,7 @@ export default function Financeiro() {
 
   /* 6. ATALHOS */
   useShortcuts({
-    F4: (e) => handleGerarLote(e),
+    F2: (e) => handleGerarLote(e),
   });
 
   /* 7. FUNÇÕES DE MANIPULAÇÃO (Ações) */
@@ -218,7 +218,7 @@ export default function Financeiro() {
                   className="w-20"
                 />
                 <Button variant="blue" icon={FaMagic} onClick={handleGerarLote} disabled={loading} className="px-4">
-                  Gerar (F4)
+                  Gerar (F2)
                 </Button>
               </div>
             </div>
@@ -237,7 +237,7 @@ export default function Financeiro() {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 ml-auto">
               {/* 2. FILTROS MENORES (MÊS, ANO, STATUS) */}
               {/* MÊS */}
               <Select
@@ -250,7 +250,14 @@ export default function Financeiro() {
               />
 
               {/* ANO */}
-              <Input label="Ano" type="number" value={anoFiltro} onChange={(e) => setAnoFiltro(e.target.value)} placeholder="2026" className="w-20" />
+              <Input 
+                label="Ano" 
+                type="number" 
+                value={anoFiltro} 
+                onChange={(e) => setAnoFiltro(e.target.value)} 
+                placeholder="2026" 
+                className="w-20" 
+              />
 
               {/* PROFESSOR */}
               <Select
@@ -280,15 +287,17 @@ export default function Financeiro() {
 
               {/* 4. STATUS/LIMPAR */}
               <div className="flex gap-2 p-4 justify-center items-center">
-                <button className="h-8 px-2 rounded-md border bg-gray-100 hover:bg-gray-200 text-xs" onClick={limparFiltros}>
+                <button 
+                  className="h-8 px-2 rounded-md border bg-gray-100 hover:bg-gray-200 text-xs" 
+                  onClick={limparFiltros}>
                   🧹 Limpar
                 </button>
               </div>
             </div>
 
             {/* 5. TOTAL REGISTROS (EXTREMA DIREITA) */}
-            <div className="flex ml-14 ">
-              <span className="ml-auto bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+            <div className="ml-auto ">
+              <span className="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                 <FaListOl /> Total de Registros:
                 <strong className="text-blue-600">{filtrados.length}</strong>
               </span>

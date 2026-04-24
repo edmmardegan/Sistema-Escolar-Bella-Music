@@ -1,31 +1,23 @@
 /* src/pages/Mapa/index.jsx */
 
+/* 1. IMPORTS */
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import api from "../../services/api";
 import { FaClock, FaWhatsapp, FaTable, FaFilter, FaListOl } from "react-icons/fa";
 
-// Funções Auxiliares para a Grade
-const gerarGradeHorarios = () => {
-  const lista = [];
-  for (let hora = 8; hora <= 22; hora++) {
-    const hStr = String(hora).padStart(2, "0");
-    lista.push(`${hStr}:00`);
-    lista.push(`${hStr}:15`);
-    lista.push(`${hStr}:30`);
-    lista.push(`${hStr}:45`);
-  }
-  return lista;
-};
+/* 1.1 IMPORTS COMPONENTS*/
+import Select from "../../components/Select.jsx";
 
-const horarios = gerarGradeHorarios();
-const diasSemanas = ["Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"];
+/* 2. CONFIGURAÇÕES ESTÁTICAS */
 
 export default function Mapa() {
+  /* 3. ESTADOS E REFS */
   // 1. ESTADOS PADRONIZADOS
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filtroProfessor, setFiltroProfessor] = useState("");
 
+  /* 4. CARREGAMENTO (Callbacks) */
   const carregar = useCallback(async () => {
     try {
       setLoading(true);
@@ -40,9 +32,30 @@ export default function Mapa() {
     }
   }, []);
 
+  /* 5. EFEITOS (useEffect) */
   useEffect(() => {
     carregar();
   }, [carregar]);
+
+  /* 6. ATALHOS */
+
+  /* 7. FUNÇÕES DE MANIPULAÇÃO (Ações) */
+
+  // Funções Auxiliares para a Grade
+  const gerarGradeHorarios = () => {
+    const lista = [];
+    for (let hora = 8; hora <= 22; hora++) {
+      const hStr = String(hora).padStart(2, "0");
+      lista.push(`${hStr}:00`);
+      lista.push(`${hStr}:15`);
+      lista.push(`${hStr}:30`);
+      lista.push(`${hStr}:45`);
+    }
+    return lista;
+  };
+
+  const horarios = gerarGradeHorarios();
+  const diasSemanas = ["Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"];
 
   // Lista de professores para o filtro
   const professoresUnicos = useMemo(() => {
@@ -63,6 +76,7 @@ export default function Mapa() {
     });
   };
 
+  /* 8. RENDERIZAÇÃO */
   return (
     <main className="p-4 bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -79,22 +93,25 @@ export default function Mapa() {
           <div className="flex items-center gap-3 mt-3 pt-3 border-t border-dashed flex-wrap">
             <FaFilter className="text-gray-400" />
 
-            <select
-              value={filtroProfessor}
-              onChange={(e) => setFiltroProfessor(e.target.value)}
-              className="border border-gray-300 rounded px-2 py-2 w-[200px]"
-            >
-              <option value="">Todos os Professores</option>
-              {professoresUnicos.map((prof) => (
-                <option key={prof} value={prof}>
-                  {prof}
-                </option>
-              ))}
-            </select>
+              {/* PROFESSOR */}
+              <Select
+                label="Professor"
+                value={filtroProfessor}
+                onChange={(e) => setFiltroProfessor(e.target.value)}
+                options={[
+                  { label: "Todas", value: "Todas" },
+                  { label: "Cristiane", value: "Cristiane" },
+                  { label: "Daiane", value: "Daiane" },
+                ]}
+                className="w-32"
+              />
+
+
+
 
             {/* CONTADOR */}
             <span className="ml-auto text-sm bg-gray-200 px-3 py-1 rounded-full flex items-center gap-2">
-              <FaListOl /> Total de Registros: 
+              <FaListOl /> Total de Registros:
               <strong className="text-blue-600">{matriculasFiltradas.length}</strong>
             </span>
 
@@ -132,7 +149,10 @@ export default function Mapa() {
                       return (
                         <td key={`${dia}-${hora}`} className={`border align-top p-1 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}>
                           {alunosNoSlot.map((m) => (
-                            <div key={m.id} className="bg-white border-l-4 border-blue-500 rounded p-1 mb-1 shadow-sm flex flex-col text-[10px] hover:bg-gray-200">
+                            <div
+                              key={m.id}
+                              className="bg-white border-l-4 border-blue-500 rounded p-1 mb-1 shadow-sm flex flex-col text-[10px] hover:bg-gray-200"
+                            >
                               <span className="font-bold text-gray-800">{m.aluno?.nome}</span>
 
                               <span className="text-gray-500">{m.curso?.nome}</span>

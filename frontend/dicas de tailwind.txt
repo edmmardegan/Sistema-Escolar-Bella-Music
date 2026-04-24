@@ -79,6 +79,7 @@ justify-center   -> centraliza vertical
 justify-between  -> espaço entre
 justify-around   -> espaço ao redor
 
+ml-auto --> alinhamento automatica a esquerda
 ---
 
 ## 🎯 Centralização completa

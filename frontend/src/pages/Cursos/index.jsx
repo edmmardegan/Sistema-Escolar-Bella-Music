@@ -115,7 +115,7 @@ export default function Cursos() {
               onClick={() => setExibindoForm(true)}
               className="px-4"
             >
-              Novo [F2]
+              Novo Curso [F2]
             </Button>
            )}
         </header>
