@@ -1,0 +1,8 @@
+➜  psql -h localhost -p 5434 -U evandro -d escolaron_dev
+	comando para acessar o banco dados desenvolvimento
+
+➜  psql -h localhost -p 5434 -U evandro -d escolaron 
+	para producao
+
+
+

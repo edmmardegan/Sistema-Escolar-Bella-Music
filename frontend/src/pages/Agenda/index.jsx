@@ -20,8 +20,6 @@ import { MESES } from "../../components/selecionarMeses";
 export default function Agenda() {
   const usuario = JSON.parse(localStorage.getItem("@App:user") || "null");
 
-  console.log("USUARIO LOGADO:", usuario);
-
   const isAdmin = usuario?.role?.toLowerCase() === "admin";
 
   // --- LÓGICA DE DATAS PADRÃO ---

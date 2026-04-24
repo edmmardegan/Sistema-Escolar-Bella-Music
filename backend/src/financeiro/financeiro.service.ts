@@ -81,6 +81,11 @@ export class FinanceiroService {
   ): Promise<{ gerados: number; totalParcelas: number }> {
     const { mes: mesInicio, ano } = dto;
 
+    // Definimos o primeiro e último dia do mês específico
+    const dataInicio = `${ano}-${String(mesInicio).padStart(2, '0')}-01`;
+    const dataFim = `${ano}-${String(mesInicio).padStart(2, '0')}-31`;
+//    const dataFim = `${ano}-${String(mesInicio).padStart(2, '0')}-31 23:59:59`;
+
     const matriculas = await this.matriculaRepo.find({
       where: { situacao: 'Em Andamento' },
       relations: ['aluno'],
@@ -90,8 +95,8 @@ export class FinanceiroService {
       .createQueryBuilder('f')
       .select('f.matriculaId', 'matriculaId')
       .where('f.dataVencimento >= :inicio AND f.dataVencimento <= :fim', {
-        inicio: `${ano}-01-01`,
-        fim: `${ano}-12-31`,
+        inicio: dataInicio,
+        fim: dataFim,
       })
       .getRawMany<{ matriculaId: number }>();
 
@@ -102,25 +107,23 @@ export class FinanceiroService {
     for (const mat of matriculas) {
       if (idsComParcela.has(mat.id)) continue;
 
-      for (let mes = mesInicio; mes <= 12; mes++) {
-        const diaBase = Number(mat.diaVencimento || 10);
+      const diaBase = Number(mat.diaVencimento || 10);
 
-        todasAsNovasParcelas.push({
-          matricula: mat,
-          aluno: mat.aluno,
-          descricao: `Mensalidade ${String(mes).padStart(2, '0')}/${ano} (Lote)`,
-          dataVencimento: FinanceiroCalculoUtil.ajustarDataVencimento(
-            ano,
-            mes,
-            diaBase,
-          ),
-          valorTotal:
-            Number(mat.valorMensalidade || 0) +
-            Number(mat.valorCombustivel || 0),
-          status: 'Aberta',
-          tipo: 'Receita',
-        });
-      }
+      todasAsNovasParcelas.push({
+        matricula: mat,
+        aluno: mat.aluno,
+        descricao: `Mensalidade ${String(mesInicio).padStart(2, '0')}/${ano} (Lote)`,
+        dataVencimento: FinanceiroCalculoUtil.ajustarDataVencimento(
+          ano,
+          mesInicio,
+          diaBase,
+        ),
+        valorTotal:
+          Number(mat.valorMensalidade || 0) + Number(mat.valorCombustivel || 0),
+        status: 'Aberta',
+        tipo: 'Receita',
+      });
+
       totalGerado++;
     }
 
@@ -129,7 +132,8 @@ export class FinanceiroService {
         chunk: 500,
       });
 
-      const contextoLote = `Geração de Lote - Ano: ${dto.ano}`;
+      // const contextoLote = `Geração de Lote - Ano: ${dto.ano}`;
+      const contextoLote = `Geração de Lote - ${String(mesInicio).padStart(2, '0')}/${ano}`;
 
       // 2. AUDITORIA: Registramos apenas UM log com o resumo da operação
       await this.auditService.createLog(

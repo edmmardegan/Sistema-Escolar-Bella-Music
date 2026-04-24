@@ -391,10 +391,12 @@ export default function Alunos() {
               </div>
 
               {/* TOTAL */}
-              <span className="ml-auto bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                <FaListOl /> Total de Registros:
-                <strong className="text-blue-600">{listaExibida.length}</strong>
-              </span>
+              <div className="flex-end">
+                <span className="ml-auto bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                  <FaListOl /> Total de Registros:
+                  <strong className="text-blue-600">{listaExibida.length}</strong>
+                </span>
+              </div>
             </div>
 
             <div className="overflow-y-auto w-full rounded-xl">
