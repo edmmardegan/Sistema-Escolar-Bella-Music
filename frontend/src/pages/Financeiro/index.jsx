@@ -1,7 +1,7 @@
 //Local: /src/pages/Financeiro/index.jsx
 
 /* 1. IMPORTS */
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { FaDollarSign, FaMagic, FaTrash, FaFilter, FaCheck, FaUndo, FaHandHoldingUsd, FaListOl, FaTimes, FaSearch } from "react-icons/fa";
 import { useSearchParams } from "react-router-dom";
 import api from "../../services/api";
@@ -19,6 +19,7 @@ export default function Financeiro() {
   const [registros, setRegistros] = useState([]);
   const [filtrados, setFiltrados] = useState([]);
   const [loading, setLoading] = useState(false);
+  const inputNomeRef = useRef(null);
   // Filtros de visualização
   const [buscaNome, setBuscaNome] = useState("");
   const [mesFiltro, setMesFiltro] = useState(alunoIdViaUrl ? 0 : new Date().getMonth() + 1);
@@ -112,6 +113,12 @@ export default function Financeiro() {
     setFiltrados(lista);
   }, [registros, buscaNome, mesFiltro, anoFiltro, statusFiltro, professorFiltro]);
 
+  useEffect(() => {
+    if (carregar && inputNomeRef.current) {
+      setTimeout(() => inputNomeRef.current.focus(), 100);
+    }
+  }, [carregar]);
+
   /* 6. ATALHOS */
   useShortcuts({
     F2: (e) => handleGerarLote(e),
@@ -168,14 +175,13 @@ export default function Financeiro() {
   };
 
   return (
-    
     <main className="p-4 bg-gray-100 h-screen flex flex-col overflow-hidden">
       <div className="max-w-6xl mx-auto w-full flex flex-col h-full space-y-4">
         {/* HEADER SEMPRE VISÍVEL (Filtros e Resumo) */}
         <header className="bg-white h-20 px-6 rounded-xl shadow-md flex justify-between items-center">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800">
-              <FaDollarSign /> Financeiro Global
-            </h2>
+            <FaDollarSign /> Financeiro Global
+          </h2>
         </header>
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col flex-1 min-h-0">
@@ -183,7 +189,7 @@ export default function Financeiro() {
             {/* TABELA */} {/* ÁREA DA TABELA COM ROLAGEM PRÓPRIA */}
             <div className="bg-white rounded-xl shadow-md flex flex-col flex-1 min-h-0">
               {/* RESUMO E TOTAL */}
-              <div className="mr-4 flex gap-3 items-center  justify-center ">                
+              <div className="mr-4 flex gap-3 items-center  justify-center ">
                 {/*Total Pago*/}
                 <div className="flex items-center gap-3 px-4 py-2 rounded-lg border bg-green-50 border-green-200 text-green-800">
                   <FaCheck className="text-lg opacity-70" />
@@ -235,6 +241,7 @@ export default function Financeiro() {
                   <div className="relative">
                     <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <Input
+                      ref={inputNomeRef}
                       value={buscaNome}
                       onChange={(e) => setBuscaNome(e.target.value)}
                       placeholder="Pesquisar aluno..."
@@ -311,8 +318,6 @@ export default function Financeiro() {
                 </div>
               </div>
             </div>
-
-
             <div className="overflow-y-auto w-full h-full">
               <table className="w-full text-sm text-left">
                 <thead className="sticky top-0 z-10">

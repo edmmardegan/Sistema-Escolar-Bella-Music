@@ -49,7 +49,10 @@ export default function Alunos() {
   const [loading, setLoading] = useState(false);
   const [filtroAba, setFiltroAba] = useState("Ativos");
   const [buscaNome, setBuscaNome] = useState("");
-  const inputNomeRef = useRef(null);
+
+  const buscaRef = useRef(null);
+  const nomeFormRef = useRef(null);
+
   const [exibirCpfReal, setExibirCpfReal] = useState(false);
   const [form, setForm] = useState(estadoInicial);
 
@@ -71,9 +74,24 @@ export default function Alunos() {
     carregar();
   }, [carregar]);
 
+
+ // Foco no campo Nome quando o formulário abrir
   useEffect(() => {
-    if (exibindoForm && inputNomeRef.current) {
-      setTimeout(() => inputNomeRef.current.focus(), 100);
+    if (exibindoForm) {
+      const timer = setTimeout(() => {
+        nomeFormRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [exibindoForm]);
+
+  // Foco no campo Busca ao carregar a página (se o form não estiver aberto)
+  useEffect(() => {
+    if (!exibindoForm) {
+      const timer = setTimeout(() => {
+        buscaRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [exibindoForm]);
 
@@ -244,7 +262,7 @@ export default function Alunos() {
             <form onSubmit={salvar} className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* NOME */}
               <Input
-                ref={inputNomeRef}
+                ref={nomeFormRef}
                 label="Nome Aluno"
                 name="nome"
                 value={form.nome}
@@ -378,6 +396,7 @@ export default function Alunos() {
                 <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
                 <Input
+                  ref={buscaRef}
                   value={buscaNome}
                   onChange={(e) => setBuscaNome(e.target.value)}
                   placeholder="Pesquisar por nome..."
@@ -396,7 +415,6 @@ export default function Alunos() {
                   <strong className="text-blue-600">{listaExibida.length}</strong>
                 </span>
               </div>
-
             </div>
 
             <div className="overflow-y-auto w-full rounded-xl">
@@ -442,7 +460,7 @@ export default function Alunos() {
                         <td className="px-3 py-1 align-middle">
                           <div className="flex justify-center gap-2">
                             {/* BOTÃO AÇÃO REGISTRO TABELA */}
-                            <td className="px-3 py-1 gap-2 flex justify-center">
+                            <div className="px-3 py-1 gap-2 flex justify-center">
                               <Button
                                 variant="gray" // Use ghost para não ter fundo colorido, ou "gray" como preferir
                                 icon={(props) => <FaCircle {...props} className={a.ativo ? "text-green-500" : "text-red-500"} />}
@@ -458,7 +476,7 @@ export default function Alunos() {
                                 className="p-2" // Sobrescrevendo o padding padrão se necessário
                               />
                               <Button variant="red" icon={FaTrash} onClick={() => excluir(a.id)} title="Excluir Registro" className="p-2" />
-                            </td>
+                            </div>
                           </div>
                         </td>
                       </tr>

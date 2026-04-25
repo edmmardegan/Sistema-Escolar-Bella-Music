@@ -1,6 +1,6 @@
 /* src/pages/Agenda/index.jsx */
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import api from "../../services/api";
 import {
   FaCheck,
@@ -44,6 +44,7 @@ export default function Agenda() {
   const [dataInicio, setDataInicio] = useState(trintaAtras);
   const [dataFim, setDataFim] = useState(hoje);
   const [buscaNome, setBuscaNome] = useState("");
+  const inputNomeRef = useRef(null);
 
   // Estados para geração automática
   const [mesGerar, setMesGerar] = useState(new Date().getMonth());
@@ -110,6 +111,12 @@ export default function Agenda() {
     }
   }, [abaAtiva, dataFiltro, dataInicio, dataFim, buscaNome]);
 
+    useEffect(() => {
+      if (carregar && inputNomeRef.current) {
+        setTimeout(() => inputNomeRef.current.focus(), 100);
+      }
+    }, [carregar]);
+  
   /* 6. ATALHOS */
   useShortcuts({
     F2: (e) => handleGerarAgenda(e),
@@ -329,6 +336,7 @@ export default function Agenda() {
                 <div className="relative w-full max-w-md">
                   <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <Input
+                    ref={inputNomeRef}
                     value={buscaNome}
                     onChange={(e) => setBuscaNome(e.target.value)}
                     placeholder="Pesquisar aluno..."

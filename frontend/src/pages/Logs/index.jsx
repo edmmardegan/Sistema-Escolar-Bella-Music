@@ -1,5 +1,5 @@
 /* 1. IMPORTS */
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { FaFilter, FaMusic, FaListOl, FaSearch, FaTimes } from "react-icons/fa"; // Adicionado FaTimes
 import api from "../../services/api";
 
@@ -21,7 +21,7 @@ export const AuditLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const inputNomeRef = useRef(null);
   const [busca, setBusca] = useState("");
   const [operacao, setOperacao] = useState("");
   const [limite, setLimite] = useState(20);
@@ -59,6 +59,13 @@ export const AuditLogs = () => {
     return () => clearTimeout(timer);
   }, [fetchLogs]);
 
+    useEffect(() => {
+      if (setLoading && inputNomeRef.current) {
+        setTimeout(() => inputNomeRef.current.focus(), 100);
+      }
+    }, [setLoading]);
+  
+
   /* 7. FUNÇÕES DE MANIPULAÇÃO */
   const limparFiltros = () => {
     setBusca("");
@@ -72,14 +79,14 @@ export const AuditLogs = () => {
     <main className="p-4 bg-gray-100 h-screen flex flex-col overflow-hidden">
       <div className="max-w-6xl mx-auto w-full flex flex-col h-full space-y-4">
         {/* HEADER */}
-        <header className="bg-white rounded-xl shadow-md p-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <FaMusic />
-              🕵️ Auditoria do Sistema
-            </h2>
-          </div>
+        <header className="bg-white h-20 px-6 rounded-xl shadow-md flex justify-between items-center">
+          <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800">
+            <FaMusic />
+            🕵️ Auditoria do Sistema
+          </h2>
+        </header>
 
+        <div className="bg-white rounded-xl shadow-md p-4 flex flex-col">
           {/* FILTROS */}
           <div className="flex flex-wrap items-center gap-4 justify-between">
             {/* BUSCA */}
@@ -88,6 +95,7 @@ export const AuditLogs = () => {
               <div className="relative w-full">
                 <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <Input
+                  ref={inputNomeRef}
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
                   placeholder="Pesquisar por usuário ou tabela..."
@@ -156,7 +164,7 @@ export const AuditLogs = () => {
               </span>
             </div>
           </div>
-        </header>
+        </div>
 
         {/* TABELA - Mantive sua estrutura de colunas */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden flex-1 flex flex-col">
