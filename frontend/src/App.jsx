@@ -23,6 +23,7 @@ import Usuarios from "./pages/Usuarios/index.jsx";
 import Boletim from "./pages/Boletim/index.jsx";
 import AuditLogs from "./pages/Logs/index.jsx";
 import ResetPassword from "./pages/Usuarios/ResetPassword.jsx";
+import Template from "./pages/Template/index.jsx";
 
 // 🎂 Componente de Aniversário (Otimizado para aparecer apenas 1x por sessão)
 function NotificacaoAniversario() {
@@ -103,6 +104,7 @@ export default function App() {
           <Route path="/usuarios"element={<PrivateLayout><Usuarios /></PrivateLayout>}/>
           <Route path="/logs" element={<PrivateLayout><AuditLogs /></PrivateLayout>}/>
           <Route path="/reset-password" element={<PrivateLayout> <ResetPassword /> </PrivateLayout>} />
+          <Route path="/template" element={<PrivateLayout> <Template /> </PrivateLayout>} />
 
           {/* Rota de escape */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -354,7 +354,7 @@ export default function Alunos() {
           </section>
         ) : (
           /* TELA 2: TABELA */
-          <section className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col max-h-[600px]">
+          <section className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col gap-2 p-2 max-h-[600px]">
             {loading && <p className="p-4 text-gray-600">Processando...</p>}
 
             {/* FILTROS */}

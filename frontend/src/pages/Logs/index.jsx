@@ -70,7 +70,7 @@ export const AuditLogs = () => {
 
   return (
     <main className="p-4 bg-gray-100 h-screen flex flex-col overflow-hidden">
-      <div className="max-w-7xl mx-auto w-full flex flex-col h-full space-y-4">
+      <div className="max-w-6xl mx-auto w-full flex flex-col h-full space-y-4">
         {/* HEADER */}
         <header className="bg-white rounded-xl shadow-md p-4">
           <div className="flex justify-between items-center mb-4">
@@ -152,7 +152,7 @@ export const AuditLogs = () => {
 
             <div className="bg-gray-100 px-4 py-1 rounded-full border">
               <span className="text-sm flex items-center gap-2">
-                <FaListOl /> Total nesta visualização: <strong className="text-blue-600">{logs.length}</strong>
+                <FaListOl /> Total Registro: <strong className="text-blue-600">{logs.length}</strong>
               </span>
             </div>
           </div>
@@ -163,21 +163,17 @@ export const AuditLogs = () => {
           <div className="overflow-auto">
             <table className="w-full table-fixed text-sm border-collapse">
               <colgroup>
-                <col className="w-[150px]" />
-                <col className="w-[130px]" />
-                <col className="w-[100px]" />
-                <col className="w-64" />
-                <col className="w-[100px]" />
-                <col className="w-96" />
+                <col className="w-[70px]" />
+                <col className="w-[140px]" />
+                <col className="w-[200px]" />
+                <col className="w-[500px]" />
               </colgroup>
 
               <thead className="text-white text-xs bg-blue-500 sticky top-0 z-10">
                 <tr>
                   <th className="p-3 text-left">Data/Hora</th>
-                  <th className="p-3 text-left">Usuário</th>
-                  <th className="p-3 text-left">Tabela</th>
-                  <th className="p-3 text-left">Contexto</th>
-                  <th className="p-3 text-left">Operação</th>
+                  <th className="p-3 text-left">Usuário / Tabela</th>
+                  <th className="p-3 text-left">Contexto / Operação</th>
                   <th className="p-3 text-center">Mudanças (De ➔ Para)</th>
                 </tr>
               </thead>
@@ -193,22 +189,29 @@ export const AuditLogs = () => {
                   logs.map((log) => (
                     <tr key={log.id} className="hover:bg-blue-50/30 transition-colors">
                       <td className="p-3 text-xs">{formatDataTabela(log.created_at)}</td>
-                      <td className="p-3 font-semibold text-gray-700">{log.user_name}</td>
-                      <td className="p-3">
-                        <span className="bg-gray-100 px-2 py-1 rounded text-[10px] uppercase font-bold text-gray-600 border">{log.table_name}</span>
+                      <td className="p-3 font-semibold text-gray-700 justify-center items-center">
+                        {log.user_name}
+                        <div className="w-full flex px-2 py-1 text-[10px] uppercase font-bold text-gray-600 items-center justify-center">
+                          {log.table_name}
+                        </div>
                       </td>
-                      <td className="p-3 text-gray-600 italic text-xs">{log.context}</td>
+
                       <td className="p-3">
-                        <span
-                          className={`px-2 py-1 rounded text-[10px] font-black
-                            ${log.action === "INSERT" ? "bg-green-100 text-green-700" : ""}
-                            ${log.action === "UPDATE" ? "bg-blue-100 text-blue-700" : ""}
-                            ${log.action === "DELETE" ? "bg-red-100 text-red-700" : ""}
-                        `}
-                        >
-                          {log.action}
-                        </span>
+                        <div className="flex flex-col items-center justify-center gap-1">
+                          {/* O texto do contexto acima */}
+                          <span className="text-gray-700">{log.context}</span>
+                          <div
+                            className={`w-fit px-3 py-1 text-[10px] uppercase font-bold rounded-full
+                              ${log.action === "INSERT" ? "bg-green-100 text-green-700" : ""}
+                              ${log.action === "UPDATE" ? "bg-blue-100 text-blue-700" : ""}
+                              ${log.action === "DELETE" ? "bg-red-100 text-red-700" : ""}
+                            `}
+                          >
+                            {log.action}
+                          </div>
+                        </div>
                       </td>
+
                       <td className="p-3">
                         <div className="flex gap-2 items-center">
                           <div className="flex-1 bg-red-50 border border-red-100 p-2 rounded h-24 overflow-auto text-[10px] font-mono">

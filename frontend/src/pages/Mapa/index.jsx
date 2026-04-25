@@ -79,51 +79,45 @@ export default function Mapa() {
   /* 8. RENDERIZAÇÃO */
   return (
     <main className="p-4 bg-gray-100 min-h-screen">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* CARD FORM */}
-        <section className="bg-white rounded-xl shadow-md p-6">
-          {/* HEADER */}
-          <div className="flex justify-between items-center flex-wrap gap-3">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <header className="bg-white h-20 px-6 rounded-xl shadow-md flex justify-between items-center">
+          <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800">
               <FaTable /> Mapa Geral de Horários
             </h2>
-          </div>
 
+        </header>
+
+        {/* TABELA */}
+        <section className="bg-white rounded-xl shadow-md overflow-hidden">
           {/* FILTRO */}
-          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-dashed flex-wrap">
+          <div className="flex items-center gap-3 p-2 mt-3 pt-3 border-t border-dashed flex-wrap">
             <FaFilter className="text-gray-400" />
 
-              {/* PROFESSOR */}
-              <Select
-                label="Professor"
-                value={filtroProfessor}
-                onChange={(e) => setFiltroProfessor(e.target.value)}
-                options={[
-                  { label: "Todas", value: "Todas" },
-                  { label: "Cristiane", value: "Cristiane" },
-                  { label: "Daiane", value: "Daiane" },
-                ]}
-                className="w-32"
-              />
-
-
-
+            {/* PROFESSOR */}
+            <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">Professor</div>
+            <Select
+              
+              value={filtroProfessor}
+              onChange={(e) => setFiltroProfessor(e.target.value)}
+              options={[
+                { label: "Todas", value: "Todas" },
+                { label: "Cristiane", value: "Cristiane" },
+                { label: "Daiane", value: "Daiane" },
+              ]}
+              className="w-32"
+            />
 
             {/* CONTADOR */}
-            <span className="ml-auto text-sm bg-gray-200 px-3 py-1 rounded-full flex items-center gap-2">
+            <span className="ml-auto text-sm bg-gray-200 px-3 py-1 rounded-xl flex items-center gap-2">
               <FaListOl /> Total de Registros:
               <strong className="text-blue-600">{matriculasFiltradas.length}</strong>
             </span>
 
             {loading && <span className="text-xs text-gray-500">Sincronizando...</span>}
           </div>
-        </section>
-
-        {/* TABELA */}
-        <section className="bg-white rounded-xl shadow-md overflow-hidden">
-          <div className="overflow-auto max-h-[calc(100vh-220px)]">
+          <div className="overflow-auto max-h-[calc(100vh-220px)] ">
             <table className="min-w-[1000px] w-full border-separate border-spacing-0 text-sm text-left table-fixed">
-              {/* HEADER FIXO */}
+
               <thead className="text-white text-xs bg-blue-500">
                 <tr>
                   <th className="sticky top-0 left-0 z-30 bg-blue-500 w-[80px] p-2 border-r text-center font-bold">Hora</th>
@@ -141,7 +135,7 @@ export default function Mapa() {
                 {horarios.map((hora, index) => (
                   <tr key={hora}>
                     {/* COLUNA FIXA */}
-                    <td className="sticky left-0 z-20 bg-gray-100 border-r text-center font-bold text-[11px]">{hora}</td>
+                    <td className="sticky left-0 z-20 bg-gray-100 border-r text-center font-bold text-xl">{hora}</td>
 
                     {diasSemanas.map((dia) => {
                       const alunosNoSlot = buscarAlunosNoSlot(dia, hora);
