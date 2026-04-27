@@ -38,7 +38,6 @@ export default function Menu() {
     { to: "/matriculas", label: "Matrículas", icon: <FaFileSignature /> },
     { to: "/logs", label: "Auditoria", icon: <FaHistory />, adminOnly: true }, 
     { to: "/usuarios", label: "Usuários", icon: <FaUserCog />, adminOnly: true },
-    { to: "/template", label: "Template", icon: <FaUserCog />, adminOnly: true },
     { to: "/reset-password", label: "Alterar Senha", icon: <FaKey /> },
   ];
 
