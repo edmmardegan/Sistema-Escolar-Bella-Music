@@ -50,8 +50,8 @@ export default function Alunos() {
   const [filtroAba, setFiltroAba] = useState("Ativos");
   const [buscaNome, setBuscaNome] = useState("");
 
-  const buscaRef = useRef(null);
-  const nomeFormRef = useRef(null);
+  const inputBuscaRef = useRef(null);
+  const inputNomeRef = useRef(null);
 
   const [exibirCpfReal, setExibirCpfReal] = useState(false);
   const [form, setForm] = useState(estadoInicial);
@@ -79,7 +79,7 @@ export default function Alunos() {
   useEffect(() => {
     if (exibindoForm) {
       const timer = setTimeout(() => {
-        nomeFormRef.current?.focus();
+        inputNomeRef.current?.focus();
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -89,7 +89,7 @@ export default function Alunos() {
   useEffect(() => {
     if (!exibindoForm) {
       const timer = setTimeout(() => {
-        buscaRef.current?.focus();
+        inputBuscaRef.current?.focus();
       }, 100);
       return () => clearTimeout(timer);
     }
@@ -262,7 +262,7 @@ export default function Alunos() {
             <form onSubmit={salvar} className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* NOME */}
               <Input
-                ref={nomeFormRef}
+                ref={inputNomeRef}
                 label="Nome Aluno"
                 name="nome"
                 value={form.nome}
@@ -396,7 +396,7 @@ export default function Alunos() {
                 <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
                 <Input
-                  ref={buscaRef}
+                  ref={inputBuscaRef}
                   value={buscaNome}
                   onChange={(e) => setBuscaNome(e.target.value)}
                   placeholder="Pesquisar por nome..."
@@ -475,7 +475,13 @@ export default function Alunos() {
                                 title="Editar Registro"
                                 className="p-2" // Sobrescrevendo o padding padrão se necessário
                               />
-                              <Button variant="red" icon={FaTrash} onClick={() => excluir(a.id)} title="Excluir Registro" className="p-2" />
+                              <Button 
+                                variant="red" 
+                                icon={FaTrash} 
+                                onClick={() => excluir(a.id)} 
+                                title="Excluir Registro" 
+                                className="p-2" 
+                              />
                             </div>
                           </div>
                         </td>

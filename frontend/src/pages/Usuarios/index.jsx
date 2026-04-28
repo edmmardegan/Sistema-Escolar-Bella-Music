@@ -1,24 +1,33 @@
 /* src/pages/Usuarios/index.jsx */
 
-import React, { useState, useEffect, useCallback } from "react";
+/* 1. IMPORTS */
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { FaUserPlus, FaKey, FaTrash, FaUserShield, FaTimes, FaPen, FaSave } from "react-icons/fa";
 import api from "../../services/api";
-// import "./styles.css";
+
+/* 1.1 IMPORTS COMPONENTS*/
+import Input from "../../components/Input.jsx";
+import Select from "../../components/Select.jsx";
+import Button from "../../components/Button";
+import { useShortcuts } from "../../components/useShortcuts.js";
+
+/* 2. CONFIGURAÇÕES ESTÁTICAS */
+const estadoInicial = {
+  nome: "",
+  email: "",
+  role: "user",
+};
 
 const Usuarios = () => {
-  // 1. ESTADOS PADRONIZADOS
+  /* 3. ESTADOS E REFS */
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(false);
   const [exibindoForm, setExibindoForm] = useState(false);
   const [editandoId, setEditandoId] = useState(null);
+  const [form, setForm] = useState(estadoInicial);
+  const inputNomeRef = useRef(null);
 
-  const [form, setForm] = useState({
-    nome: "",
-    email: "",
-    role: "user",
-  });
-
-  // --- CARREGAMENTO DE DADOS ---
+  /* 4. CARREGAMENTO (Callbacks) */
   const carregar = useCallback(async () => {
     try {
       setLoading(true);
@@ -32,30 +41,30 @@ const Usuarios = () => {
     }
   }, []);
 
+  /* 5. EFEITOS (useEffect) */
   useEffect(() => {
     carregar();
   }, [carregar]);
 
-  // --- ATALHOS DE TECLADO [F2, F4, Esc] ---
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "F2" && !exibindoForm) {
-        e.preventDefault();
-        setExibindoForm(true);
-      }
-      if (e.key === "F4" && exibindoForm) {
-        e.preventDefault();
-        document.getElementById("btn-salvar")?.click();
-      }
-      if (e.key === "Escape" && exibindoForm) {
-        limparForm();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    if (exibindoForm && inputNomeRef.current) {
+      setTimeout(() => inputNomeRef.current.focus(), 100);
+    }
   }, [exibindoForm]);
 
-  // --- AÇÕES ---
+  /* 6. ATALHOS */
+  useShortcuts({
+    F2: () => !exibindoForm && setExibindoForm(true),
+    F4: (e) => exibindoForm && salvar(e),
+    Escape: () => exibindoForm && limparForm(),
+  });
+
+  /* 7. FUNÇÕES DE MANIPULAÇÃO (Ações) */
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm({ ...form, [name]: type === "checkbox" ? checked : value });
+  };
+
   const salvar = async (e) => {
     if (e) e.preventDefault();
     try {
@@ -85,11 +94,17 @@ const Usuarios = () => {
     }
   };
 
-  const prepararEdicao = (u) => {
-    setEditandoId(u.id);
-    setForm({ nome: u.nome, email: u.email, role: u.role });
+  const prepararEdicao = (usuario) => {
+    setForm({ ...usuario });
+    setEditandoId(usuario.id);
     setExibindoForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const limparForm = () => {
+    setForm(estadoInicial);
+    setEditandoId(null);
+    setExibindoForm(false);
   };
 
   const handleReset = async (id, nome) => {
@@ -102,163 +117,135 @@ const Usuarios = () => {
     }
   };
 
-  const limparForm = () => {
-    setForm({ nome: "", email: "", role: "user" });
-    setEditandoId(null);
-    setExibindoForm(false);
-  };
-
+  /* 8. RENDERIZAÇÃO */
   return (
     <main className="p-4 bg-gray-100 min-h-screen">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* CARD FORM */}
-        <section className="bg-white rounded-xl shadow-md p-6">
-          {/* HEADER */}
-            <div className="flex justify-between items-center flex-wrap gap-3">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-              <FaUserShield />
-              {editandoId ? "Editar Usuário" : exibindoForm ? "Novo Usuário" : "Gerenciar Usuários"}
-            </h2>
-            {!exibindoForm && (
-              <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 transition" onClick={() => setExibindoForm(true)}>
-                <FaUserPlus /> Novo Usuário [F2]
-              </button>
-            )}
-          </div>
+        {/* HEADER SEMPRE VISÍVEL */}
+        <header className="bg-white p-6 h-20 rounded-xl shadow-md flex justify-between items-center">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <FaUserShield />
+            {editandoId ? "Editar Usuário" : exibindoForm ? "Novo Usuário" : "Gerenciar Usuários"}
+          </h2>
 
-          {/* FORM */}
-          {exibindoForm && (
-            <form className="grid grid-cols-1 md:grid-cols-3 gap-4 itens-end"
-                  onSubmit={salvar}>
+          {!exibindoForm && (
+            <Button icon={FaUserPlus} onClick={() => setExibindoForm(true)} className="px-4">
+              Novo Curso [F2]
+            </Button>
+          )}
+        </header>
 
+        {exibindoForm ? (
+          <section className="bg-white p-6 rounded-xl shadow-md">
+            <form className="grid grid-cols-1 md:grid-cols-3 gap-4 itens-end" onSubmit={salvar}>
               {/* NOME */}
-              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
-                <label>Nome Completo</label>
-                <input 
-                className="w-full h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                  required name="nome" 
-                  value={form.nome} 
-                  onChange={(e) => 
-                  setForm({ ...form, nome: e.target.value })}/>
-              </div>
+              <Input
+                ref={inputNomeRef}
+                label="Nome Usuário"
+                name="nome"
+                value={form.nome}
+                onChange={handleChange}
+                placeholder="Ex: João da Silva"
+                className="w-70" // Use classes aqui para ajustes finos de largura
+                required
+              />
+
               {/* LOGIN - EMAIL*/}
-              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
-                <label>E-mail (Login)</label>
-                <input
-                className="w-full h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-              </div>
-              
-              {/* NIVEL ACESSO */}
-              <div className="text-sm font-semibold text-gray-600 flex flex-col gap-2">
-                <label>Nível de Acesso</label>
-                <select 
-                className="w-full h-8 px-4 border rounded-md bg-write text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  name="role" 
-                  value={form.role} 
-                  onChange={(e) => 
-                  setForm({ ...form, role: e.target.value })} >
-                    <option value="user">Usuário</option>
-                    <option value="admin">Administrador</option>
-                </select>
-              </div>
+              <Input
+                label="E-mail (Login)"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Ex: nome@bellamusic.com"
+                className="w-70" // Use classes aqui para ajustes finos de largura
+                required
+              />
 
-              {/* BOTÕES */}
+              <Select
+                label="Nível de Acesso"
+                name="role"
+                value={form.role}
+                onChange={handleChange}
+                options={[
+                  { label: "Usuário", value: "user" },
+                  { label: "Administrador", value: "admin" },
+                ]}
+                className="w-40"
+              />
+
+              {/* BOTÃO AÇÃO REGISTRO FORM */}
               <div className="md:col-span-3 flex gap-3 mt-2">
-                <button 
-                className="h-[35px] flex items-center gap-2 bg-green-500 text-white px-4 rounded-md font-semibold hover:bg-green-700 transition disabled:opacity-50" 
-                id="btn-salvar"
-                title="Salvar Registro"
-                type="submit" 
-                disabled={loading}>
-                  <FaSave /> Salvar [F4]
-                </button>
+                <Button title="Salvar Registro" variant="green" icon={FaSave} type="submit" disabled={loading} className="px-4">
+                  Salvar [F4]
+                </Button>
 
-                <button 
-                className="flex items-center gap-2 bg-red-500 text-white px-4 rounded-md font-semibold hover:bg-red-700 transition disabled:opacity-50" 
-                type="button"
-                title="Cancelar Operação"       
-                onClick={limparForm}>
-                  <FaTimes /> Cancelar [Esc]
-                </button>
+                <Button title="Cancelar edição" variant="red" icon={FaTimes} onClick={limparForm} className="px-4">
+                  Cancelar [Esc]
+                </Button>
               </div>
-
             </form>
-          )}
-        </section>
+          </section>
+        ) : (
+          <section className="bg-white rounded-xl shadow-md overflow-hidden">
+            {loading && <p className="p-4 text-gray-600">Processando...</p>}
 
-        {/* LISTAGEM */}
-        <section className="bg-white rounded-xl shadow-md overflow-hidden">
-          {loading && (
-            <p className="p-4 text-gray-600">
-              Processando...
-            </p>
-          )}
-
-          <table className="w-full text-sm text-left">
-            <thead className="text-white text-xs bg-blue-500">
-              <tr>
-                <th className="px-4 py-3">NOME</th>
-                <th className="px-4 py-3">E-MAIL</th>
-                <th className="px-4 py-3">ACESSO</th>
-                <th className="px-4 py-3 text-center w-[150px]">AÇOES</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y">
-              {registros.map((u) => (
-                <tr 
-                  className="hover:bg-gray-100 transition"
-                  key={u.id}>
-                  <td className="px-4 py-3 font-semi-bold text-gray-800">
-                    <strong>{u.nome}</strong>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600">{u.email}</td>
-                  <td className="px-4 py-3">
-                    <span 
-                      className={`px-3 py-1 rounded-full text-xs font-semibold 
-                        ${
-                          u.role === "admin" 
-                            ? "bg-red-100 text-red-600" 
-                            : "bg-blue-100 text-blue-600"
-                        }`}
-                            >
-                              {u.role.toUpperCase()}</span>
-                  </td>
-
-                  {/* AÇÕES */}
-                  <td className="px-4 py-3 gap-2 flex justify-center">
-                    <button 
-                      className="p-2 bg-green-400 hover:bg-green-600 text-white rounded-md" 
-                      onClick={() => 
-                      prepararEdicao(u)} 
-                      title="Editar">
-                      <FaPen />
-                    </button>
-                    <button 
-                      className="p-2 bg-yellow-400 hover:bg-orange-600 text-white rounded-md" 
-                      onClick={() => handleReset(u.id, u.nome)} 
-                      title="Resetar Senha">
-                      <FaKey />
-                    </button>
-                    <button  
-                      className="p-2 bg-red-400 hover:bg-red-600 text-white rounded-md"
-                      onClick={() => excluir(u.id)} 
-                      title="Excluir">
-                      <FaTrash />
-                    </button>
-                  </td>
-
+            <table className="w-full text-sm text-left">
+              <thead className="text-white text-xs bg-blue-500">
+                <tr>
+                  <th className="px-4 py-3">NOME</th>
+                  <th className="px-4 py-3">E-MAIL</th>
+                  <th className="px-4 py-3">ACESSO</th>
+                  <th className="px-4 py-3 text-center w-[150px]">AÇOES</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
+              </thead>
+
+              <tbody className="divide-y">
+                {registros.map((u) => (
+                  <tr className="hover:bg-gray-100 transition" key={u.id}>
+                    <td className="px-4 py-3 font-semi-bold text-gray-800">
+                      <strong>{u.nome}</strong>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold 
+                        ${u.role === "admin" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"}`}
+                      >
+                        {u.role.toUpperCase()}
+                      </span>
+                    </td>
+
+                    {/* BOTÃO AÇÃO REGISTRO TABELA */}
+                    <td className="px-4 py-3 gap-2 flex justify-center">
+                      <Button
+                        variant="green"
+                        icon={FaPen}
+                        onClick={() => prepararEdicao(u)}
+                        title="Editar Registro"
+                        className="p-2" // Sobrescrevendo o padding padrão se necessário
+                      />
+                      <Button 
+                        variant="yellow" 
+                        icon={FaTrash} 
+                        onClick={() => handleReset(u.id, u.nome)}
+                        title="Resetar Senha" 
+                        className="p-2" 
+                      />
+                      <Button 
+                        variant="red" 
+                        icon={FaTrash} 
+                        onClick={() => excluir(u.id)} 
+                        title="Excluir Registro" 
+                        className="p-2" 
+                      />
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        )}
       </div>
     </main>
   );

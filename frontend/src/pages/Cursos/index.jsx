@@ -161,6 +161,7 @@ export default function Cursos() {
               {/* BOTÃO AÇÃO REGISTRO FORM */}
               <div className="md:col-span-3 flex gap-3 mt-2">
                 <Button 
+                  title="Salvar Registro"
                   variant="green" 
                   icon={FaSave} 
                   type="submit" 
@@ -170,6 +171,7 @@ export default function Cursos() {
                 </Button>
 
                 <Button 
+                  title="Cancelar edição"
                   variant="red" 
                   icon={FaTimes} 
                   onClick={limparForm} 
