@@ -85,8 +85,6 @@ export default function Login() {
                 autoComplete="off"
                 readOnly={!isEditable} // Começa bloqueado
                 onFocus={() => setIsEditable(true)} // Desbloqueia ao clicar
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="none"
               />
             </div>
             {/* SENHA */}
