@@ -113,7 +113,7 @@ export default function Mapa() {
               <strong className="text-blue-600">{matriculasFiltradas.length}</strong>
             </span>
 
-            {loading && <span className="text-xs text-gray-500">Sincronizando...</span>}
+            {/*loading && <span className="text-xs text-gray-500">Sincronizando...</span>*/}
           </div>
           <div className="overflow-auto max-h-[calc(100vh-220px)] ">
             <table className="min-w-[1000px] w-full border-separate border-spacing-0 text-sm text-left table-fixed">

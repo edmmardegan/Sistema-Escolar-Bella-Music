@@ -74,11 +74,11 @@ function PrivateLayout({ children }) {
   if (user.primeiroAcesso === 1) return <Navigate to="/reset-password" replace />;
 
   return (
-    <div className="app-layout">
+    <div className="flex">
       <Menu />
       <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
         <NotificacaoAniversario />
-        <main className="conteudo-principal">{children}</main>
+        <main className="flex-1 ml-[80px] p-3 min-h-screen bg-white">{children}</main>
       </div>
     </div>
   );

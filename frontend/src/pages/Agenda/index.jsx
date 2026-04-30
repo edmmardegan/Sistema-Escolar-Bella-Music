@@ -111,12 +111,12 @@ export default function Agenda() {
     }
   }, [abaAtiva, dataFiltro, dataInicio, dataFim, buscaNome]);
 
-    useEffect(() => {
-      if (carregar && inputNomeRef.current) {
-        setTimeout(() => inputNomeRef.current.focus(), 100);
-      }
-    }, [carregar]);
-  
+  useEffect(() => {
+    if (carregar && inputNomeRef.current) {
+      setTimeout(() => inputNomeRef.current.focus(), 100);
+    }
+  }, [carregar]);
+
   /* 6. ATALHOS */
   useShortcuts({
     F2: (e) => handleGerarAgenda(e),
@@ -269,15 +269,15 @@ export default function Agenda() {
 
   return (
     <main className="p-4 bg-gray-100 min-h-screen">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-4">
         {/* HEADER SEMPRE VISÍVEL */}
         <header className="bg-white h-20 px-6 rounded-xl shadow-md flex justify-between items-center">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800">
-              <FaCalendarAlt /> Controle de Frequência
-            </h2>
+            <FaCalendarAlt /> Controle de Frequência
+          </h2>
         </header>
 
-        <section className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col max-h-[600px]">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col max-h-[600px]">
           {/* CONTAINER PRINCIPAL DE FILTROS */}
           <div className="flex flex-col gap-4 p-2 bg-white border-b">
             {/* LINHA 1: ABAS E GERAR LOTE (WIDTH FULL) */}
@@ -294,7 +294,7 @@ export default function Agenda() {
                     key={aba.key}
                     onClick={() => setAbaAtiva(aba.key)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold transition
-          ${abaAtiva === aba.key ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
+                    ${abaAtiva === aba.key ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
                   >
                     {aba.icon} {aba.label}
                   </button>
@@ -302,7 +302,7 @@ export default function Agenda() {
               </div>
 
               {/* GERAR LOTE (ALINHADO À DIREITA) */}
-              <div className="flex items-center gap-2 p-2 rounded-lg border bg-gray-50 border-gray-200 shadow-sm">
+              <div className="flex items-center gap-2 p-2 rounded-lg border bg-gray-100 hover:bg-gray-200 border-gray-200 shadow-sm">
                 <span className="text-sm font-semibold text-blue-800">Gerar Lote:</span>
                 <Select value={mesGerar} onChange={(e) => setMesGerar(Number(e.target.value))} options={opcoesMesesGerar} className="w-32" />
                 <Input type="number" value={anoGerar} onChange={(e) => setAnoGerar(e.target.value)} placeholder="2026" className="w-20" />
@@ -350,20 +350,19 @@ export default function Agenda() {
 
               {/* COLUNA DIREITA: TOTAL */}
               <div className="flex justify-end">
-                <span className="bg-gray-100 px-4 py-2 rounded-full text-sm font-medium border flex items-center gap-2">
+                <span className="bg-gray-200 px-4 py-2 rounded-full text-sm font-medium border flex items-center gap-2">
                   <FaListOl className="text-gray-500" />
                   Total Registros: <strong className="text-blue-600">{registros.length}</strong>
                 </span>
               </div>
             </div>
           </div>
-
-          <div className="overflow-y-auto w-full h-full rounded-lg">
-            {/* TABELA */}
-            {loading && <p className="p-4 text-gray-600">Processando...</p>}
-            <table className="w-full text-sm text-left border-separate border-spacing-0">
-              {/* border-separate evita bugs visuais no sticky */}
-              <thead className="text-white text-xs bg-blue-500 sticky top-0 z-10">
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col max-h-[600px]">
+          <div className="overflow-y-auto w-full p-2">
+            <table className="w-full text-sm text-left rounded-xl">
+              <thead className="text-white text-xs bg-blue-500 sticky top-0 z-10 rounded-xl">
                 <tr>
                   <th className="px-4 py-3">Data</th>
                   <th className="px-4 py-3">Horário</th>
@@ -448,7 +447,7 @@ export default function Agenda() {
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
       </div>
     </main>
   );

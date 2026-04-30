@@ -184,225 +184,226 @@ export default function Financeiro() {
           </h2>
         </header>
 
-        <div className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col flex-1 min-h-0">
-          <div className="p-3 gap-3 w-full h-full">
-            {/* TABELA */} {/* ÁREA DA TABELA COM ROLAGEM PRÓPRIA */}
-            <div className="bg-white rounded-xl shadow-md flex flex-col flex-1 min-h-0">
-              {/* RESUMO E TOTAL */}
-              <div className="mr-4 flex gap-3 items-center  justify-center ">
-                {/*Total Pago*/}
-                <div className="flex items-center gap-3 px-4 py-2 rounded-lg border bg-green-50 border-green-200 text-green-800">
-                  <FaCheck className="text-lg opacity-70" />
-                  <div>
-                    <span className="text-xs font-bold uppercase block">Total Pago</span>
-                    <strong className="text-2xl">{fMoeda(totalPago)}</strong>
-                  </div>
-                </div>
-                {/*Total Em aberto*/}
-                <div className="flex items-center gap-3 px-4 py-2 rounded-lg border bg-yellow-50 border-yellow-200 text-yellow-700">
-                  <FaHandHoldingUsd className="text-lg opacity-70" />
-                  <div>
-                    <span className="text-xs font-bold uppercase block">Em Aberto</span>
-                    <strong className="text-2xl">{fMoeda(totalAberto)}</strong>
-                  </div>
-                </div>
-                {/*Geração em Lote*/}
-                <div className="flex flex-end ml-auto items-center gap-3 p-4 rounded-lg border bg-gray-50 border-gray-200 ">
-                  <span className="text-xs font-bold text-red-800">Geração em Lote:</span>
-
-                  {/* MÊS GERAR */}
-                  <Select
-                    label="Mês Gerar"
-                    name="mesGerar"
-                    value={mesGerar}
-                    onChange={(e) => setMesGerar(Number(e.target.value))}
-                    options={opcoesMesesGerar}
-                    className="w-32"
-                  />
-
-                  {/* ANO GERAR */}
-                  <Input
-                    label="Ano Gerar"
-                    type="number"
-                    value={anoGerar}
-                    onChange={(e) => setAnoGerar(e.target.value)}
-                    placeholder="2026"
-                    className="w-20"
-                  />
-                  <Button variant="blue" icon={FaMagic} onClick={handleGerarLote} disabled={loading} className="px-4">
-                    Gerar [F2]
-                  </Button>
+        <div className="p-3 bg-white rounded-xl shadow-md overflow-hidden flex flex-col min-h-0 ">
+          {/* TABELA */} {/* ÁREA DA TABELA COM ROLAGEM PRÓPRIA */}
+          <div className="bg-white rounded-xl flex flex-col min-h-0 ">
+            {/* RESUMO E TOTAL */}
+            <div className="mr-4 flex gap-3 items-center  justify-center ">
+              {/*Total Pago*/}
+              <div className="flex items-center gap-3 px-4 py-2 rounded-lg border bg-green-100 border-green-200 text-green-800">
+                <FaCheck className="text-lg opacity-70" />
+                <div>
+                  <span className="text-xs font-bold uppercase block">Total Pago</span>
+                  <strong className="text-2xl">{fMoeda(totalPago)}</strong>
                 </div>
               </div>
-              {/* DEMAIS FILTROS */}
-              <div className="gap-2 mt-4 flex items-center justify-center rounded-lg">
-                {/* 3. PESQUISAR (CENTRALIZADO NO GRID - OCUPA 2 COLUNAS) */}
-                <div className="md:col-span-2  flex flex-col">
-                  <div className="relative">
-                    <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <Input
-                      ref={inputNomeRef}
-                      value={buscaNome}
-                      onChange={(e) => setBuscaNome(e.target.value)}
-                      placeholder="Pesquisar aluno..."
-                      className="pl-9 pr-11 h-9"
-                    />
-                    {buscaNome && (
-                      <FaTimes onClick={() => setBuscaNome("")} className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400" />
-                    )}
-                  </div>
+              {/*Total Em aberto*/}
+              <div className="flex items-center gap-3 px-4 py-2 rounded-lg border bg-yellow-100 border-yellow-200 text-yellow-700">
+                <FaHandHoldingUsd className="text-lg opacity-70" />
+                <div>
+                  <span className="text-xs font-bold uppercase block">Em Aberto</span>
+                  <strong className="text-2xl">{fMoeda(totalAberto)}</strong>
                 </div>
+              </div>
+              {/*Geração em Lote*/}
+              <div className="flex flex-end ml-auto items-center gap-3 p-4 rounded-lg border bg-gray-100 hover:bg-gray-200 border-gray-200 ">
+                <span className="text-xs font-bold text-red-800">Geração em Lote:</span>
 
-                <div className="flex gap-2 ml-auto">
-                  {/* 2. FILTROS MENORES (MÊS, ANO, STATUS) */}
-                  {/* MÊS */}
-                  <Select
-                    label="Mês de Referência"
-                    name="mesReferencia"
-                    value={mesFiltro}
-                    onChange={(e) => setMesFiltro(e.target.value)}
-                    options={opcoesMeses}
-                    className="w-32"
-                  />
+                {/* MÊS GERAR */}
+                <Select
+                  label="Mês Gerar"
+                  name="mesGerar"
+                  value={mesGerar}
+                  onChange={(e) => setMesGerar(Number(e.target.value))}
+                  options={opcoesMesesGerar}
+                  className="w-32"
+                />
 
-                  {/* ANO */}
-                  <Input
-                    label="Ano"
-                    type="number"
-                    value={anoFiltro}
-                    onChange={(e) => setAnoFiltro(e.target.value)}
-                    placeholder="2026"
-                    className="w-20"
-                  />
-
-                  {/* PROFESSOR */}
-                  <Select
-                    label="Professor"
-                    value={professorFiltro}
-                    onChange={(e) => setProfessorFiltro(e.target.value)}
-                    options={[
-                      { label: "Todas", value: "Todas" },
-                      { label: "Cristiane", value: "Cristiane" },
-                      { label: "Daiane", value: "Daiane" },
-                    ]}
-                    className="w-32"
-                  />
-
-                  {/* STATUS */}
-                  <Select
-                    label="Status"
-                    value={statusFiltro}
-                    onChange={(e) => setStatusFiltro(e.target.value)}
-                    options={[
-                      { label: "Todos", value: "Todos" },
-                      { label: "Em Aberto", value: "Aberta" },
-                      { label: "Pagos", value: "Paga" },
-                    ]}
-                    className="w-32"
-                  />
-
-                  {/* 4. STATUS/LIMPAR */}
-                  <div className="flex p-4 justify-center items-center">
-                    <button className="h-8 px-2 rounded-md border bg-gray-100 hover:bg-gray-200 text-xs" onClick={limparFiltros}>
-                      🧹 Limpar
-                    </button>
-                  </div>
-                </div>
-
-                {/* 5. TOTAL REGISTROS (EXTREMA DIREITA) */}
-                <div className="ml-auto ">
-                  <span className="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                    <FaListOl /> Total de Registros:
-                    <strong className="text-blue-600">{filtrados.length}</strong>
-                  </span>
-                </div>
+                {/* ANO GERAR */}
+                <Input
+                  label="Ano Gerar"
+                  type="number"
+                  value={anoGerar}
+                  onChange={(e) => setAnoGerar(e.target.value)}
+                  placeholder="2026"
+                  className="w-20"
+                />
+                <Button variant="blue" icon={FaMagic} onClick={handleGerarLote} disabled={loading} className="px-4">
+                  Gerar [F2]
+                </Button>
               </div>
             </div>
-            <div className="overflow-y-auto w-full h-full">
-              <table className="w-full text-sm text-left">
-                <thead className="sticky top-0 z-10">
-                  <tr className="bg-blue-600 text-white">
-                    <th className="px-2 py-2">Vencimento</th>
-                    <th className="px-2 py-2">Aluno / Professor</th>
-                    <th className="px-2 py-2">Valor</th>
-                    <th className="px-2 py-2">Status</th>
-                    <th className="px-2 py-2">Ações</th>
+            {/* DEMAIS FILTROS */}
+            <div className="gap-2 mt-4 flex items-center justify-center rounded-lg">
+              {/* 3. PESQUISAR (CENTRALIZADO NO GRID - OCUPA 2 COLUNAS) */}
+              <div className="md:col-span-2  flex flex-col">
+                <div className="relative">
+                  <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    ref={inputNomeRef}
+                    value={buscaNome}
+                    onChange={(e) => setBuscaNome(e.target.value)}
+                    placeholder="Pesquisar aluno..."
+                    className="pl-9 pr-11 h-9"
+                  />
+                  {buscaNome && (
+                    <FaTimes onClick={() => setBuscaNome("")} className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400" />
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-2 ml-auto">
+                {/* 2. FILTROS MENORES (MÊS, ANO, STATUS) */}
+                {/* MÊS */}
+                <Select
+                  label="Mês de Referência"
+                  name="mesReferencia"
+                  value={mesFiltro}
+                  onChange={(e) => setMesFiltro(e.target.value)}
+                  options={opcoesMeses}
+                  className="w-32"
+                />
+
+                {/* ANO */}
+                <Input
+                  label="Ano"
+                  type="number"
+                  value={anoFiltro}
+                  onChange={(e) => setAnoFiltro(e.target.value)}
+                  placeholder="2026"
+                  className="w-20"
+                />
+
+                {/* PROFESSOR */}
+                <Select
+                  label="Professor"
+                  value={professorFiltro}
+                  onChange={(e) => setProfessorFiltro(e.target.value)}
+                  options={[
+                    { label: "Todas", value: "Todas" },
+                    { label: "Cristiane", value: "Cristiane" },
+                    { label: "Daiane", value: "Daiane" },
+                  ]}
+                  className="w-32"
+                />
+
+                {/* STATUS */}
+                <Select
+                  label="Status"
+                  value={statusFiltro}
+                  onChange={(e) => setStatusFiltro(e.target.value)}
+                  options={[
+                    { label: "Todos", value: "Todos" },
+                    { label: "Em Aberto", value: "Aberta" },
+                    { label: "Pagos", value: "Paga" },
+                  ]}
+                  className="w-32"
+                />
+
+                {/* 4. STATUS/LIMPAR */}
+                <div className="flex p-4 justify-center items-center">
+                  <button className="h-8 px-2 rounded-md border bg-gray-100 hover:bg-gray-200 text-xs" onClick={limparFiltros}>
+                    🧹 Limpar
+                  </button>
+                </div>
+              </div>
+
+              {/* 5. TOTAL REGISTROS (EXTREMA DIREITA) */}
+              <div className="ml-auto ">
+                <span className="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                  <FaListOl /> Total de Registros:
+                  <strong className="text-blue-600">{filtrados.length}</strong>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col flex-1 min-h-0">
+          <div className="overflow-y-auto w-full h-full">
+            <table className="w-full text-sm text-left">
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-blue-600 text-white">
+                  <th className="px-2 py-2">Vencimento</th>
+                  <th className="px-2 py-2">Aluno / Professor</th>
+                  <th className="px-2 py-2">Valor</th>
+                  <th className="px-2 py-2">Status</th>
+                  <th className="px-2 py-2">Ações</th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y bg-white">
+                {loading ? (
+                  <tr>
+                    <td className="text-center py-10 text-gray-400">Carregando dados...</td>
                   </tr>
-                </thead>
+                ) : (
+                  filtrados.map((p) => {
+                    const isPaga = p.status?.toLowerCase() === "paga";
+                    const isVencida = !isPaga && new Date(p.dataVencimento) < new Date().setHours(0, 0, 0, 0);
 
-                <tbody className="divide-y bg-white">
-                  {loading ? (
-                    <tr>
-                      <td className="text-center py-10 text-gray-400">Carregando dados...</td>
-                    </tr>
-                  ) : (
-                    filtrados.map((p) => {
-                      const isPaga = p.status?.toLowerCase() === "paga";
-                      const isVencida = !isPaga && new Date(p.dataVencimento) < new Date().setHours(0, 0, 0, 0);
+                    return (
+                      <tr key={p.id} className="border-t hover:bg-gray-50">
+                        <td className="px-4 py-3">{fData(p.dataVencimento)}</td>
 
-                      return (
-                        <tr key={p.id} className="border-t hover:bg-gray-50">
-                          <td className="px-4 py-3">{fData(p.dataVencimento)}</td>
+                        <td className="px-4 py-3">
+                          <strong>{p.aluno?.nome || p.matricula?.aluno?.nome || "Sem Nome"}</strong>
+                          <div className="text-xs text-red-500">Profa. {p.matricula?.professor || "---"}</div>
+                        </td>
 
-                          <td className="px-4 py-3">
-                            <strong>{p.aluno?.nome || p.matricula?.aluno?.nome || "Sem Nome"}</strong>
-                            <div className="text-xs text-red-500">Profa. {p.matricula?.professor || "---"}</div>
-                          </td>
+                        <td className="px-4 py-3 font-semibold">{fMoeda(p.valorTotal)}</td>
 
-                          <td className="px-4 py-3 font-semibold">{fMoeda(p.valorTotal)}</td>
-
-                          <td className="px-4 py-3">
-                            <span
-                              className={`px-2 py-1 text-xs rounded font-bold
+                        <td className="px-4 py-3">
+                          <span
+                            className={`px-2 py-1 text-xs rounded font-bold
                         ${isPaga && "bg-green-100 text-green-700"}
                         ${!isPaga && isVencida && "bg-red-100 text-red-600 border border-red-200"}
                         ${!isPaga && !isVencida && "bg-yellow-100 text-yellow-700"}
                       `}
-                            >
-                              {isPaga ? "PAGA" : isVencida ? "VENCIDA" : "ABERTA"}
-                            </span>
-                          </td>
+                          >
+                            {isPaga ? "PAGA" : isVencida ? "VENCIDA" : "ABERTA"}
+                          </span>
+                        </td>
 
-                          <td className="px-4 py-3">
-                            <div className="flex justify-center gap-2">
-                              {!isPaga ? (
-                                <>
-                                  <button
-                                    onClick={() => handleAcao(p.id, "pagar")}
-                                    className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
-                                  >
-                                    <FaCheck />
-                                  </button>
-
-                                  <button
-                                    onClick={async () => {
-                                      if (window.confirm("Excluir?")) {
-                                        await api.deleteParcela(p.id);
-                                        carregar();
-                                      }
-                                    }}
-                                    className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
-                                  >
-                                    <FaTrash />
-                                  </button>
-                                </>
-                              ) : (
+                        <td className="px-4 py-3">
+                          <div className="flex justify-center gap-2">
+                            {!isPaga ? (
+                              <>
                                 <button
-                                  onClick={() => handleAcao(p.id, "estornar")}
-                                  className="p-2 bg-orange-400 hover:bg-orange-500 text-white rounded-md"
+                                  onClick={() => handleAcao(p.id, "pagar")}
+                                  className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
                                 >
-                                  <FaUndo />
+                                  <FaCheck />
                                 </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+
+                                <button
+                                  onClick={async () => {
+                                    if (window.confirm("Excluir?")) {
+                                      await api.deleteParcela(p.id);
+                                      carregar();
+                                    }
+                                  }}
+                                  className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
+                                >
+                                  <FaTrash />
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => handleAcao(p.id, "estornar")}
+                                className="p-2 bg-orange-400 hover:bg-orange-500 text-white rounded-md"
+                              >
+                                <FaUndo />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

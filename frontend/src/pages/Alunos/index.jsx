@@ -74,8 +74,7 @@ export default function Alunos() {
     carregar();
   }, [carregar]);
 
-
- // Foco no campo Nome quando o formulário abrir
+  // Foco no campo Nome quando o formulário abrir
   useEffect(() => {
     if (exibindoForm) {
       const timer = setTimeout(() => {
@@ -241,7 +240,7 @@ export default function Alunos() {
   /* 8. RENDERIZAÇÃO */
   return (
     <main className="p-4 bg-gray-100 min-h-screen">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-4">
         {/* HEADER SEMPRE VISÍVEL */}
         <header className="bg-white h-20 px-6 rounded-xl shadow-md flex justify-between items-center">
           <h2 className="flex items-center gap-2 text-xl font-bold text-gray-800">
@@ -258,7 +257,7 @@ export default function Alunos() {
 
         {exibindoForm ? (
           /* TELA 1: FORMULÁRIO */
-          <section className="bg-white p-6 rounded-xl shadow-md">
+          <section className="bg-white p-6 rounded-md shadow-md">
             <form onSubmit={salvar} className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* NOME */}
               <Input
@@ -298,12 +297,13 @@ export default function Alunos() {
 
               {/* DATA NASCIMENTO*/}
               <Input
+                type="date"
                 label="Data Nascimento"
                 name="dataNascimento"
                 value={form.dataNascimento}
                 onChange={handleChange}
                 placeholder="dd/mm/aaaa"
-                className="w-32 "
+                className="w-40 "
               />
 
               {/* CEP */}
@@ -372,13 +372,13 @@ export default function Alunos() {
           </section>
         ) : (
           /* TELA 2: TABELA */
-          <section className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col gap-2 p-2 max-h-[600px]">
+          <section className="bg-gray-100 overflow-hidden flex flex-col gap-4 ">
             {loading && <p className="p-4 text-gray-600">Processando...</p>}
 
             {/* FILTROS */}
-            <div className="flex items-center gap-4 px-6 h-[50px] flex-shrink-0 bg-white border-b">
+            <div className="rounded-xl flex items-center gap-4 h-[50px] flex-shrink-0 bg-white ">
               {/* ABAS */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 p-2">
                 {["Ativos", "Inativos", "Todos"].map((aba) => (
                   <button
                     key={aba}
@@ -475,13 +475,7 @@ export default function Alunos() {
                                 title="Editar Registro"
                                 className="p-2" // Sobrescrevendo o padding padrão se necessário
                               />
-                              <Button 
-                                variant="red" 
-                                icon={FaTrash} 
-                                onClick={() => excluir(a.id)} 
-                                title="Excluir Registro" 
-                                className="p-2" 
-                              />
+                              <Button variant="red" icon={FaTrash} onClick={() => excluir(a.id)} title="Excluir Registro" className="p-2" />
                             </div>
                           </div>
                         </td>
@@ -497,6 +491,7 @@ export default function Alunos() {
                 </tbody>
               </table>
             </div>
+
           </section>
         )}
       </div>
