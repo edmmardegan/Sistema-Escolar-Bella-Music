@@ -902,7 +902,7 @@ export default function Matriculas() {
                               <Button
                                 variant="blue"
                                 icon={FaPrint}
-                                onClick={() => executarImpressaoMatricula(m)}
+                                onClick={async () => await executarImpressaoMatricula(m)}
                                 title="Imprimir Matrícula"
                                 className="p-2"
                               />
@@ -947,8 +947,8 @@ export default function Matriculas() {
               <Button
                 variant="blue"
                 title="Imprimir Carnê"
-                onClick={() => {
-                  executarImpressao(configCarne, new Date().getMonth(), String(anoGeracao), true);
+                onClick={async () => {
+                  await executarImpressao(configCarne, new Date().getMonth(), String(anoGeracao), true);
                   setConfigCarne(null);
                 }}
                 className="px-6" // Aumentei o padding lateral para o texto respirar

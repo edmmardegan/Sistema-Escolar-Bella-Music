@@ -1,9 +1,9 @@
 /* src/utils/geradorMatricula.js */
 
-import jsPDF from "jspdf";
-
-export const executarImpressaoMatricula = (m) => {
+export const executarImpressaoMatricula = async (m) => {
   try {
+    const { default: jsPDF } = await import("jspdf");
+    
     const doc = new jsPDF("p", "mm", "a4");
     let yAtual = 20;
     const margemEsq = 20;

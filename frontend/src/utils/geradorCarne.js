@@ -1,13 +1,12 @@
 // Local: /src/utils/geradorCarne.js
 
-import jsPDF from "jspdf";
-
 /**
  * Função para gerar o PDF do carnê com largura de 20cm (total)
  * Dividido em dois blocos de 9.5cm cada.
  */
-export const executarImpressao = (m, mesInicio, anoRef, incMatricula) => {
+export const executarImpressao = async (m, mesInicio, anoRef, incMatricula) => {
   try {
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF("p", "mm", "a4");
     const larguraUtilizada = 200; // 20cm
     const larguraCadaRecibo = 95; // 9.5cm
