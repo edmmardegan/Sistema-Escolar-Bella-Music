@@ -8,9 +8,9 @@ import { FaBirthdayCake, FaTimes } from "react-icons/fa";
 import { AuthProvider } from "./AuthContext.jsx";
 import { useAuth } from "./hooks/useAuth.js";
 import api from "./services/api.js";
+import Sidebar from "./components/Menu/Sidebar.jsx";
 
 // 2. Componentes de Layout e Páginas
-import Menu from "./components/Menu/index.jsx";
 import Login from "./pages/Login";
 const Home = lazy(() => import("./pages/Home/index"));
 const Alunos = lazy(() => import("./pages/Alunos/index.jsx"));
@@ -47,6 +47,30 @@ function NotificacaoAniversario() {
 
   if (!visivel || aniversariantes.length === 0) return null;
 
+function PrivateLayout({ children }) {
+  const { user, loading } = useAuth();
+  const [collapsed, setCollapsed] = useState(false); // Novo estado
+
+  if (loading) return <div style={{ padding: "20px" }}>Sincronizando...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.primeiroAcesso === 1) return <Navigate to="/reset-password" replace />;
+
+  return (
+    <div className="flex min-h-screen bg-slate-50">
+      {/* O novo Menu */}
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+      
+      {/* Conteúdo Principal com margem dinâmica */}
+      <div 
+        className={`flex-1 transition-all duration-300 ${collapsed ? "ml-[72px]" : "ml-[260px]"}`}
+      >
+        <NotificacaoAniversario />
+        <main className="p-6">{children}</main>
+      </div>
+    </div>
+  );
+}
+
   return (
     <div className="alerta-aniversario-container">
       <div className="alerta-aniversario-content">
@@ -62,22 +86,32 @@ function NotificacaoAniversario() {
   );
 }
 
-// 🛡️ Wrapper de Proteção e Layout (Garante que o Menu apareça em todas)
 function PrivateLayout({ children }) {
   const { user, loading } = useAuth();
+  // Criamos o estado para controlar se o menu está recolhido ou não
+  const [collapsed, setCollapsed] = useState(false);
 
   if (loading) return <div style={{ padding: "20px" }}>Sincronizando...</div>;
   if (!user) return <Navigate to="/login" replace />;
-
-  // Redireciona se for primeiro acesso
   if (user.primeiroAcesso === 1) return <Navigate to="/reset-password" replace />;
 
   return (
-    <div className="flex">
-      <Menu />
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
+    <div className="flex min-h-screen bg-slate-50">
+      {/* 1. Usamos o novo Sidebar aqui */}
+      <Sidebar 
+        collapsed={collapsed} 
+        onToggle={() => setCollapsed(!collapsed)} 
+      />
+      
+      {/* 2. Ajustamos a margem do conteúdo principal conforme o estado do menu */}
+      <div 
+        className={`flex-1 transition-all duration-300 flex flex-col overflow-hidden 
+          ${collapsed ? "ml-[72px]" : "ml-[260px]"}`}
+      >
         <NotificacaoAniversario />
-        <main className="flex-1 ml-[80px] p-3 min-h-screen bg-white">{children}</main>
+        <main className="flex-1 p-6 bg-white">
+          {children}
+        </main>
       </div>
     </div>
   );

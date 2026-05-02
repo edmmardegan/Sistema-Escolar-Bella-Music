@@ -62,7 +62,8 @@ export default function ResetPassword() {
   };
 
   return (
-    <main className="fixed inset-0 flex items-center justify-center bg-gray-100 z-50 px-4">
+    // Substitua a linha do main por esta:
+    <main className="flex items-center justify-center min-h-[80vh] px-4 py-8">
       {exibindoForm ? (
         <section className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
           {/* HEADER */}
