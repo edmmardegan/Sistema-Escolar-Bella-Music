@@ -412,7 +412,7 @@ export default function Matriculas() {
 
         {exibindoForm ? (
           /* TELA 1: FORMULÁRIO */
-          <section className="bg-white p-6 rounded-xl shadow-md">
+          <section className="bg-white p-4 rounded-xl shadow-xl">
             <form onSubmit={salvar} className="grid grid-cols-1 md:grid-cols-4 gap-2">
               {/* NOME */}
               <Select
@@ -605,11 +605,11 @@ export default function Matriculas() {
           </section>
         ) : (
           /* TELA 2: TABELA */
-          <section className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col gap-2 p-2 max-h-[600px]">
+          <section className="overflow-hidden flex flex-col gap-4">
             {loading && <p className="p-4 text-gray-600">Processando...</p>}
 
             {/* FILTROS */}
-            <div className="flex flex-wrap justify-center items-center gap-4">
+            <div className="bg-white rounded-xl shadow-xl flex items-center gap-4 flex-shrink-0 p-4">
               {/* ABAS */}
               <div className="flex gap-2 p-2 gap-2">
                 {["Em Andamento", "Trancado", "Finalizado", "Todos"].map((s) => (

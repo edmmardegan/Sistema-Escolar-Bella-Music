@@ -257,7 +257,7 @@ export default function Alunos() {
 
         {exibindoForm ? (
           /* TELA 1: FORMULÁRIO */
-          <section className="bg-white p-6 rounded-md shadow-md">
+          <section className="bg-white p-4 rounded-xl shadow-xl">
             <form onSubmit={salvar} className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* NOME */}
               <Input
@@ -372,18 +372,18 @@ export default function Alunos() {
           </section>
         ) : (
           /* TELA 2: TABELA */
-          <section className="bg-gray-100 overflow-hidden flex flex-col gap-4 ">
+          <section className="overflow-hidden flex flex-col gap-4">
             {loading && <p className="p-4 text-gray-600">Processando...</p>}
 
             {/* FILTROS */}
-            <div className="rounded-xl flex items-center gap-4 h-[50px] flex-shrink-0 bg-white ">
+            <div className="bg-white rounded-xl shadow-xl flex items-center gap-4 flex-shrink-0 p-4">
               {/* ABAS */}
-              <div className="flex gap-2 p-2">
+              <div className="flex gap-2 ">
                 {["Ativos", "Inativos", "Todos"].map((aba) => (
                   <button
                     key={aba}
                     onClick={() => setFiltroAba(aba)}
-                    className={`px-3 py-2 rounded-md text-sm font-semibold
+                    className={`px-3 py-2 rounded-xl text-sm font-semibold
                   ${filtroAba === aba ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
                   >
                     {aba}
